@@ -102,7 +102,8 @@ class ConfigLoader:
             raise ValueError("配置文件中缺少有效的 'projects' 配置，或指定的目录中未发现Git仓库")
 
         # authors 可以为空，表示包含所有作者
-        if 'authors' not in config:
+        # 确保authors始终是列表（YAML中空的authors会被解析为None）
+        if 'authors' not in config or config['authors'] is None:
             config['authors'] = []
 
         return config

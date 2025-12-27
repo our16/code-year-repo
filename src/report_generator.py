@@ -26,10 +26,12 @@ class ReportGenerator:
         """生成HTML报告"""
 
         # 生成AI文案
-        if self.use_llm:
+        if self.use_llm and self.llm_client:
             ai_text = self.llm_client.generate_report_text(data)
         else:
-            ai_text = self.llm_client._get_default_text(data)
+            # 创建临时LLM客户端获取默认文案
+            temp_llm = LLMClient(self.config)
+            ai_text = temp_llm._get_default_text(data)
 
         # 读取HTML模板
         template_path = Path(__file__).parent.parent / 'templates' / 'report.html'
@@ -61,10 +63,12 @@ class SimpleReportGenerator:
         """生成HTML报告"""
 
         # 生成AI文案
-        if self.use_llm:
+        if self.use_llm and self.llm_client:
             ai_text = self.llm_client.generate_report_text(data)
         else:
-            ai_text = self.llm_client._get_default_text(data)
+            # 创建临时LLM客户端获取默认文案
+            temp_llm = LLMClient(self.config)
+            ai_text = temp_llm._get_default_text(data)
 
         # 读取HTML模板
         template_path = Path(__file__).parent.parent / 'templates' / 'report.html'
