@@ -619,7 +619,7 @@ def load_report_data(reports_dir: Path) -> dict:
                     'projects': len(data.get('projects', [])),
                     'json_file': json_file.name,
                 }
-                logger.info(f"加载报告: {author_id} ({json_file.name})")
+                # logger.info(f"加载报告: {author_id} ({json_file.name})")
         except Exception as e:
             logger.warning(f"无法读取 {json_file.name}: {str(e)}")
 
