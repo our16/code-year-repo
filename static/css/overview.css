@@ -305,6 +305,45 @@ body {
     font-size: 1.2em;
 }
 
+/* 卡片加载状态 */
+.author-card.generating {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.author-card.generating::after {
+    content: '生成中...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(102, 126, 234, 0.95);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.author-card.generating .view-btn {
+    display: none;
+}
+
+/* 卡片动画效果 */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}
+
+.author-card.generating {
+    animation: pulse 2s ease-in-out infinite;
+}
+
 /* 进度卡片 */
 .progress-card {
     background: rgba(255, 255, 255, 0.15);
@@ -335,6 +374,34 @@ body {
     border-radius: 10px;
     transition: width 0.3s ease;
     width: 0%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 进度条动画 */
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .progress-text {

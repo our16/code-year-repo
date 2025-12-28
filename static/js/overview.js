@@ -5,6 +5,13 @@ const selectedAuthors = new Set();
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
+    // 重置生成按钮状态（防止页面刷新后按钮仍处于禁用状态）
+    const generateBtn = document.getElementById('generateBtn');
+    if (generateBtn) {
+        generateBtn.disabled = false;
+        generateBtn.textContent = '🔄 生成报告';
+    }
+
     loadAuthorsData();
     checkProgress();
 });
@@ -58,6 +65,8 @@ async function loadAuthorsData() {
         if (data.authors && data.authors.length > 0) {
             displayStats(data);
             displayAuthors(data.authors);
+            // 开始轮询更新（检测新生成的报告）
+            startPollingForUpdates();
         } else {
             showError('没有找到作者数据');
         }
@@ -329,6 +338,64 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// 轮询更新（检测新生成的报告）
+let pollingInterval = null;
+
+function startPollingForUpdates() {
+    // 清除之前的轮询
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+
+    // 每3秒检查一次是否有新报告
+    pollingInterval = setInterval(async () => {
+        try {
+            const response = await fetch('/api/authors');
+            const data = await response.json();
+
+            if (data.authors && data.authors.length > 0) {
+                // 检查是否有新增的作者
+                const currentCards = document.querySelectorAll('.author-card');
+                const currentCount = currentCards.length;
+
+                if (data.authors.length > currentCount) {
+                    console.log(`发现新报告: ${data.authors.length - currentCount} 个`);
+                    // 更新统计
+                    displayStats(data);
+                    // 增量添加新卡片
+                    const newAuthors = data.authors.slice(currentCount);
+                    newAuthors.forEach((author, index) => {
+                        const card = createAuthorCard(author);
+                        document.getElementById('authorsGrid').appendChild(card);
+
+                        // 添加动画
+                        setTimeout(() => {
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(20px)';
+                            card.style.transition = 'opacity 0.5s, transform 0.5s';
+
+                            requestAnimationFrame(() => {
+                                card.style.opacity = '1';
+                                card.style.transform = 'translateY(0)';
+                            });
+                        }, index * 100);
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('轮询更新失败:', error);
+        }
+    }, 3000);
+}
+
+// 停止轮询
+function stopPollingForUpdates() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+    }
 }
 
 // 显示错误信息

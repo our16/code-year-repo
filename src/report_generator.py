@@ -121,6 +121,7 @@ class ReportGenerator:
                         'path': project_data['path'],
                         'commits': author_commits,
                         'total_commits': len(author_commits),
+                        'language_stats': project_data.get('language_stats', {}),  # 添加语言统计
                     })
             if author_projects:
                 author_data_map[mapped_author] = author_projects
@@ -130,17 +131,17 @@ class ReportGenerator:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         report_index = {}
         total = len(author_data_map)
-        
+
         for idx, (author_info, author_projects) in enumerate(author_data_map.items(), 1):
             author_name = author_info.split('<')[0].strip()
             logger.info(f"[{idx}/{total}] 生成报告: {author_name}")
-            
+
             analyzed_data = analyzer.analyze(author_projects)
-            
+
             # 构建报告
             safe_name = "".join(c if c.isalnum() or c in ('-', '_') else '_' for c in author_name)
             json_filename = f"{safe_name}_{config.get('report_year', 2025)}.json"
-            
+
             report_data = {
                 'meta': {
                     'author': author_name,
@@ -151,10 +152,10 @@ class ReportGenerator:
                 },
                 **analyzed_data
             }
-            
+
             with open(self.output_dir / json_filename, 'w', encoding='utf-8') as f:
                 json.dump(report_data, f, ensure_ascii=False, indent=2)
-            
+
             report_index[author_info] = {
                 'id': author_info,
                 'name': author_name,
@@ -163,16 +164,22 @@ class ReportGenerator:
                 'net_lines': report_data['summary']['net_lines'],
                 'projects': len(report_data['projects']),
             }
-            
-            # 更新进度
+
+            # 每生成一个报告就更新进度文件（支持前端实时检测）
+            progress_data = {
+                'status': 'generating',
+                'total': total,
+                'completed': idx,
+                'current': f'正在生成 {author_name}',
+                'percentage': round(idx / total * 100, 1),
+                'latest_author': author_name,
+                'latest_file': json_filename
+            }
+            self.save_progress(progress_data)
+
+            # 调用回调函数
             if progress_callback:
-                progress_callback({
-                    'status': 'generating',
-                    'total': total,
-                    'completed': idx,
-                    'current': f'正在生成 {author_name}',
-                    'percentage': round(idx / total * 100, 1)
-                })
+                progress_callback(progress_data)
         
         # 保存索引
         with open(self.output_dir / 'report_index.json', 'w', encoding='utf-8') as f:
