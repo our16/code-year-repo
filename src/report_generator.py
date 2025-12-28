@@ -29,6 +29,27 @@ class ReportGenerator:
         self.output_dir = project_root / 'reports'
         self.progress_file = self.output_dir / '.progress.json'
 
+        # 清理旧的未完成进度文件（避免误显示）
+        self._cleanup_stale_progress()
+
+    def _cleanup_stale_progress(self):
+        """清理旧的未完成进度文件"""
+        if self.progress_file.exists():
+            try:
+                with open(self.progress_file, 'r', encoding='utf-8') as f:
+                    progress = json.load(f)
+
+                # 如果状态是generating且超过5分钟，认为是旧任务
+                if progress.get('status') == 'generating':
+                    import time
+                    # 检查文件修改时间
+                    file_mtime = self.progress_file.stat().st_mtime
+                    if time.time() - file_mtime > 300:  # 5分钟
+                        logger.info("清理旧的未完成进度文件")
+                        self.progress_file.unlink()
+            except Exception as e:
+                logger.warning(f"清理进度文件失败: {e}")
+
     def load_config(self) -> dict:
         """加载配置文件"""
         if not self.config_path.exists():

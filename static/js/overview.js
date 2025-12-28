@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     loadAuthorsData();
-    checkProgress();
+    // 页面加载时不检查进度，避免显示旧的进度条
+    // checkProgress();
 });
 
 // 生成报告
