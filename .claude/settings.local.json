@@ -9,7 +9,9 @@
       "Bash(ls:*)",
       "Bash(wc:*)",
       "Bash(cat:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(cmd /c \"dir /S /B static templates 2>nul\")",
+      "Bash(find:*)"
     ]
   }
 }

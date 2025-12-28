@@ -1,204 +1,264 @@
 # 代码年度报告生成器
 
-一个基于Git历史数据的个人年度代码报告生成工具，通过分析Git仓库自动生成精美的年度代码报告。
+一个用于生成团队和个人代码年度报告的工具，支持从Git仓库中提取数据并生成精美的可视化报告。
 
-## 功能特性
+## ✨ 特性
 
-- ✨ **智能项目发现**：支持指定目录自动发现Git仓库，或手动指定具体项目
-- 👥 **灵活的作者筛选**：可指定特定作者，或包含所有提交者
-- 📊 **丰富的数据维度**：提交量、代码行数、语言分布、时间热力图等
-- 🤖 **AI驱动的文案**：使用LLM自动生成个性化年度总结
-- 🎨 **精美的可视化**：基于HTML+JS的交互式报告
-- ⚡ **纯前端展示**：生成的报告无需后端，可直接在浏览器打开
+- 📊 自动分析Git仓库数据
+- 👥 支持多作者报告生成
+- 🎨 精美的可视化展示（类似QQ音乐年度报告）
+- 🤖 支持AI生成个性化文案
+- 🔗 作者名字映射功能
+- 📈 生成进度实时显示
+- 💻 纯静态文件+API架构
 
-## 快速开始
+## 📁 项目结构
 
-### 方式1：快速体验（推荐）
+```
+.
+├── start_server.py             # 主程序入口 - 启动Web服务
+├── config/                     # 配置文件目录
+│   ├── config.yaml            # 主配置文件
+│   ├── config.example.yaml    # 配置文件示例
+│   ├── author_mapping.yaml    # 作者映射配置
+│   └── author_mapping.example.yaml  # 作者映射示例
+├── src/                        # Python源代码目录
+│   ├── git_collector.py       # Git数据采集
+│   ├── data_analyzer.py       # 数据分析
+│   ├── llm_client.py          # LLM客户端
+│   ├── config_loader.py       # 配置加载
+│   ├── server.py              # Web服务器
+│   └── report_generator.py    # 报告生成（已废弃）
+├── static/                     # 静态资源
+│   ├── overview.html          # 总览页面
+│   ├── css/
+│   │   └── overview.css       # 样式文件
+│   └── js/
+│       └── overview.js        # JavaScript
+├── templates/                  # HTML模板
+│   ├── report.html            # 标准报告模板
+│   └── report_story.html      # 逐页展示模板（推荐）
+└── reports/                    # 生成的报告目录
+    ├── report_index.json      # 报告索引
+    └── *.json                 # 作者报告数据
+```
 
-无需配置，直接查看演示报告：
+## 🚀 快速开始
+
+### 1. 安装依赖
 
 ```bash
-python quick_test.py
-# 打开 reports/index.html 查看
+pip install pyyaml jinja2
 ```
 
-### 方式2：分析真实项目
+### 2. 配置文件
 
-#### 1. 安装依赖
+复制示例配置并根据实际情况修改：
 
 ```bash
-pip install -r requirements.txt
+cp config/config.example.yaml config/config.yaml
+cp config/author_mapping.example.yaml config/author_mapping.yaml
 ```
 
-#### 2. 配置项目
+编辑 `config/config.yaml`:
 
-编辑 `config.yaml` 文件。支持三种配置方式：
-
-**方式A：自动发现目录下的所有Git仓库（最简单）**
 ```yaml
 projects:
-  - path: "F:/project"  # 指定项目根目录
-    name: "所有项目"    # 自动发现子目录中的Git仓库
+  - path: "F:/project/your-project"
+    name: "your-project"
 
-authors:                # 留空表示包含所有作者
-```
+report_year: 2025
 
-**方式B：指定具体的Git仓库**
-```yaml
-projects:
-  - path: "F:/project/my-repo-1"
-    name: "项目1"
-  - path: "F:/project/my-repo-2"
-    name: "项目2"
-
+# 留空表示包含所有作者
 authors:
-  - "Your Name"
+
+# LLM配置（可选）
+llm:
+  provider: "openai"
+  model: "gpt-4"
+  api_key: "your-api-key-here"
 ```
 
-**方式C：混合使用**
+编辑 `config/author_mapping.yaml`（可选）:
+
 ```yaml
-projects:
-  - path: "F:/project"          # 自动发现
-    name: "自动发现的项目"
-  - path: "F:/other-repo"       # 手动指定
-    name: "特定仓库"
-
-authors:  # 留空=所有作者，或指定特定作者
+# 统一不同格式的作者名字
+"Monge" : "Monge(中文名) <monge@example.com>"
+"monge" : "Monge(中文名) <monge@example.com>"
 ```
 
-#### 3. 生成报告
+### 3. 启动Web服务
 
 ```bash
-python main.py
+python start_server.py
 ```
 
-系统会自动扫描指定的目录，发现Git仓库并生成报告。
+或指定端口：
 
-#### 4. 查看报告
-
-在浏览器中打开 `./reports/index.html` 即可查看报告。
-
-## 项目结构
-
-```
-code-year-report/
-├── main.py                 # 主程序入口
-├── config.yaml            # 配置文件
-├── requirements.txt       # Python依赖
-├── README.md             # 项目说明
-├── src/
-│   ├── __init__.py
-│   ├── git_collector.py  # Git数据采集
-│   ├── data_analyzer.py  # 数据分析
-│   ├── report_generator.py # 报告生成
-│   └── llm_client.py     # LLM客户端
-├── templates/
-│   └── report.html       # HTML报告模板
-└── reports/              # 输出目录
-    └── index.html        # 生成的报告
+```bash
+python start_server.py --port 8080
 ```
 
-## 报告内容
+### 4. 访问报告
 
-报告包含以下核心指标：
+在浏览器中打开：
+- 本地访问：`http://localhost:8000`
+- 网络访问：`http://your-ip:8000`
 
-### 基础产出
-- 总提交次数
-- 新增/删除/净增代码行数
-- 平均提交频率
+## 📊 数据流程
 
-### 代码质量
-- 代码异味趋势
-- 漏洞修复统计
-- 重复率变化
+```
+Git仓库 → src/server.py → JSON数据 → Web界面
+          (数据采集+API服务)
+```
 
-### 代码审查
-- MR/PR数量
-- 评论次数
-- 被采纳的建议数
+### start_server.py 功能
 
-### 项目参与
-- 完成任务数
-- 参与项目数量
-- 技术栈分布
+- 主程序入口
+- 启动Web服务器
+- 可以通过Web UI触发数据生成
 
-### 效率与模式
-- 提交时间分布热力图
-- 高效时段分析
-- 重构贡献统计
+### src/server.py 功能
 
-## 配置说明
+- 提供HTTP服务
+- API接口：
+  - `GET /api/authors` - 获取作者列表
+  - `GET /api/author/<id>` - 获取作者数据
+  - `GET /api/progress` - 获取生成进度
+  - `POST /api/generate` - 生成报告数据
+- 渲染HTML报告页面
+- 提供静态资源服务
 
-### LLM配置（可选）
+## 🎨 UI特性
 
-如果需要使用AI生成个性化文案，配置LLM：
+### 总览页面
+
+- 显示所有贡献者
+- 搜索功能
+- 进度条显示（如果正在生成）
+- 卡片动画效果
+
+### 个人报告（两种模板）
+
+1. **标准模板** (`report.html`)
+   - 单页展示所有数据
+   - 热力图、图表等可视化
+
+2. **故事模板** (`report_story.html`) - 推荐
+   - 逐页展示效果
+   - 类似QQ音乐年度报告
+   - 滚动动画
+   - 章节导航
+
+## 🔧 高级配置
+
+### 作者名字映射
+
+解决同一个作者有多个名字的问题：
+
+```yaml
+# config/author_mapping.yaml
+"John Doe" : "John Doe <john@example.com>"
+"john.doe@example.com" : "John Doe <john@example.com>"
+"J. Doe" : "John Doe <john@example.com>"
+```
+
+支持多种匹配方式：
+- 完全匹配：`"Name <email>"`
+- 仅名字：`"Name"`
+- 仅邮箱：`"email@example.com"`
+
+### LLM文案生成
+
+在 `config/config.yaml` 中配置：
 
 ```yaml
 llm:
   provider: "openai"  # 或 "anthropic"
   model: "gpt-4"
   api_key: "sk-..."
+  base_url: "https://api.openai.com/v1"  # 可选
 ```
 
-如果不配置LLM，将使用预设模板生成报告。
-
-### 主题定制
-
-可以自定义报告的配色方案：
-
-```yaml
-theme:
-  primary_color: "#667eea"
-  secondary_color: "#764ba2"
-  accent_color: "#f093fb"
-```
-
-## 高级功能
-
-### 多作者分析
-
-支持为多个作者生成独立或合并报告：
-
-```yaml
-authors:
-  - "Alice <alice@example.com>"
-  - "Bob <bob@example.com>"
-```
-
-### 自定义时间范围
-
-```yaml
-date_range:
-  start: "2024-01-01"
-  end: "2024-12-31"
-```
-
-### 数据导出
-
-支持导出原始数据为JSON格式：
+跳过LLM：
 
 ```bash
-python main.py --export-json
+python main.py --no-llm
 ```
 
-## 常见问题
+## 📦 生成的文件
 
-**Q: 支持哪些Git平台？**
-A: 支持所有Git仓库，包括GitHub、GitLab、Gitee、本地仓库等。
+运行 `python main.py` 后，在 `reports/` 目录生成：
 
-**Q: 如何识别提交者？**
-A: 通过配置的authors字段，匹配Git提交的作者名和邮箱。
+```
+reports/
+├── report_index.json              # 索引文件
+├── AuthorName_2025.json          # 作者报告数据
+├── AuthorName2_2025.json
+└── ...
+```
 
-**Q: 报告可以离线查看吗？**
-A: 可以，生成的HTML文件是完全独立的，可以离线打开。
+JSON文件结构：
 
-**Q: 数据安全吗？**
-A: 所有数据在本地处理，不会上传到任何服务器（LLM调用除外）。
+```json
+{
+  "meta": {
+    "author": "作者名",
+    "email": "email@example.com",
+    "author_id": "作者ID",
+    "year": 2025,
+    "generated_at": "2025-12-28T..."
+  },
+  "summary": {
+    "total_commits": 1000,
+    "net_lines": 50000,
+    ...
+  },
+  "languages": {...},
+  "projects": [...],
+  "ai_text": "AI生成的文案...",
+  "theme": {...}
+}
+```
 
-## 许可证
+## 🎯 使用场景
+
+1. **团队年度总结**
+   - 展示团队整体贡献
+   - 个人成就展示
+
+2. **个人技术回顾**
+   - 查看自己的代码提交
+   - 分析编程语言使用
+   - 回顾项目参与情况
+
+3. **技术团队建设**
+   - 增强团队凝聚力
+   - 技术成长可视化
+
+## 📝 注意事项
+
+- `.gitignore` 已配置，不会提交配置文件和生成的报告
+- `novels/` 目录是小说内容，禁止分析和修改
+- 所有Python代码在 `src/` 目录
+- HTML/JS/CSS 在 `static/` 和 `templates/` 目录
+
+## 🔍 故障排查
+
+### 问题：找不到Git仓库
+
+检查 `config/config.yaml` 中的路径是否正确。
+
+### 问题：LLM调用失败
+
+- 检查API key是否正确
+- 检查网络连接
+- 使用 `--no-llm` 跳过LLM
+
+### 问题：作者名字不统一
+
+配置 `config/author_mapping.yaml` 统一名字。
+
+## 📄 许可证
 
 MIT License
-
-## 贡献
-
-欢迎提交Issue和Pull Request！

@@ -6,5 +6,5 @@ src/ python程序
 static/ 静态资源
 templates/ 模板信息
 reports/ 生成的报告目录
-md/ 设计文档，修改文档目录
+md/ 设计文档，修改文档目录 ，*.md 文件必须放到这个文件
 config.yaml  扫描配置文件

@@ -37,9 +37,9 @@ ENV/
 reports/
 *.html
 
-# Config (keep example)
-config.yaml
-config.example.yaml
+# Config files (keep examples)
+config/config.yaml
+config/author_mapping.yaml
 
 # OS
 .DS_Store
