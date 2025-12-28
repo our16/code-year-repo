@@ -42,12 +42,28 @@ def setup_logger(name: str = 'code-year-report', level=logging.INFO):
     # 添加handler到日志记录器
     logger.addHandler(console_handler)
 
+    # 测试日志输出
+    logger.info("Logger initialized")
+
     return logger
 
 
-def get_logger(name: str = 'code-year-report'):
+def get_logger(name: str = None):
     """获取日志记录器"""
-    return logging.getLogger(name)
+    # 确保全局logger已初始化
+    global logger
+    if not logger.handlers:
+        setup_logger()
+
+    if name:
+        # 返回命名logger或子logger
+        child_logger = logging.getLogger(name)
+        # 确保子logger也有handler（继承父logger）
+        if not child_logger.handlers:
+            child_logger.parent = logger
+        child_logger.setLevel(logger.level)
+        return child_logger
+    return logger
 
 
 # 初始化全局日志记录器

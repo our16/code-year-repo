@@ -459,36 +459,36 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
 
 def load_report_data(reports_dir: Path) -> dict:
-    """加载报告索引数据"""
+    """加载报告索引数据 - 扫描所有作者JSON文件"""
     report_data = {}
-    index_file = reports_dir / 'report_index.json'
 
-    if index_file.exists():
-        with open(index_file, 'r', encoding='utf-8') as f:
-            report_data = json.load(f)
-    else:
-        # 如果没有索引文件，扫描JSON文件
-        for json_file in reports_dir.glob('*.json'):
-            if json_file.name == 'report_index.json':
-                continue
+    # 排除的文件：进度文件和索引文件
+    excluded_files = {'.progress.json', 'report_index.json'}
 
-            try:
-                with open(json_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    meta = data.get('meta', {})
-                    author_id = meta.get('author_id', meta.get('author', json_file.stem))
+    # 扫描所有JSON文件
+    for json_file in reports_dir.glob('*.json'):
+        # 跳过排除的文件
+        if json_file.name in excluded_files:
+            continue
 
-                    report_data[author_id] = {
-                        'id': author_id,
-                        'name': meta.get('author', 'Unknown'),
-                        'email': meta.get('email', ''),
-                        'commits': data.get('summary', {}).get('total_commits', 0),
-                        'net_lines': data.get('summary', {}).get('net_lines', 0),
-                        'projects': len(data.get('projects', [])),
-                        'json_file': json_file.name,
-                    }
-            except Exception as e:
-                print(f"警告: 无法读取 {json_file.name}: {str(e)}")
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                meta = data.get('meta', {})
+                author_id = meta.get('author_id', meta.get('author', json_file.stem))
+
+                report_data[author_id] = {
+                    'id': author_id,
+                    'name': meta.get('author', 'Unknown'),
+                    'email': meta.get('email', ''),
+                    'commits': data.get('summary', {}).get('total_commits', 0),
+                    'net_lines': data.get('summary', {}).get('net_lines', 0),
+                    'projects': len(data.get('projects', [])),
+                    'json_file': json_file.name,
+                }
+                logger.info(f"加载报告: {author_id} ({json_file.name})")
+        except Exception as e:
+            logger.warning(f"无法读取 {json_file.name}: {str(e)}")
 
     return report_data
 

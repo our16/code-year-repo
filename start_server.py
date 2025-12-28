@@ -16,6 +16,11 @@ os.chdir(project_root)
 src_path = project_root / 'src'
 sys.path.insert(0, str(src_path))
 
+# 初始化logger（必须在导入server之前）
+from src.logger_config import setup_logger
+setup_logger()
+logger = setup_logger()
+
 from src.server import start_server
 
 if __name__ == '__main__':
@@ -36,4 +41,5 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    logger.info("启动Web服务器")
     start_server(port=args.port, reports_dir=args.dir)
