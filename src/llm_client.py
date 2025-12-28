@@ -24,50 +24,10 @@ class LLMClient:
             return self._get_default_text(data)
 
         try:
-            if self.provider == 'openai':
-                return self._generate_with_openai(data)
-            elif self.provider == 'anthropic':
-                return self._generate_with_anthropic(data)
-            else:
-                return self._get_default_text(data)
+            return self._generate_with_anthropic(data)
         except Exception as e:
             print(f"LLM生成失败，使用默认文案: {str(e)}")
             return self._get_default_text(data)
-
-    def _generate_with_openai(self, data: Dict[str, Any]) -> str:
-        """使用OpenAI生成文案"""
-        try:
-            from openai import OpenAI
-
-            client = OpenAI(
-                api_key=self.api_key,
-                base_url=self.base_url or None
-            )
-
-            prompt = self._build_prompt(data)
-
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "你是一位专业的技术写作专家，擅长用温暖、富有感染力的语言描述程序员的工作成果。"
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                temperature=0.8,
-                max_tokens=2000,
-            )
-
-            return response.choices[0].message.content
-
-        except ImportError:
-            raise Exception("请安装 openai 库: pip install openai")
-        except Exception as e:
-            raise Exception(f"OpenAI调用失败: {str(e)}")
 
     def _generate_with_anthropic(self, data: Dict[str, Any]) -> str:
         """使用Anthropic生成文案"""
