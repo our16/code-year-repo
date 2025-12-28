@@ -136,11 +136,25 @@ class DataAnalyzer:
         """生成完整的365天日历热力图数据"""
         from datetime import date, timedelta
 
-        # 统计每天的提交数
-        heatmap_dict = defaultdict(int)
+        # 按日期统计提交信息
+        daily_stats = defaultdict(lambda: {
+            'count': 0,
+            'additions': 0,
+            'deletions': 0,
+            'latest_time': None
+        })
+
         for commit in commits:
             date_str = commit['date'][:10]  # YYYY-MM-DD
-            heatmap_dict[date_str] += 1
+            time_str = commit['date'][11:19]  # HH:MM:SS
+
+            daily_stats[date_str]['count'] += 1
+            daily_stats[date_str]['additions'] += commit.get('additions', 0)
+            daily_stats[date_str]['deletions'] += commit.get('deletions', 0)
+
+            # 更新最晚提交时间（晚6点-次日早6点算夜间提交）
+            if daily_stats[date_str]['latest_time'] is None or time_str > daily_stats[date_str]['latest_time']:
+                daily_stats[date_str]['latest_time'] = time_str
 
         # 生成完整的365天数据
         start_date = date(self.report_year, 1, 1)
@@ -150,10 +164,15 @@ class DataAnalyzer:
         current_date = start_date
         while current_date <= end_date:
             date_str = current_date.isoformat()
-            count = heatmap_dict.get(date_str, 0)
+            stats = daily_stats.get(date_str, {'count': 0, 'additions': 0, 'deletions': 0, 'latest_time': None})
+            count = stats['count']
+
             result.append({
                 'date': date_str,
                 'count': count,
+                'additions': stats['additions'],
+                'deletions': stats['deletions'],
+                'latest_time': stats['latest_time'],
                 'level': self._get_heatmap_level(count)
             })
             current_date += timedelta(days=1)
