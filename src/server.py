@@ -165,10 +165,14 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
     def serve_author_report(self, author_id):
         """提供个人报告页面"""
+        # URL解码
+        from urllib.parse import unquote
+        author_id = unquote(author_id)
+
         # 查找作者信息
         author_info = None
         for aid, data in self.report_data.items():
-            if aid == author_id or data.get('name') == author_id:
+            if aid == author_id or data.get('name') == author_id or data.get('id') == author_id:
                 author_info = data
                 break
 
@@ -176,23 +180,64 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_error(404, "Author not found")
             return
 
-        # 读取JSON数据
+        # 查找JSON文件
         json_file = author_info.get('json_file')
-        if not json_file:
-            self.send_error(404, "Report file not found")
-            return
 
-        json_path = Path(self.directory) / json_file
-        if not json_path.exists():
-            self.send_error(404, "JSON file not found")
-            return
+        if json_file:
+            json_path = Path(self.directory) / json_file
+            if json_path.exists():
+                # 读取JSON数据并渲染
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    report_data = json.load(f)
+                html = self.render_report_html(report_data)
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(html.encode('utf-8'))
+                return
 
-        with open(json_path, 'r', encoding='utf-8') as f:
-            report_data = json.load(f)
-
-        # 渲染HTML模板
-        html = self.render_report_html(report_data)
-
+        # 没有JSON文件，显示无数据提示
+        html = f"""<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暂无数据</title>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }}
+        .message {{
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }}
+        h1 {{ margin-bottom: 20px; }}
+        p {{ font-size: 1.2em; }}
+        a {{ color: #f093fb; text-decoration: none; }}
+        a:hover {{ text-decoration: underline; }}
+    </style>
+</head>
+<body>
+    <div class="message">
+        <h1>📊 暂无报告数据</h1>
+        <p>作者：{author_info.get('name', 'Unknown')}</p>
+        <p style="margin-top: 30px;">
+            <a href="/">返回首页</a>
+        </p>
+    </div>
+</body>
+</html>
+"""
         self.send_response(200)
         self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
