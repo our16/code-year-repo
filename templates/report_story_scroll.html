@@ -833,6 +833,22 @@
 
             const sections = parseAIText(aiText);
 
+            // 提取年度寄语
+            let endingMessage = {
+                title: '星光不问赶路人，时光不负有心人',
+                content: '这一年，你在代码的世界里书写了传奇<br>愿你在新的一年里，继续燃烧激情<br>在代码的世界里书写更多震撼人心的篇章'
+            };
+
+            // 从sections中查找年度寄语卡片
+            const endingCard = sections.find(s => s.type === '年度寄语');
+            if (endingCard) {
+                endingMessage = {
+                    title: endingCard.title,
+                    content: endingCard.description
+                };
+                console.log('使用后端生成的年度寄语:', endingMessage);
+            }
+
             let html = '<div class="scroll-container">';
 
             // 标题屏
@@ -865,16 +881,14 @@
                 `;
             });
 
-            // 结尾屏
+            // 结尾屏 - 使用后端生成的年度寄语
             html += `
                 <div class="screen">
                     <div class="metric-card ending-card">
                         <div class="metric-icon">✨</div>
-                        <h2>星光不问赶路人，时光不负有心人</h2>
+                        <h2>${endingMessage.title}</h2>
                         <p>
-                            这一年，你在代码的世界里书写了传奇<br>
-                            愿你在新的一年里，继续燃烧激情<br>
-                            在代码的世界里书写更多震撼人心的篇章
+                            ${endingMessage.content}
                         </p>
                     </div>
                 </div>
