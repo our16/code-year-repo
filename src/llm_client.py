@@ -62,10 +62,22 @@ class LLMClient:
                     }
                 ],
                 temperature=0.8,
-                max_tokens=2000,
+                max_tokens=4000,  # 增加max_tokens以确保完整输出
             )
 
-            return response.choices[0].message.content
+            content = response.choices[0].message.content
+
+            # 验证响应不为空
+            if not content or len(content.strip()) == 0:
+                raise Exception("LLM返回空响应")
+
+            # 验证包含graphs标签
+            if '<graphs>' not in content or '</graphs>' not in content:
+                print(f"警告：LLM返回内容不包含完整的graphs标签")
+                raise Exception("响应格式不正确，缺少graphs标签")
+
+            print(f"LLM生成成功，响应长度: {len(content)} 字符")
+            return content
 
         except ImportError:
             raise Exception("请安装 openai 库: pip install openai")
@@ -209,47 +221,80 @@ class LLMClient:
         return prompt
 
     def _get_default_text(self, data: Dict[str, Any]) -> str:
-        """获取默认文案"""
+        """获取默认文案（XML格式，包含所有指标卡片）"""
         summary = data.get('summary', {})
         languages = data.get('languages', {})
         projects = data.get('projects', [])
         time_dist = data.get('time_distribution', {})
         code_quality = data.get('code_quality', {})
 
-        top_lang = languages.get('top_languages', [])[:3]
+        top_lang = languages.get('top_languages', [])[:2]
         lang_names = [l['name'] for l in top_lang]
 
         project_count = len(projects)
         top_project = projects[0] if projects else {}
 
-        # 个性化结尾语生成
+        # 个性化年度寄语生成
         ending = self._generate_personalized_ending(summary, time_dist, code_quality, project_count, lang_names)
 
-        text = f"""
-# 💌 致过去的一年：你的代码，你的诗篇
+        total_commits = summary.get('total_commits', 0)
+        net_lines = summary.get('net_lines', 0)
+        additions = summary.get('total_additions', 0)
+        deletions = summary.get('total_deletions', 0)
+        refactor_ratio = code_quality.get('refactor_ratio', 0)
+        best_hour = time_dist.get('best_period', {}).get('hour', '未知')
 
-在冰冷的数字背后，是你一整年的热忱、思考和创造。
+        # 构建XML格式的指标卡片
+        text = f"""<graphs>
+<graph>
+<type>提交次数</type>
+<value>{total_commits}</value>
+<title>数字中的热忱</title>
+<content>这一年，你用{total_commits}次提交在编程的世界里书写了一段传奇。新增{additions}行代码，删除{deletions}行过往，净增长{net_lines}行的积累——每一行都承载着你的创意与智慧。</content>
+</graph>
 
-## 年初的Flag，是写在晨光里的序章
+<graph>
+<type>代码行数</type>
+<value>{net_lines}</value>
+<title>代码长城的筑造</title>
+<content>这是你技术成长的巍峨丰碑。{additions}行新增的代码，构筑起产品的血肉；而{deletions}行的删除，更是你追求优雅与简洁的证明。大规模创造与勇敢舍弃的结合，正是大师级程序员的标志。</content>
+</graph>
 
-每一个早起的清晨，每一个静谧的深夜，键盘敲击出的不只是代码，更是你解决问题的决心。那些 **{summary.get('total_commits', 0)}** 次的提交，是你与复杂问题一次次交锋的勋章。新增的 **{summary.get('total_additions', 0)}** 行代码，构筑起产品的血肉；而删除的 **{summary.get('total_deletions', 0)}** 行，更是你追求优雅与简洁的证明——真正的大师，不仅乐于创造，更勇于做减法。
+<graph>
+<type>项目数量</type>
+<value>{project_count}</value>
+<title>技术探索的足迹</title>
+<content>在{project_count}个不同项目的广阔天地中纵横驰骋，证明你不仅是深耕某一领域的专家，更是具备全局视野的团队协作者。多点开花，重点突破，这种开发模式让你既能在核心项目上达到足够的深度，又能保持对多个项目的广度视野。</content>
+</graph>
 
-## 你的技术栈，是你探索世界的地图
+<graph>
+<type>编程语言</type>
+<value>{lang_names[0] if lang_names else '未知'}</value>
+<title>技术的武器库</title>
+<content>以{lang_names[0] if lang_names else '多种语言'}为主要武器，在编程的世界里探索。你的技术栈，是你探索世界的地图，每一次提交都是对技术边界的勇敢突破。</content>
+</graph>
 
-这一年，你在 **{', '.join(lang_names) if lang_names else '多种技术栈'}** 的世界里探索。参与 **{project_count}** 个不同项目的经历，证明你不仅是深耕某一领域的专家，更是具备全局视野的团队协作者。在 **{top_project.get('name', '核心项目')}** 中的 **{top_project.get('commits', 0)}** 次提交，记录了你在这个项目上的深度投入。
+<graph>
+<type>高效时段</type>
+<value>{best_hour}</value>
+<title>深夜的代码骑士</title>
+<content>{best_hour}点是你创作的高峰时段。这个黄金时段的选择，展现了你对技术的热爱——即使在一天中最安静的时刻，你依然选择用代码来创造价值。那些在深夜里敲下的代码，带着特别的温度与诗意。</content>
+</graph>
 
-## 提交时间分布，是你奋斗时刻的剪影
+<graph>
+<type>重构比例</type>
+<value>{refactor_ratio}%</value>
+<title>精简的艺术</title>
+<content>你的重构比例达到{refactor_ratio}%，这震撼的数字透露出你作为顶级程序员的核心理念——极致的完美主义。你不满足于"能用就行"，而是执着追求"用得完美"。近四分之一的时间用于重构，说明你不仅在创造价值，更在用心雕琢每一个细节。</content>
+</graph>
 
-热力图上的每一个色块，都是你辛勤付出的坐标。它记录了你为攻克难题的坚守，也记录了你高效工作日的专注流程。找到自己的节奏，比盲目追赶更重要。
-
-## 精简的艺术
-
-特别值得一提的是，你的 **{code_quality.get('refactor_ratio', 0)}%** 的提交用于重构和优化，这展现了你对代码质量的追求和对系统可持续性的思考。
-
----
-
-{ending}
-"""
+<graph>
+<type>年度寄语</type>
+<value>致敬</value>
+<title>写给明天的你</title>
+<content>{ending}</content>
+</graph>
+</graphs>"""
 
         return text
 
