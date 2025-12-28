@@ -942,18 +942,26 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         html = html.replace('{{ accent_color | default(\'#f093fb\') }}', accent_color)
         html = html.replace('{{ accent_color }}', accent_color)
 
-        # AI文案 - 需要处理 markdown
+        # AI文案 - 需要处理 markdown 或 XML
         ai_text = data.get('ai_text', None)
         if ai_text:
-            # 将markdown转换为HTML（简单处理）
             import re
-            # 转换换行
-            ai_text_html = ai_text.replace('\n\n', '</p><p>').replace('\n', '<br>')
-            ai_text_html = f'<p>{ai_text_html}</p>'
-            # 处理标题
-            ai_text_html = re.sub(r'<p># (.*?)</p>', r'<h3>\1</h3>', ai_text_html)
-            ai_text_html = re.sub(r'<p>## (.*?)</p>', r'<h4>\1</h4>', ai_text_html)
-            ai_text_html = re.sub(r'<p>### (.*?)</p>', r'<h5>\1</h5>', ai_text_html)
+
+            # 检查是否是XML格式
+            if '<graphs>' in ai_text and '<graph>' in ai_text:
+                # 解析XML格式
+                ai_text_html = self._parse_xml_ai_text(ai_text, data)
+            else:
+                # 将markdown转换为HTML（简单处理）
+                # 转换换行
+                ai_text_html = ai_text.replace('\n\n', '</p><p>').replace('\n', '<br>')
+                ai_text_html = f'<p>{ai_text_html}</p>'
+                # 处理标题
+                ai_text_html = re.sub(r'<p># (.*?)</p>', r'<h3>\1</h3>', ai_text_html)
+                ai_text_html = re.sub(r'<p>## (.*?)</p>', r'<h4>\1</h4>', ai_text_html)
+                ai_text_html = re.sub(r'<p>### (.*?)</p>', r'<h5>\1</h5>', ai_text_html)
+                # 处理粗体
+                ai_text_html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', ai_text_html)
         else:
             # 使用默认文案
             ai_text_html = self._get_default_ai_text(data)
@@ -962,6 +970,108 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         html = html.replace('{{ ai_text }}', ai_text_html)
 
         return html
+
+    def _parse_xml_ai_text(self, ai_text: str, data: dict) -> str:
+        """解析XML格式的AI文案
+
+        Args:
+            ai_text: XML格式的AI文案
+            data: 报告数据
+
+        Returns:
+            HTML格式的文案
+        """
+        import re
+
+        try:
+            # 提取<graphs>标签内容
+            graphs_match = re.search(r'<graphs>([\s\S]*?)</graphs>', ai_text)
+            if not graphs_match:
+                # 如果解析失败，返回默认文案
+                return self._get_default_ai_text(data)
+
+            graphs_content = graphs_match.group(1)
+
+            # 提取所有<graph>标签
+            graph_matches = re.findall(r'<graph>([\s\S]*?)</graph>', graphs_content)
+
+            if not graph_matches:
+                return self._get_default_ai_text(data)
+
+            # 图标映射
+            icon_map = {
+                '提交次数': '💫',
+                '提交': '💫',
+                '代码行数': '🌈',
+                '代码': '🌈',
+                '净增代码': '🌈',
+                '项目数量': '🚀',
+                '项目': '🚀',
+                '参与项目': '🚀',
+                '编程语言': '💻',
+                '语言': '💻',
+                '主要语言': '💻',
+                '高效时段': '🌙',
+                '时段': '🌙',
+                '时间': '🌙',
+                '黄金时段': '🌙',
+                '重构比例': '🎯',
+                '重构': '🎯',
+                '精简': '🎯'
+            }
+
+            def get_icon_for_type(type_text):
+                """根据type自动匹配图标"""
+                for key, icon in icon_map.items():
+                    if key in type_text:
+                        return icon
+                return '📊'
+
+            html_parts = []
+
+            for graph_xml in graph_matches:
+                # 解析每个字段
+                type_match = re.search(r'<type>(.*?)</type>', graph_xml)
+                value_match = re.search(r'<value>(.*?)</value>', graph_xml)
+                title_match = re.search(r'<title>(.*?)</title>', graph_xml)
+                content_match = re.search(r'<content>(.*?)</content>', graph_xml, re.DOTALL)
+
+                if type_match and value_match and title_match and content_match:
+                    metric_type = type_match.group(1).strip()
+                    value = value_match.group(1).strip()
+                    title = title_match.group(1).strip()
+                    content = content_match.group(1).strip()
+
+                    # 获取图标
+                    icon = get_icon_for_type(metric_type)
+
+                    # 转换content中的换行为<br>
+                    content_html = content.replace('\n\n', '</p><p>').replace('\n', '<br>')
+
+                    # 生成HTML卡片
+                    card_html = f'''
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-icon">{icon}</span>
+                            <span class="metric-value">{value}</span>
+                            <span class="metric-label">{metric_type}</span>
+                        </div>
+                        <div class="metric-content">
+                            <h4 class="metric-title">{title}</h4>
+                            <p class="metric-description">{content_html}</p>
+                        </div>
+                    </div>
+                    '''
+                    html_parts.append(card_html)
+
+            if html_parts:
+                return '\n'.join(html_parts)
+            else:
+                return self._get_default_ai_text(data)
+
+        except Exception as e:
+            logger.warning(f"XML解析失败: {e}")
+            return self._get_default_ai_text(data)
 
     def _get_default_ai_text(self, data: dict) -> str:
         """生成默认AI文案"""
