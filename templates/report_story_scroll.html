@@ -613,6 +613,19 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* 自动播放期间禁用交互 */
+        .scroll-container.autoplay-active {
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .scroll-container.autoplay-active .navigation-arrow,
+        .scroll-container.autoplay-active .dot {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -1009,7 +1022,8 @@
             // 点击指示器跳转
             dots.forEach(dot => {
                 dot.addEventListener('click', () => {
-                    stopAutoplay();
+                    // 播放期间禁止点击
+                    if (isAutoplaying) return;
                     const index = parseInt(dot.dataset.index);
                     navigateTo(index);
                 });
@@ -1017,12 +1031,14 @@
 
             // 导航箭头点击
             prevArrow.addEventListener('click', () => {
-                stopAutoplay();
+                // 播放期间禁止点击
+                if (isAutoplaying) return;
                 navigateTo(currentIndex - 1);
             });
 
             nextArrow.addEventListener('click', () => {
-                stopAutoplay();
+                // 播放期间禁止点击
+                if (isAutoplaying) return;
                 navigateTo(currentIndex + 1);
             });
 
@@ -1050,9 +1066,15 @@
                     jumpButton.classList.remove('show');
                 }
 
+                // 禁用交互（播放期间不允许手动操作）
+                container.classList.add('autoplay-active');
+
                 // 清除旧的定时器（如果存在）
                 if (autoplayInterval) {
                     clearInterval(autoplayInterval);
+                }
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
                 }
 
                 // 启动倒计时动画
@@ -1093,6 +1115,7 @@
                         clearInterval(countdownInterval);
                         clearInterval(autoplayInterval);
                         autoplayInterval = null;
+                        countdownInterval = null;
                         stopAutoplay();
                         if (jumpButton) {
                             jumpButton.classList.add('show');
@@ -1122,6 +1145,9 @@
                 autoplayBtn.classList.remove('playing');
                 autoplayBtn.title = '自动播放';
 
+                // 启用交互（播放完成允许手动操作）
+                container.classList.remove('autoplay-active');
+
                 if (autoplayInterval) {
                     clearInterval(autoplayInterval);
                     autoplayInterval = null;
@@ -1130,12 +1156,6 @@
                 if (countdownInterval) {
                     clearInterval(countdownInterval);
                     countdownInterval = null;
-                }
-
-                // 清理鼠标悬停定时器
-                if (mouseHoverTimer) {
-                    clearTimeout(mouseHoverTimer);
-                    mouseHoverTimer = null;
                 }
             }
 
@@ -1214,7 +1234,8 @@
 
                 if (Math.abs(diff) < swipeThreshold) return;
 
-                stopAutoplay();
+                // 播放期间禁止滑动
+                if (isAutoplaying) return;
 
                 if (diff > 0) {
                     // 上滑，下一屏
@@ -1254,11 +1275,8 @@
             let wheelAccumulator = 0;
 
             container.addEventListener('wheel', (e) => {
-                // 不阻止默认行为，让浏览器处理
-                // 但暂停自动播放
-                if (isAutoplaying) {
-                    stopAutoplay();
-                }
+                // 播放期间禁止滚轮
+                if (isAutoplaying) return;
 
                 // 累积滚动量
                 wheelAccumulator += e.deltaY;
@@ -1298,86 +1316,6 @@
                     window.location.href = `${currentPath}?style=classic`;
                 });
             }
-
-            let mouseHoverTimer = null; // 鼠标悬停定时器
-            let mouseHoverCountdown = 5; // 悬停时的倒计时值
-
-            // 鼠标悬停时暂停自动播放
-            container.addEventListener('mouseenter', () => {
-                if (isAutoplaying && autoplayInterval) {
-                    console.log('Mouse enter: pausing autoplay');
-                    // 临时暂停
-                    clearInterval(autoplayInterval);
-                    autoplayInterval = null;
-
-                    // 保存当前倒计时值
-                    if (countdownNumber) {
-                        mouseHoverCountdown = parseInt(countdownNumber.textContent) || 5;
-                    }
-                }
-            });
-
-            container.addEventListener('mouseleave', () => {
-                // 只有在自动播放状态且未播放完成时才恢复
-                if (isAutoplaying && autoplayTargetIndex < totalScreens - 1) {
-                    console.log('Mouse leave: resuming autoplay from target', autoplayTargetIndex);
-
-                    // 清除可能存在的旧定时器
-                    if (mouseHoverTimer) {
-                        clearTimeout(mouseHoverTimer);
-                        mouseHoverTimer = null;
-                    }
-
-                    // 使用保存的倒计时值继续，而不是重置为5秒
-                    const resumeDelay = mouseHoverCountdown * 1000;
-
-                    mouseHoverTimer = setTimeout(() => {
-                        if (!isAutoplaying) return;
-
-                        // 使用独立的目标索引，不依赖currentIndex
-                        autoplayTargetIndex += 1;
-
-                        console.log('Autoplay tick (resume): target=' + autoplayTargetIndex + ', total=' + totalScreens);
-
-                        // 检查是否已经超出范围
-                        if (autoplayTargetIndex >= totalScreens) {
-                            console.log('Autoplay: reached end, stopping');
-                            stopAutoplay();
-                            if (jumpButton) {
-                                jumpButton.classList.add('show');
-                            }
-                            return;
-                        }
-
-                        // 导航到目标屏幕
-                        console.log('Autoplay: navigating to', autoplayTargetIndex);
-                        navigateTo(autoplayTargetIndex);
-
-                        // 导航后，重新启动正常的5秒定时器
-                        if (isAutoplaying) {
-                            autoplayInterval = setInterval(() => {
-                                autoplayTargetIndex += 1;
-
-                                console.log('Autoplay tick: target=' + autoplayTargetIndex + ', total=' + totalScreens);
-
-                                if (autoplayTargetIndex >= totalScreens) {
-                                    console.log('Autoplay: reached end, stopping');
-                                    clearInterval(autoplayInterval);
-                                    autoplayInterval = null;
-                                    stopAutoplay();
-                                    if (jumpButton) {
-                                        jumpButton.classList.add('show');
-                                    }
-                                    return;
-                                }
-
-                                console.log('Autoplay: navigating to', autoplayTargetIndex);
-                                navigateTo(autoplayTargetIndex);
-                            }, 5000);
-                        }
-                    }, resumeDelay);
-                }
-            });
         }
 
         // 初始化
