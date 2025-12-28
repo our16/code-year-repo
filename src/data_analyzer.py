@@ -133,21 +133,30 @@ class DataAnalyzer:
         }
 
     def _generate_calendar_heatmap(self, commits: List[Dict]) -> List[Dict]:
-        """生成日历热力图数据"""
-        heatmap = defaultdict(int)
+        """生成完整的365天日历热力图数据"""
+        from datetime import date, timedelta
 
+        # 统计每天的提交数
+        heatmap_dict = defaultdict(int)
         for commit in commits:
-            date = commit['date'][:10]  # YYYY-MM-DD
-            heatmap[date] += 1
+            date_str = commit['date'][:10]  # YYYY-MM-DD
+            heatmap_dict[date_str] += 1
 
-        # 转换为列表格式
+        # 生成完整的365天数据
+        start_date = date(self.report_year, 1, 1)
+        end_date = date(self.report_year, 12, 31)
+
         result = []
-        for date, count in sorted(heatmap.items()):
+        current_date = start_date
+        while current_date <= end_date:
+            date_str = current_date.isoformat()
+            count = heatmap_dict.get(date_str, 0)
             result.append({
-                'date': date,
+                'date': date_str,
                 'count': count,
                 'level': self._get_heatmap_level(count)
             })
+            current_date += timedelta(days=1)
 
         return result
 
