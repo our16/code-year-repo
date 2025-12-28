@@ -262,25 +262,31 @@ class LLMClient:
         refactor_ratio = code_quality.get('refactor_ratio', 0)
         best_hour = time_dist.get('best_period', {}).get('hour', 12)
         total_commits = summary.get('total_commits', 0)
+        net_lines = summary.get('net_lines', 0)
+        additions = summary.get('total_additions', 0)
+        deletions = summary.get('total_deletions', 0)
 
         endings = []
 
-        # 高产型开发者
+        # 高产型开发者 - 动态生成
         if avg_commits > 100:
             endings.append([
                 f"这一年，你用 **{total_commits}** 次提交诠释了什么叫「极致输出」。星光不问赶路人，你的代码早已铺就通往明天的路。",
                 f"**{total_commits}** 次提交，是你写给代码最深情的诗行。时光不负有心人，愿你的每一次敲击键盘，都成为点亮未来的星光。",
-                f"以 **{avg_commits:.0f}** 次月均提交的节奏，你在代码的世界里一往无前。星光不问赶路人，时光定不负你这份坚持。"
+                f"以 **{avg_commits:.0f}** 次月均提交的节奏，你在代码的世界里一往无前。星光不问赶路人，时光定不负你这份坚持。",
+                f"**{additions:,}** 行新增，**{deletions:,}** 行删除，净增长 **{net_lines:,}** 行——这**{total_commits}** 次提交背后，是你对技术无限的热忱。",
             ])
         elif avg_commits > 50:
             endings.append([
                 f"稳健的 **{total_commits}** 次提交，见证了你一年来的成长与突破。代码如诗，你用坚持续写着属于自己的篇章。",
-                f"**{avg_commits:.0f}** 次月均提交，不多不少，恰是你的节奏。愿你在代码的世界里继续从容前行，时光终不负你。"
+                f"**{avg_commits:.0f}** 次月均提交，不多不少，恰是你的节奏。愿你在代码的世界里继续从容前行，时光终不负你。",
+                f"这一年新增 **{additions:,}** 行代码，删除 **{deletions:,}** 行过往，**{total_commits}** 次提交记录了你的每一次思考和突破。",
             ])
         else:
             endings.append([
                 f"虽然提交次数只有 **{total_commits}** 次，但每一次都凝聚着你的思考与匠心。代码不在多，在于精——你的每一步都算数。",
-                f"**{total_commits}** 次提交，少而精。这一年你用代码书写的故事，或许不喧哗，却足够深刻。时光会记得所有用心的创作。"
+                f"**{total_commits}** 次提交，少而精。这一年你用代码书写的故事，或许不喧哗，却足够深刻。时光会记得所有用心的创作。",
+                f"**{total_commits}** 次提交，净增 **{net_lines:,}** 行代码。质量的重量胜于数量，你的每一行代码都经过深思熟虑。",
             ])
 
         # 完美主义者
@@ -288,10 +294,14 @@ class LLMClient:
             endings[-1].append(
                 f"**{refactor_ratio}%** 的重构占比，暴露了你作为「代码艺术家」的本色。你在追求完美的路上孤独前行，但时光终将证明——那些被你精心雕琢的代码，会成为他人仰望的星空。"
             )
+            endings[-1].append(
+                f"近 **{int(refactor_ratio)}%** 的代码是重构而来，这份对完美的执着令人敬佩。在快速迭代的互联网时代，你依然坚持打磨每一个细节——这就是工匠精神的体现。"
+            )
         elif refactor_ratio > 15:
             endings[-1].extend([
                 f"近 **{int(refactor_ratio)}%** 的时间用于重构，这份对完美的执着让人敬佩。你的代码不只是功能实现，更是艺术品——时光不负匠心。",
-                f"在 **{refactor_ratio}%** 重构比例背后，是你对代码质量的极致追求。星光不问赶路人，你的每一行精雕细琢的代码，都在为未来铺路。"
+                f"在 **{refactor_ratio}%** 重构比例背后，是你对代码质量的极致追求。星光不问赶路人，你的每一行精雕细琢的代码，都在为未来铺路。",
+                f"**{refactor_ratio}%** 的重构投入，说明你不仅是代码的创造者，更是代码的守护者。这种对质量的坚持，在当今时代尤为珍贵。",
             ])
 
         # 深夜奋斗者
@@ -299,6 +309,7 @@ class LLMClient:
             endings[-1].extend([
                 f"**深夜 {best_hour}点** 是你的创作高峰，静谧的深夜里，只有你和代码在对话。那些深夜敲下的代码，带着特别的温度——星光不问赶路人，时光终不负夜行者。",
                 f"当世界沉睡时，你在 **{best_hour}点** 依然在用代码编织梦想。星光不问赶路人，你的每一份深夜坚持，都将成为照亮前路的灯塔。",
+                f"**{best_hour}点** 的深夜创作时光，静谧而专注。在这段大多数人已经休息的时间里，你的思维最为活跃，代码最为精彩——致敬每一位深夜奋斗者。",
             ])
         elif best_hour >= 19:
             endings[-1].append(
@@ -314,11 +325,13 @@ class LLMClient:
             endings[-1].extend([
                 f"纵横 **{project_count}** 个项目，你是代码世界的「探索者」。星光不问赶路人，愿你在技术的征途上继续乘风破浪。",
                 f"一年参与 **{project_count}** 个项目，你的足迹遍布多个领域。时光不负有心人，愿这份广度成为你独特的优势。",
+                f"在 **{project_count}** 个项目中穿梭自如，你是真正的「技术多面手」。星光不问赶路人，愿你的每一次跨界都收获新的成长。",
             ])
         elif project_count >= 3:
             ends = [
                 f"在 **{project_count}** 个项目中留下你的代码，既有深度又有广度。星光不问赶路人，愿你在每个项目上都收获成长。",
                 f"**{project_count}** 个项目的历练，让你成为更全面的开发者。时光会记得你在每个项目中留下的印记。",
+                f"**{project_count}** 个项目，**{total_commits}** 次提交——你在多个领域都有建树，是多面手，也是实干家。",
             ]
             if len(endings[-1]) < 3:
                 endings[-1].extend(ends)
@@ -330,9 +343,15 @@ class LLMClient:
             endings[-1].append(
                 f"一年深耕 **{lang_names[0]}**，你在单一领域做到了极致。星光不问赶路人，愿你的专业成为最锋利的武器，劈开所有技术难题。"
             )
+            endings[-1].append(
+                f"专注于 **{lang_names[0]}**，你在单一技术上钻研到极致。这种「一万小时定律」式的坚持，终将让你成为该领域的专家。"
+            )
         elif len(lang_names) >= 3:
             endings[-1].append(
                 f"熟练运用 **{len(lang_names)}** 种语言，你是真正的「技术多面手」。星光不问赶路人，愿你的技术栈成为探索世界的罗盘。"
+            )
+            endings[-1].append(
+                f"**{', '.join(lang_names[:3])}** 等多种语言信手拈来，你的技术武器库丰富多彩。星光不问赶路人，愿你在技术的海洋中自由遨游。"
             )
 
         # 选择最后一个列表，然后随机选择一句
@@ -341,10 +360,27 @@ class LLMClient:
             options = endings[-1]
             return random.choice(options)
 
-        # 默认结尾
-        defaults = [
-            "*星光不问赶路人，时光不负有心人。愿你在代码的世界里继续书写精彩！*",
-            "*代码如诗，你是最美的诗人。继续用热爱书写你的故事吧！*",
-            "*每一行代码都是你成长的脚印。愿星光常伴，时光不负，继续前行！*",
+        # 默认结尾 - 也是动态生成，提供20条不同风格的模板
+        default_templates = [
+            f"*星光不问赶路人，时光不负有心人。这一年你用 **{total_commits}** 次提交书写了属于自己的代码故事。*",
+            f"*代码如诗，你是最美的诗人。**{total_commits}** 次提交，**{net_lines:,}** 行代码，继续用热爱书写你的故事吧！*",
+            f"*每一行代码都是你成长的脚印。**{additions:,}** 行新增，**{deletions:,}** 行精简，愿星光常伴，时光不负，继续前行！*",
+            f"***{total_commits}** 次提交，**{net_lines:,}** 行代码，这些数字背后是你无数个日夜的思考与创造。愿新的一年，你的代码如繁星般璀璨。*",
+            f"*这一年，你在键盘上敲击出 **{total_commits}** 次回响，用 **{net_lines:,}** 行代码构建着心中的世界。星光不负赶路人，继续闪耀吧！*",
+            f"*代码是写给自己最美的情书。**{total_commits}** 次提交，每一次都是对完美的追求。愿你的热爱永不熄灭，前路星河长明。*",
+            f"*从 **{additions:,}** 行新增到 **{deletions:,}** 行删除，**{total_commits}** 次提交见证你的成长轨迹。时光记得每一份努力，星光照亮每一步前行。*",
+            f"*程序员的世界里，没有白敲的代码。**{total_commits}** 次提交，**{net_lines:,}** 行积累，愿你的每一行代码都成为通往梦想的阶梯。*",
+            f"*这一年的代码之旅，你用 **{total_commits}** 次提交丈量。**{additions:,}** 行创造，**{deletions:,}** 行打磨，精益求精，不负韶华。*",
+            f"***{total_commits}** 次提交，是你与技术对话的足迹；**{net_lines:,}** 行代码，是你思维的具象化。愿星光引路，未来可期。*",
+            f"*在代码的世界里，你是最执着的追光者。**{total_commits}** 次提交，每一次都承载着你的匠心与热忱。继续前行，不负时光。*",
+            f"***{additions:,}** 行的创造，**{deletions:,}** 行的取舍，**{total_commits}** 次提交的坚持——这就是你这一年的代码人生。星光不问赶路人，时光终不负你。*",
+            f"*每一次提交都是一次思考的沉淀，每一行代码都是一次成长的印记。**{total_commits}** 次，**{net_lines:,}** 行，愿你的代码之路越走越宽广。*",
+            f"*代码不仅是工作，更是艺术。**{total_commits}** 次提交，**{net_lines:,}** 行创作，你用键盘谱写着属于自己的交响曲。愿星光常伴，音乐不止。*",
+            f"*这一年，你用 **{total_commits}** 次提交在代码的海洋里航行。新增 **{additions:,}** 行，优化 **{deletions:,}** 行，星光指引，破浪前行。*",
+            f"***{total_commits}** 次提交，**{net_lines:,}** 行代码，数字之外是你对技术的无限热爱。愿这份热爱如星光，照亮你前行的每一步。*",
+            f"*从第一个字符到第 **{net_lines:,}** 行，从第一次提交到第 **{total_commits}** 次，你的每一步都算数。星光不问赶路人，时光不负有心人。*",
+            f"*代码的世界里，你用 **{total_commits}** 次提交证明：坚持是最好的天赋。**{additions:,}** 行创造，**{deletions:,}** 行打磨，愿你的热爱永不褪色。*",
+            f"*这一年的 **{total_commits}** 次提交，是你与技术的深情对话。**{net_lines:,}** 行代码，每一行都承载着你的思考与梦想。星光引路，未来可期。*",
+            f"***{additions:,}** 行的新生，**{deletions:,}** 行的蜕变，**{total_commits}** 次提交的轮回。在代码的世界里，你用匠心书写着不平凡的篇章。星光不负赶路人，继续前行！*",
         ]
-        return random.choice(defaults)
+        return random.choice(default_templates)
