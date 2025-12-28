@@ -34,6 +34,33 @@ body {
     opacity: 0.9;
 }
 
+.generate-btn {
+    margin-top: 20px;
+    padding: 12px 30px;
+    font-size: 1.1em;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 30px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+}
+
+.generate-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.generate-btn:active {
+    transform: scale(0.95);
+}
+
+.generate-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

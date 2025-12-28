@@ -6,6 +6,46 @@ document.addEventListener('DOMContentLoaded', function() {
     checkProgress();
 });
 
+// 生成报告
+async function generateReports() {
+    const btn = document.getElementById('generateBtn');
+
+    try {
+        // 禁用按钮
+        btn.disabled = true;
+        btn.textContent = '⏳ 生成中...';
+
+        // 发送生成请求
+        const response = await fetch('/api/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(result.message);
+            // 开始检查进度
+            checkProgress();
+            // 3秒后刷新页面
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        } else {
+            alert('生成失败: ' + (result.error || '未知错误'));
+            btn.disabled = false;
+            btn.textContent = '🔄 生成报告';
+        }
+    } catch (error) {
+        console.error('生成失败:', error);
+        alert('生成失败，请稍后重试');
+        btn.disabled = false;
+        btn.textContent = '🔄 生成报告';
+    }
+}
+
 // 加载作者数据
 async function loadAuthorsData() {
     try {

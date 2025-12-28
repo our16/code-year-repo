@@ -7,12 +7,20 @@
 
 import os
 import json
+import logging
 import socket
 import sys
+import subprocess
+import threading
 from datetime import datetime
 from pathlib import Path
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
+
+# 导入日志配置
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
@@ -60,12 +68,23 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         if path.startswith('/report/'):
             author_id = path.split('/')[-1]
             # URL解码
-            author_id = author_id.replace('%20', ' ').replace('%3C', '<').replace('%3E', '>').replace('%40', '@')
+            from urllib.parse import unquote
+            author_id = unquote(author_id)
             self.serve_author_report(author_id)
             return
 
         # 其他请求：尝试从静态目录提供
         self.serve_static_file(path.lstrip('/'))
+
+    def do_POST(self):
+        """处理POST请求"""
+        parsed_path = urlparse(self.path)
+        path = parsed_path.path
+
+        # API：生成报告
+        if path == '/api/generate':
+            self.generate_report()
+            return
 
     def serve_static_file(self, relative_path):
         """提供静态文件服务"""
@@ -153,7 +172,21 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.send_json_response(report_data)
 
     def send_progress_api(self):
-        """发送生成进度API（静态数据，实际应从进度文件读取）"""
+        """发送生成进度API"""
+        # 读取进度文件（如果存在）
+        project_root = Path(__file__).parent.parent
+        progress_file = project_root / 'reports' / '.progress.json'
+
+        if progress_file.exists():
+            try:
+                with open(progress_file, 'r', encoding='utf-8') as f:
+                    progress = json.load(f)
+                self.send_json_response(progress)
+                return
+            except:
+                pass
+
+        # 默认返回完成状态
         response = {
             'status': 'completed',
             'total': len(self.report_data),
@@ -162,6 +195,54 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             'percentage': 100
         }
         self.send_json_response(response)
+
+    def generate_report(self):
+        """生成报告数据"""
+        try:
+            logger.info("收到生成报告请求")
+
+            # 在后台线程中运行生成脚本
+            def run_generation():
+                project_root = Path(__file__).parent.parent
+                main_script = project_root / 'src' / 'generate_reports.py'
+
+                if main_script.exists():
+                    logger.info(f"开始执行生成脚本: {main_script}")
+                    # 执行生成脚本，使用encoding='utf-8'避免编码问题
+                    result = subprocess.run(
+                        [sys.executable, str(main_script)],
+                        capture_output=True,
+                        encoding='utf-8',
+                        errors='replace',
+                        cwd=str(project_root)
+                    )
+                    logger.info(f"生成脚本执行完成，返回码: {result.returncode}")
+                    if result.stdout:
+                        logger.info(f"输出: {result.stdout}")
+                    if result.stderr:
+                        logger.warning(f"错误输出: {result.stderr}")
+                else:
+                    logger.error(f"找不到生成脚本: {main_script}")
+
+            # 启动后台线程
+            thread = threading.Thread(target=run_generation, daemon=True)
+            thread.start()
+
+            # 返回成功响应
+            response = {
+                'success': True,
+                'message': '报告生成已启动，请稍后刷新页面查看结果'
+            }
+            self.send_json_response(response)
+            logger.info("生成报告请求已处理")
+
+        except Exception as e:
+            logger.error(f"生成报告失败: {str(e)}", exc_info=True)
+            response = {
+                'success': False,
+                'error': str(e)
+            }
+            self.send_json_response(response)
 
     def serve_author_report(self, author_id):
         """提供个人报告页面"""
@@ -223,17 +304,12 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         }}
         h1 {{ margin-bottom: 20px; }}
         p {{ font-size: 1.2em; }}
-        a {{ color: #f093fb; text-decoration: none; }}
-        a:hover {{ text-decoration: underline; }}
     </style>
 </head>
 <body>
     <div class="message">
         <h1>📊 暂无报告数据</h1>
         <p>作者：{author_info.get('name', 'Unknown')}</p>
-        <p style="margin-top: 30px;">
-            <a href="/">返回首页</a>
-        </p>
     </div>
 </body>
 </html>
@@ -421,10 +497,10 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.wfile.write(response.encode('utf-8'))
 
     def log_message(self, format, *args):
-        """自定义日志输出"""
-        # 只显示重要信息
+        """自定义日志输出 - 使用logger"""
+        # 使用logger记录访问日志
         if 'GET' in format or 'POST' in format:
-            print(f"  [访问] {args[0]}")
+            logger.info(f"[访问] {args[0] if args else format}")
 
 
 def load_report_data(reports_dir: Path) -> dict:
@@ -480,17 +556,18 @@ def start_server(port: int = 8000, reports_dir: str = './reports'):
     # 获取报告目录（不切换当前目录）
     reports_path = Path(reports_dir).absolute()
     if not reports_path.exists():
-        print(f"错误: 报告目录不存在: {reports_path}")
+        logger.error(f"报告目录不存在: {reports_path}")
         sys.exit(1)
 
+    logger.info(f"报告目录: {reports_path}")
+
     # 加载报告数据
-    print(f"加载报告数据...")
+    logger.info("加载报告数据...")
     report_data = load_report_data(reports_path)
-    print(f"找到 {len(report_data)} 个报告")
+    logger.info(f"找到 {len(report_data)} 个报告")
 
     if not report_data:
-        print("\n警告: 没有找到任何报告数据")
-        print("请通过Web界面生成报告")
+        logger.warning("没有找到任何报告数据，请通过Web界面生成报告")
         # 不退出，继续启动服务器
 
     # 创建请求处理器
@@ -503,6 +580,18 @@ def start_server(port: int = 8000, reports_dir: str = './reports'):
 
     local_ip = get_local_ip()
 
+    logger.info("=" * 60)
+    logger.info("Web服务器已启动")
+    logger.info("=" * 60)
+    logger.info(f"本地访问: http://localhost:{port}")
+    logger.info(f"网络访问: http://{local_ip}:{port}")
+    logger.info(f"报告目录: {reports_path}")
+    logger.info("API端点:")
+    logger.info("  GET /api/authors - 获取作者列表")
+    logger.info("  GET /api/author/<id> - 获取特定作者数据")
+    logger.info("  GET /api/progress - 获取生成进度")
+    logger.info("  POST /api/generate - 生成报告数据")
+    logger.info("  GET /report/<id> - 查看个人报告页面")
     print("\n" + "=" * 60)
     print("Web服务器已启动！")
     print("=" * 60)
@@ -510,10 +599,6 @@ def start_server(port: int = 8000, reports_dir: str = './reports'):
     print(f"  本地访问: http://localhost:{port}")
     print(f"  网络访问: http://{local_ip}:{port}")
     print(f"\n报告目录: {reports_path}")
-    print(f"\nAPI端点:")
-    print(f"  GET /api/authors - 获取作者列表")
-    print(f"  GET /api/author/<id> - 获取特定作者数据")
-    print(f"  GET /report/<id> - 查看个人报告页面")
     print(f"\n按 Ctrl+C 停止服务器\n")
 
     try:
