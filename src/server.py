@@ -182,7 +182,7 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         # 实时重新加载报告数据
         reports_dir = Path(self.directory)
         report_data = load_report_data(reports_dir)
-        logger.info(f"API调用：实时加载了 {len(report_data)} 个报告")
+        # logger.info(f"API调用：实时加载了 {len(report_data)} 个报告")
 
         authors = []
 
