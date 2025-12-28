@@ -113,7 +113,7 @@ function startGeneration(btn) {
     btn.disabled = true;
     btn.textContent = '⏳ 生成中...';
 
-    // 开始检查进度
+    // 开始检查进度（自动轮询，不再自动刷新页面）
     checkProgress();
 
     // 提示用户
@@ -133,9 +133,10 @@ function startGeneration(btn) {
     toast.textContent = '✨ 报告生成中，请稍候...';
     document.body.appendChild(toast);
 
+    // 3秒后移除提示，但不再刷新页面
+    // 用户可以看到实时进度更新
     setTimeout(() => {
         toast.remove();
-        location.reload();
     }, 3000);
 }
 
@@ -187,8 +188,12 @@ function displayProgress(progress) {
     progressText.textContent = `${progress.current} (${progress.completed}/${progress.total}) - ${progress.percentage.toFixed(1)}%`;
 
     if (progress.status === 'completed') {
+        // 完成时显示完成消息
+        progressText.textContent = '✅ 报告生成完成！页面将自动刷新...';
+
+        // 3秒后刷新页面以加载新报告
         setTimeout(() => {
-            progressCard.style.display = 'none';
+            location.reload();
         }, 3000);
     }
 }
