@@ -644,9 +644,10 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         """提供个人报告页面 - 实时加载
 
         支持的URL格式:
-        - /report/<author_id>           - 使用默认模板
+        - /report/<author_id>              - 使用默认模板
         - /report/<author_id>?style=interactive - 使用交互式滚动模板
         - /report/<author_id>?style=story       - 使用故事模板
+        - /report/<author_id>?style=scroll      - 使用照片墙滚动模板（推荐）
         """
         # URL解码
         from urllib.parse import unquote
@@ -659,11 +660,13 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
         # 根据style参数选择模板
         template_map = {
-            'default': 'report.html',
+            'default': 'report_story_scroll.html',  # 默认使用照片墙滚动模板
             'interactive': 'report_interactive.html',
-            'story': 'report_story.html'
+            'story': 'report_story.html',
+            'scroll': 'report_story_scroll.html',
+            'classic': 'report.html'  # 经典模板
         }
-        template_name = template_map.get(style, 'report.html')
+        template_name = template_map.get(style, 'report_story_scroll.html')
 
         # 实时重新加载报告数据
         reports_dir = Path(self.directory)
@@ -708,7 +711,7 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
         Args:
             data: 报告数据
-            template_name: 模板文件名，支持 'report.html', 'report_interactive.html', 'report_story.html'
+            template_name: 模板文件名，支持 'report.html', 'report_interactive.html', 'report_story.html', 'report_story_scroll.html'
         """
         # 读取模板（从项目根目录）
         project_root = Path(__file__).parent.parent

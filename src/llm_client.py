@@ -88,8 +88,14 @@ class LLMClient:
         top_project = projects[0] if projects else {}
         project_count = len(projects)
 
+        # 获取当前时间
+        from datetime import datetime
+        current_date = datetime.now().strftime('%Y年%m月%d日')
+
         prompt = f"""
-请根据以下代码年度数据，生成一份温暖、富有感染力的年度总结文案。文案应该包含以下几个部分，每个部分都要有情感色彩，避免枯燥的数据罗列：
+请根据以下代码年度数据，生成一份温暖、富有感染力的年度总结文案。
+
+**当前时间：** {current_date}
 
 **数据概览：**
 - 总提交次数: {summary.get('total_commits', 0)}
@@ -103,16 +109,65 @@ class LLMClient:
 - 高效时段: {time_dist.get('best_period', {}).get('hour', '未知')}
 - 重构提交占比: {code_quality.get('refactor_ratio', 0)}%
 
-**要求：**
-1. 标题：吸引人的年度报告标题
-2. 开篇：温暖的开场白，营造回顾氛围
-3. 第一部分：数字背后的热忱（提交量、代码行数）
-4. 第二部分：技术的探索之路（语言、项目）
-5. 第三部分：时间的足迹（提交习惯、高效时段）
-6. 第四部分：精简的艺术（重构贡献）
-7. 结语：展望未来的寄语
+**输出格式要求：**
 
-请用中文撰写，语言要优美、有感染力，避免过于技术化的表达。每个段落之间用空行分隔。
+必须严格按照以下XML格式输出，每个<graph>标签代表一个独立的指标卡片：
+
+```xml
+<graphs>
+<graph>
+<type>提交次数</type>
+<value>{summary.get('total_commits', 0)}</value>
+<title>数字中的热忱</title>
+<content>这一年，你用{summary.get('total_commits', 0)}次提交在编程的世界里书写了一段传奇。新增{summary.get('total_additions', 0)}行代码，删除{summary.get('total_deletions', 0)}行过往，净增长{summary.get('net_lines', 0)}行的积累——每一行都承载着你的创意与智慧。</content>
+</graph>
+
+<graph>
+<type>代码行数</type>
+<value>{summary.get('net_lines', 0)}</value>
+<title>代码长城的筑造</title>
+<content>这是你技术成长的巍峨丰碑。{summary.get('total_additions', 0)}行新增的代码，构筑起产品的血肉；而{summary.get('total_deletions', 0)}行的删除，更是你追求优雅与简洁的证明。大规模创造与勇敢舍弃的结合，正是大师级程序员的标志。</content>
+</graph>
+
+<graph>
+<type>项目数量</type>
+<value>{project_count}</value>
+<title>技术探索的足迹</title>
+<content>在{project_count}个不同项目的广阔天地中纵横驰骋，证明你不仅是深耕某一领域的专家，更是具备全局视野的团队协作者。多点开花，重点突破，这种开发模式让你既能在核心项目上达到足够的深度，又能保持对多个项目的广度视野。</content>
+</graph>
+
+<graph>
+<type>编程语言</type>
+<value>{lang_names[0] if lang_names else '未知'}</value>
+<title>技术的武器库</title>
+<content>以{lang_names[0] if lang_names else '多种语言'}为主要武器，在编程的世界里探索。你的技术栈，是你探索世界的地图，每一次提交都是对技术边界的勇敢突破。</content>
+</graph>
+
+<graph>
+<type>高效时段</type>
+<value>{time_dist.get('best_period', {}).get('hour', '未知')}</value>
+<title>深夜的代码骑士</title>
+<content>{time_dist.get('best_period', {}).get('hour', '未知')}是你创作的高峰时段。这个黄金时段的选择，展现了你对技术的热爱——即使在一天中最安静的时刻，你依然选择用代码来创造价值。那些在深夜里敲下的代码，带着特别的温度与诗意。</content>
+</graph>
+
+<graph>
+<type>重构比例</type>
+<value>{code_quality.get('refactor_ratio', 0)}%</value>
+<title>精简的艺术</title>
+<content>你的重构比例达到{code_quality.get('refactor_ratio', 0)}%，这震撼的数字透露出你作为顶级程序员的核心理念——极致的完美主义。你不满足于"能用就行"，而是执着追求"用得完美"。近四分之一的时间用于重构，说明你不仅在创造价值，更在用心雕琢每一个细节。</content>
+</graph>
+</graphs>
+```
+
+**重要说明：**
+1. 必须严格按照上面的XML格式输出
+2. 只输出<graphs>...</graphs>部分，不要包含其他文字
+3. 每个指标卡片包含type、value、title、content四个字段（不需要icon字段，图标由前端自动匹配）
+4. content字段中的文案要温暖、有感染力，避免枯燥的数据罗列
+5. title字段要有诗意和感染力
+6. type字段的可选值：提交次数、代码行数、项目数量、编程语言、高效时段、重构比例等
+
+现在请根据实际数据，生成上述格式的XML输出：
 """
         return prompt
 
