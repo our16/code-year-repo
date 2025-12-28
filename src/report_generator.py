@@ -153,11 +153,35 @@ class ReportGenerator:
         report_index = {}
         total = len(author_data_map)
 
+        # 初始化LLM客户端
+        use_llm = config.get('llm', {}).get('api_key')
+        llm_client = None
+        if use_llm:
+            try:
+                llm_client = LLMClient(config)
+                logger.info("LLM客户端初始化成功")
+            except Exception as e:
+                logger.warning(f"LLM客户端初始化失败: {e}，将使用默认模板")
+
         for idx, (author_info, author_projects) in enumerate(author_data_map.items(), 1):
             author_name = author_info.split('<')[0].strip()
             logger.info(f"[{idx}/{total}] 生成报告: {author_name}")
 
             analyzed_data = analyzer.analyze(author_projects)
+
+            # 生成AI文案
+            ai_text = None
+            if llm_client:
+                try:
+                    logger.info(f"  正在调用LLM生成文案...")
+                    ai_text = llm_client.generate_report_text(analyzed_data)
+                    if ai_text and len(ai_text) > 100:
+                        logger.info(f"  ✓ AI文案生成成功 (长度: {len(ai_text)} 字符)")
+                    else:
+                        logger.warning(f"  ✗ AI文案生成失败或内容过短，使用默认模板")
+                        ai_text = None
+                except Exception as e:
+                    logger.warning(f"  ✗ AI文案生成失败: {str(e)}，使用默认模板")
 
             # 构建报告
             safe_name = "".join(c if c.isalnum() or c in ('-', '_') else '_' for c in author_name)
@@ -171,6 +195,8 @@ class ReportGenerator:
                     'generated_at': datetime.now().isoformat(),
                     'json_file': json_filename,
                 },
+                'ai_text': ai_text,  # 添加AI生成的文案
+                'theme': config.get('theme', {}),
                 **analyzed_data
             }
 
