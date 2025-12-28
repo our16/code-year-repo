@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暂无数据</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .message {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        h1 { margin-bottom: 20px; }
+        p { font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <h1 id="title">📊 暂无报告数据</h1>
+        <p id="author-name">作者：Unknown</p>
+    </div>
+    <script>
+        // 从URL参数获取作者名
+        const urlParams = new URLSearchParams(window.location.search);
+        const author = urlParams.get('author') || 'Unknown';
+        document.getElementById('author-name').textContent = `作者：${author}`;
+    </script>
+</body>
+</html>

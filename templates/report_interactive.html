@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 {{ author }} 的代码之旅 - {{ year }}年度报告</title>
+
+    <!-- 动态生成Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23{{ primary_color | default('#667eea') | replace('#', '') }};stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23{{ secondary_color | default('#764ba2') | replace('#', '') }};stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='url(%23grad)'/%3E%3Ctext x='50' y='70' font-family='Arial, sans-serif' font-size='60' font-weight='bold' fill='white' text-anchor='middle'%3E{{ year | default('2025') }}%3C/text%3E%3C/svg%3E">
+
+    <!-- 备用ICO格式Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJxSURBVFhH7ZbPSxtRFMVfYqKJiYkmJqHwxNDV3dzc3MTFxMPCBtBQcPCDcXBxcQFxE9zcXNwR1BEEQVRw9HrRWgqIoiiq+oCKCKLoqIoiqIoigL6rt1r77XnPCempDPQcO/Pufc+881nvnDPtCZRSikvQWgMwHAeQa0sAQwDkQQAQAiABEACIAGQASIABEAkgAMQCRIAEmIBkAEiABEAkgAJAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZBIg8j6+4xGjJb9UAAAAABJRU5ErkJggg==">
+
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23{{ primary_color | default('#667eea') | replace('#', '') }};stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23{{ secondary_color | default('#764ba2') | replace('#', '') }};stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='url(%23grad)'/%3E%3Ctext x='50' y='70' font-family='Arial, sans-serif' font-size='60' font-weight='bold' fill='white' text-anchor='middle'%3E{{ year | default('2025') }}%3C/text%3E%3C/svg%3E">
+
+    <!-- 主题色预览 -->
+    <meta name="theme-color" content="{{ primary_color | default('#667eea') }}">
+    <meta name="msapplication-TileColor" content="{{ primary_color | default('#667eea') }}">
+
+    <!-- SEO优化 -->
+    <meta name="description" content="{{ author }} 的 {{ year }} 年度代码报告 - 查看{{ year }}年的代码提交、项目贡献、技术栈等详细数据">
+    <meta name="keywords" content="代码年度报告,{{ year }},{{ author }},git,编程,开发者">
+    <meta name="author" content="{{ author }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="🎨 {{ author }} 的代码之旅 - {{ year }}年度报告">
+    <meta property="og:description" content="{{ year }}年共提交{{ summary.total_commits }}次，净增{{ summary.net_lines }}行代码">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:title" content="🎨 {{ author }} 的代码之旅 - {{ year }}年度报告">
+    <meta property="twitter:description" content="{{ year }}年共提交{{ summary.total_commits }}次，净增{{ summary.net_lines }}行代码">
+
+    <!-- 页面加载状态样式 -->
+    <style>
+        /* Loading遮罩层 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+
+        .loading-progress {
+            margin-top: 15px;
+            color: var(--primary-color);
+            font-size: 0.9em;
+        }
+
+        /* 骨架屏效果 */
+        .skeleton {
+            background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0.05) 25%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+    <style>
+        :root {
+            --primary-color: {{ primary_color | default('#667eea') }};
+            --secondary-color: {{ secondary_color | default('#764ba2') }};
+            --accent-color: {{ accent_color | default('#f093fb') }};
+            --bg-color: #0f0f1e;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            overflow-y: hidden; /* 禁用默认滚动,使用自定义滚动 */
+        }
+
+        /* 主容器 */
+        .main-container {
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-snap-type: y mandatory;
+            position: relative;
+        }
+
+        /* 章节 - 全屏滚动 */
+        .chapter {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            position: relative;
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .chapter.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .chapter-content {
+            max-width: 1200px;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+        }
+
+        .chapter.active .chapter-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 封面章节 */
+        .intro-chapter {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .intro-chapter::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .intro-chapter h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .intro-chapter .subtitle {
+            font-size: 1.5em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .intro-chapter .scroll-hint {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* 指标卡片 */
+        .metric-chapter {
+            background: linear-gradient(180deg,
+                rgba(102, 126, 234, 0.05) 0%,
+                rgba(118, 75, 162, 0.05) 100%);
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 80px 60px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+        }
+
+        .metric-icon {
+            font-size: 5em;
+            margin-bottom: 30px;
+            display: block;
+        }
+
+        .metric-title {
+            font-size: 1.5em;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .metric-value {
+            font-size: 6em;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+
+        .metric-description {
+            font-size: 1.3em;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .metric-number {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .metric-number.animate {
+            animation: fadeInNumber 0.8s ease forwards;
+        }
+
+        @keyframes fadeInNumber {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 故事章节 */
+        .story-chapter {
+            background: linear-gradient(180deg,
+                rgba(118, 75, 162, 0.1) 0%,
+                rgba(240, 147, 251, 0.1) 100%);
+        }
+
+        .story-content {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.2em;
+            line-height: 2;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .story-content h3 {
+            color: var(--accent-color);
+            margin: 30px 0 20px;
+            font-size: 1.5em;
+        }
+
+        .story-content p {
+            margin-bottom: 20px;
+        }
+
+        /* 语言分布 */
+        .language-chapter {
+            background: linear-gradient(180deg,
+                rgba(240, 147, 251, 0.05) 0%,
+                var(--bg-color) 100%);
+        }
+
+        .language-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 60px 0;
+        }
+
+        .language-tag {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 20px 40px;
+            border-radius: 30px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .language-tag.animate {
+            animation: popIn 0.5s ease forwards;
+        }
+
+        @keyframes popIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .language-tag:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .language-tag .percentage {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+
+        /* 项目章节 */
+        .projects-chapter {
+            background: linear-gradient(180deg,
+                var(--bg-color) 0%,
+                rgba(102, 126, 234, 0.05) 100%);
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .project-card.animate {
+            animation: slideUp 0.6s ease forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .project-card h4 {
+            color: var(--primary-color);
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .project-card .stats {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .project-card .stat {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+        }
+
+        .project-card .stat .value {
+            color: var(--text-primary);
+            font-weight: bold;
+        }
+
+        /* 总结章节 */
+        .summary-chapter {
+            background: linear-gradient(135deg,
+                var(--secondary-color) 0%,
+                var(--accent-color) 100%);
+            text-align: center;
+        }
+
+        .summary-chapter h2 {
+            font-size: 3em;
+            margin-bottom: 30px;
+        }
+
+        .summary-chapter .message {
+            font-size: 1.5em;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+
+        /* 进度指示器 */
+        .progress-indicator {
+            position: fixed;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .progress-dot:hover, .progress-dot.active {
+            background: var(--primary-color);
+            transform: scale(1.3);
+        }
+
+        .progress-dot .tooltip {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(15, 15, 30, 0.95);
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            border-radius: 8px;
+            padding: 8px 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            font-size: 0.85em;
+        }
+
+        .progress-dot:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* 滚动提示 */
+        .scroll-hint-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .intro-chapter h1 {
+                font-size: 2.5em;
+            }
+
+            .metric-value {
+                font-size: 4em;
+            }
+
+            .chapter {
+                padding: 40px 20px;
+            }
+
+            .metric-card {
+                padding: 40px 20px;
+            }
+
+            .progress-indicator {
+                display: none;
+            }
+
+            .story-content {
+                padding: 30px;
+            }
+        }
+
+        /* 滚动条样式 */
+        .main-container::-webkit-scrollbar,
+        .story-content::-webkit-scrollbar,
+        .project-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .main-container::-webkit-scrollbar-track,
+        .story-content::-webkit-scrollbar-track,
+        .project-grid::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .main-container::-webkit-scrollbar-thumb,
+        .story-content::-webkit-scrollbar-thumb,
+        .project-grid::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        .main-container::-webkit-scrollbar-thumb:hover,
+        .story-content::-webkit-scrollbar-thumb:hover,
+        .project-grid::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading遮罩层 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载报告...</div>
+        <div class="loading-progress" id="loadingProgress">准备中...</div>
+    </div>
+
+    <div class="main-container" id="mainContainer">
+        <!-- 封面 -->
+        <section class="chapter intro-chapter" data-chapter="intro" data-title="开始">
+            <div class="chapter-content">
+                <h1>🎨 你的代码年度报告</h1>
+                <div class="subtitle">{{ year }}年度回顾</div>
+                <div class="scroll-hint">
+                    <div class="scroll-hint-text">
+                        向下滚动探索 ↓
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 指标1: 总提交次数 -->
+        <section class="chapter metric-chapter" data-chapter="commits" data-title="提交次数">
+            <div class="chapter-content">
+                <div class="metric-card">
+                    <span class="metric-icon">💻</span>
+                    <div class="metric-title">总提交次数</div>
+                    <div class="metric-value">
+                        <span class="metric-number" id="total-commits">0</span>
+                    </div>
+                    <div class="metric-description">每一次提交都是成长的足迹</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 指标2: 净增代码行 -->
+        <section class="chapter metric-chapter" data-chapter="lines" data-title="代码行数">
+            <div class="chapter-content">
+                <div class="metric-card">
+                    <span class="metric-icon">✨</span>
+                    <div class="metric-title">净增代码行</div>
+                    <div class="metric-value">
+                        <span class="metric-number" id="net-lines">0</span>
+                    </div>
+                    <div class="metric-description">用代码创造价值</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 指标3: 参与项目 -->
+        <section class="chapter metric-chapter" data-chapter="projects" data-title="参与项目">
+            <div class="chapter-content">
+                <div class="metric-card">
+                    <span class="metric-icon">🚀</span>
+                    <div class="metric-title">参与项目</div>
+                    <div class="metric-value">
+                        <span class="metric-number" id="project-count">0</span>
+                    </div>
+                    <div class="metric-description">在多个领域探索</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 指标4: 代码删除 -->
+        <section class="chapter metric-chapter" data-chapter="deletions" data-title="代码删除">
+            <div class="chapter-content">
+                <div class="metric-card">
+                    <span class="metric-icon">🔥</span>
+                    <div class="metric-title">代码删除</div>
+                    <div class="metric-value">
+                        <span class="metric-number" id="deletions">0</span>
+                    </div>
+                    <div class="metric-description">重构与优化的艺术</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI年度总结 -->
+        <section class="chapter story-chapter" data-chapter="story" data-title="AI总结">
+            <div class="chapter-content">
+                <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.5em;">💌 AI为你撰写的年度总结</h2>
+                <div class="story-content">
+                    {{ ai_text | safe }}
+                </div>
+            </div>
+        </section>
+
+        <!-- 编程语言 -->
+        <section class="chapter language-chapter" data-chapter="languages" data-title="编程语言">
+            <div class="chapter-content">
+                <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.5em;">💻 你的技术栈</h2>
+                <div class="language-list" id="language-list">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 项目贡献 -->
+        <section class="chapter projects-chapter" data-chapter="projects-detail" data-title="项目详情">
+            <div class="chapter-content">
+                <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.5em;">🚀 项目贡献详情</h2>
+                <div class="project-grid" id="project-grid">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 总结 -->
+        <section class="chapter summary-chapter" data-chapter="summary" data-title="总结">
+            <div class="chapter-content">
+                <h2>🎉 感谢这一年的努力</h2>
+                <p class="message">
+                    每一行代码都是通往未来的阶梯<br>
+                    继续保持热爱,继续创造<br>
+                    最好的代码,永远是下一行
+                </p>
+                <p style="font-size: 0.9em; opacity: 0.8;">
+                    生成时间: <span id="generate-time"></span>
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <!-- 进度指示器 -->
+    <div class="progress-indicator" id="progressIndicator"></div>
+
+    <script>
+        // 数据
+        const data = {{ data_json | default('{}') }};
+
+        // ========== Loading状态管理 ==========
+        const LoadingManager = {
+            overlay: document.getElementById('loadingOverlay'),
+            progressText: document.getElementById('loadingProgress'),
+            isLoaded: false,
+
+            // 更新进度文本
+            updateProgress(text) {
+                if (this.progressText) {
+                    this.progressText.textContent = text;
+                }
+            },
+
+            // 隐藏Loading
+            hide() {
+                if (!this.isLoaded) {
+                    this.overlay.classList.add('hidden');
+                    this.isLoaded = true;
+
+                    // 完全移除DOM以释放资源
+                    setTimeout(() => {
+                        this.overlay.style.display = 'none';
+                    }, 500);
+                }
+            },
+
+            // 显示错误
+            showError(message) {
+                this.updateProgress('❌ ' + message);
+                setTimeout(() => {
+                    this.hide();
+                }, 2000);
+            }
+        };
+
+        // ========== 数据验证 ==========
+        function validateData(data) {
+            try {
+                if (!data || Object.keys(data).length === 0) {
+                    throw new Error('数据为空');
+                }
+
+                if (!data.summary) {
+                    throw new Error('缺少summary数据');
+                }
+
+                return true;
+            } catch (error) {
+                console.error('数据验证失败:', error);
+                LoadingManager.showError(error.message);
+                return false;
+            }
+        }
+
+        // ========== 初始化流程 ==========
+        async function initializeApp() {
+            try {
+                LoadingManager.updateProgress('📊 加载数据...');
+
+                // 验证数据
+                if (!validateData(data)) {
+                    return;
+                }
+
+                LoadingManager.updateProgress('🎨 初始化界面...');
+
+                // 初始化各个模块
+                await Promise.all([
+                    initLanguages(),
+                    initProjects(),
+                    initGenerateTime(),
+                    createProgressIndicator()
+                ]);
+
+                LoadingManager.updateProgress('✨ 准备就绪');
+
+                // 短暂延迟后隐藏Loading，让用户看到"准备就绪"
+                setTimeout(() => {
+                    LoadingManager.hide();
+                }, 500);
+
+                // 初始化指标动画和滚动监听
+                initMetrics();
+                const container = document.getElementById('mainContainer');
+                container.addEventListener('scroll', handleScroll);
+                setTimeout(handleScroll, 100);
+
+            } catch (error) {
+                console.error('初始化失败:', error);
+                LoadingManager.showError('初始化失败: ' + error.message);
+            }
+        }
+
+        // 格式化数字
+        function formatNumber(num) {
+            if (num >= 10000) {
+                return (num / 10000).toFixed(1) + 'w';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            return num.toString();
+        }
+
+        // 数字动画
+        function animateNumber(element, target, duration = 1500) {
+            const start = 0;
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // 缓动函数
+                const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+                const current = Math.floor(start + (target - start) * easeOutQuart);
+
+                element.textContent = formatNumber(current);
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = formatNumber(target);
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        // 初始化指标
+        function initMetrics() {
+            const summary = data.summary || {};
+
+            // 创建IntersectionObserver用于检测章节可见性
+            const root = document.getElementById('mainContainer');
+            if (!root) {
+                console.error('找不到 mainContainer 元素');
+                return;
+            }
+
+            const observerOptions = {
+                root: root,
+                threshold: 0.5,
+                rootMargin: '-10% 0px -10% 0px'
+            };
+
+            const metricObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const chapter = entry.target;
+                        console.log('章节可见:', chapter.dataset.chapter);
+
+                        // 触发指标数字动画
+                        if (chapter.dataset.chapter === 'commits') {
+                            const element = document.getElementById('total-commits');
+                            if (element) {
+                                element.classList.add('animate');
+                                animateNumber(element, summary.total_commits || 0);
+                            }
+                        } else if (chapter.dataset.chapter === 'lines') {
+                            const element = document.getElementById('net-lines');
+                            if (element) {
+                                element.classList.add('animate');
+                                animateNumber(element, summary.net_lines || 0);
+                            }
+                        } else if (chapter.dataset.chapter === 'projects') {
+                            const element = document.getElementById('project-count');
+                            if (element) {
+                                element.classList.add('animate');
+                                animateNumber(element, (data.projects || []).length);
+                            }
+                        } else if (chapter.dataset.chapter === 'deletions') {
+                            const element = document.getElementById('deletions');
+                            if (element) {
+                                element.classList.add('animate');
+                                animateNumber(element, summary.total_deletions || 0);
+                            }
+                        }
+
+                        // 触发语言标签动画
+                        if (chapter.dataset.chapter === 'languages') {
+                            const tags = chapter.querySelectorAll('.language-tag');
+                            tags.forEach((tag, index) => {
+                                setTimeout(() => {
+                                    tag.classList.add('animate');
+                                }, index * 100);
+                            });
+                        }
+
+                        // 触发项目卡片动画
+                        if (chapter.dataset.chapter === 'projects-detail') {
+                            const cards = chapter.querySelectorAll('.project-card');
+                            cards.forEach((card, index) => {
+                                setTimeout(() => {
+                                    card.classList.add('animate');
+                                }, index * 150);
+                            });
+                        }
+
+                        metricObserver.unobserve(chapter);
+                    }
+                });
+            }, observerOptions);
+
+            // 观察所有章节
+            const chapters = document.querySelectorAll('.chapter');
+            console.log('找到章节数量:', chapters.length);
+            chapters.forEach(chapter => {
+                metricObserver.observe(chapter);
+            });
+        }
+
+        // 初始化语言列表
+        function initLanguages() {
+            const languages = data.languages || {};
+            const topLanguages = languages.top_languages || [];
+
+            const container = document.getElementById('language-list');
+            container.innerHTML = topLanguages.map(lang => `
+                <div class="language-tag">
+                    <span>${lang.name}</span>
+                    <span class="percentage">${lang.percentage}%</span>
+                </div>
+            `).join('');
+        }
+
+        // 初始化项目列表
+        function initProjects() {
+            const projects = data.projects || [];
+
+            const container = document.getElementById('project-grid');
+
+            if (projects.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">暂无数据</p>';
+                return;
+            }
+
+            container.innerHTML = projects.map(project => `
+                <div class="project-card">
+                    <h4>${project.name}</h4>
+                    <div class="stats">
+                        <div class="stat">
+                            <span>📝 提交次数</span>
+                            <span class="value">${project.commits}</span>
+                        </div>
+                        <div class="stat">
+                            <span>➕ 新增代码</span>
+                            <span class="value">${formatNumber(project.additions)}</span>
+                        </div>
+                        <div class="stat">
+                            <span>➖ 删除代码</span>
+                            <span class="value">${formatNumber(project.deletions)}</span>
+                        </div>
+                        <div class="stat">
+                            <span>📊 净增代码</span>
+                            <span class="value">${formatNumber(project.net_lines)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 初始化生成时间
+        function initGenerateTime() {
+            const meta = data.meta || {};
+            const generatedAt = meta.generated_at || new Date().toISOString();
+            const timeStr = new Date(generatedAt).toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+            document.getElementById('generate-time').textContent = timeStr;
+        }
+
+        // 创建进度指示器
+        function createProgressIndicator() {
+            const chapters = document.querySelectorAll('.chapter');
+            const container = document.getElementById('progressIndicator');
+
+            chapters.forEach((chapter, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+                dot.innerHTML = `<span class="tooltip">${chapter.dataset.title || `第${index + 1}页`}</span>`;
+
+                dot.addEventListener('click', () => {
+                    chapter.scrollIntoView({ behavior: 'smooth' });
+                });
+
+                container.appendChild(dot);
+            });
+        }
+
+        // 章节可见性检测
+        function handleScroll() {
+            const container = document.getElementById('mainContainer');
+            const chapters = document.querySelectorAll('.chapter');
+            const dots = document.querySelectorAll('.progress-dot');
+            const containerCenter = container.scrollTop + container.clientHeight / 2;
+
+            chapters.forEach((chapter, index) => {
+                const chapterTop = chapter.offsetTop;
+                const chapterBottom = chapterTop + chapter.offsetHeight;
+                const chapterCenter = (chapterTop + chapterBottom) / 2;
+
+                // 检查章节是否在视口中心
+                const distance = Math.abs(containerCenter - chapterCenter);
+                const isActive = distance < container.clientHeight / 2;
+
+                if (isActive) {
+                    chapter.classList.add('active');
+                    if (dots[index]) {
+                        dots.forEach(d => d.classList.remove('active'));
+                        dots[index].classList.add('active');
+                    }
+                } else {
+                    chapter.classList.remove('active');
+                }
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 使用新的初始化流程
+            initializeApp();
+        });
+
+        // 支持键盘导航
+        document.addEventListener('keydown', function(e) {
+            const container = document.getElementById('mainContainer');
+            const scrollAmount = container.clientHeight;
+
+            if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+                e.preventDefault();
+                container.scrollBy({
+                    top: scrollAmount,
+                    behavior: 'smooth'
+                });
+            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                e.preventDefault();
+                container.scrollBy({
+                    top: -scrollAmount,
+                    behavior: 'smooth'
+                });
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                container.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                container.scrollTo({
+                    top: container.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    </script>
+</body>
+</html>

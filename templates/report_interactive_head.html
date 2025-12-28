@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 {{ author }} 的代码之旅 - {{ year }}年度报告</title>
+
+    <!-- Favicon - 使用emoji图标，纯本地资源，无外部依赖 -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJxSURBVFhH7ZbPSxtRFMVfYqKJiYkmJqHwxNDV3dzc3MTFxMPCBtBQcPCDcXBxcQFxE9zcXNwR1BEEQVRw9HrRWgqIoiiq+oCKCKLoqIoiqIoigL6rt1r77XnPCempDPQcO/Pufc+881nvnDPtCZRSikvQWgMwHAeQa0sAQwDkQQAQAiABEACIAGQASIABEAkgAMQCRIAEmIBkAEiABEAkgAJAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZABIgASQAmQASIABkAEiABJACZABIgAGQASIAEkAJkAEiAAZBIg8j6+4xGjJb9UAAAAABJRU5ErkJggg==">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+
+    <!-- 主题色预览 -->
+    <meta name="theme-color" content="{{ primary_color | default('#667eea') }}">
+    <meta name="msapplication-TileColor" content="{{ primary_color | default('#667eea') }}">
+
+    <!-- SEO优化 -->
+    <meta name="description" content="{{ author }} 的 {{ year }} 年度代码报告 - 查看{{ year }}年的代码提交、项目贡献、技术栈等详细数据">
+    <meta name="keywords" content="代码年度报告,{{ year }},{{ author }},git,编程,开发者">
+    <meta name="author" content="{{ author }}">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="🎨 {{ author }} 的代码之旅 - {{ year }}年度报告">
+    <meta property="og:description" content="{{ year }}年共提交{{ summary.total_commits }}次，净增{{ summary.net_lines }}行代码">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary">
+    <meta property="twitter:title" content="🎨 {{ author }} 的代码之旅 - {{ year }}年度报告">
+    <meta property="twitter:description" content="{{ year }}年共提交{{ summary.total_commits }}次，净增{{ summary.net_lines }}行代码">

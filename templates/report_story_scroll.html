@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码年度报告 - {{ year }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: {{ primary_color | default('#667eea') }};
+            --secondary-color: {{ secondary_color | default('#764ba2') }};
+            --accent-color: {{ accent_color | default('#f093fb') }};
+            --bg-color: #0f0f1e;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.8;
+            overflow-x: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* 背景动画 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(240, 147, 251, 0.2) 0%, transparent 50%);
+            animation: bgShift 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes bgShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* 星星背景 */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* 主容器 */
+        .scroll-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 隐藏滚动条但保留功能 */
+        .scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        /* 每一屏 */
+        .screen {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            scroll-snap-align: start;
+            position: relative;
+        }
+
+        /* 标题屏 */
+        .title-screen {
+            text-align: center;
+        }
+
+        .title-screen h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .title-screen .subtitle {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .title-screen .author-name {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            color: var(--primary-color);
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 指标卡片 - 照片墙风格 */
+        .metric-card {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 50px 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: cardAppear 0.8s ease-out;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* 卡片头部：图标+数值+标签 */
+        .metric-header {
+            text-align: center;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .metric-value {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: countUp 1.5s ease-out;
+            display: block;
+        }
+
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .metric-label {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: var(--text-secondary);
+            display: block;
+        }
+
+        /* 卡片内容：AI寄语 */
+        .metric-content {
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .metric-title {
+            font-size: clamp(1.3rem, 3vw, 1.8rem);
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric-title::before {
+            content: '"';
+            font-size: 1.5em;
+            opacity: 0.5;
+        }
+
+        .metric-title::after {
+            content: '"';
+            font-size: 1.5em;
+            opacity: 0.5;
+        }
+
+        .metric-description {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            line-height: 2;
+            color: var(--text-primary);
+        }
+
+        .metric-description p {
+            margin-bottom: 15px;
+        }
+
+        .metric-description p:last-child {
+            margin-bottom: 0;
+        }
+
+        .metric-description strong {
+            color: var(--primary-color);
+            font-weight: 600;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* 特殊卡片：结尾 */
+        .ending-card {
+            text-align: center;
+        }
+
+        .ending-card .metric-icon {
+            font-size: 5rem;
+            margin-bottom: 30px;
+        }
+
+        .ending-card h2 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .ending-card p {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            line-height: 2;
+            color: var(--text-secondary);
+        }
+
+        /* 进度指示器 */
+        .progress-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .dot:hover {
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(1.2);
+        }
+
+        .dot.active {
+            background: var(--primary-color);
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .dot-tooltip {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .dot:hover .dot-tooltip {
+            opacity: 1;
+        }
+
+        /* 导航提示 */
+        .scroll-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .scroll-hint:hover {
+            opacity: 0.7;
+        }
+
+        .scroll-hint-icon {
+            font-size: 2rem;
+            color: var(--text-secondary);
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* 导航箭头 */
+        .nav-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-arrow:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-arrow:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .nav-arrow.prev {
+            left: 30px;
+        }
+
+        .nav-arrow.next {
+            right: 80px;
+        }
+
+        .nav-arrow.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 自动播放控制 */
+        .autoplay-control {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.3rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .autoplay-control:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .autoplay-control.playing {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: var(--primary-color);
+        }
+
+        /* 进度条 */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
+
+        /* 倒计时环形进度条 */
+        .countdown-container {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .countdown-container.show {
+            display: flex;
+        }
+
+        .countdown-ring {
+            width: 60px;
+            height: 60px;
+            position: relative;
+        }
+
+        .countdown-ring svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .countdown-ring circle {
+            fill: none;
+            stroke-width: 4;
+        }
+
+        .countdown-ring .bg-ring {
+            stroke: rgba(255, 255, 255, 0.1);
+        }
+
+        .countdown-ring .progress-ring {
+            stroke: var(--accent-color);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+
+        .countdown-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        /* 跳转按钮 */
+        .jump-button {
+            position: fixed;
+            bottom: 100px;
+            right: 50%;
+            transform: translateX(50%) scale(0);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .jump-button.show {
+            transform: translateX(50%) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .jump-button:hover {
+            transform: translateX(50%) scale(1.05);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .jump-button:active {
+            transform: translateX(50%) scale(0.98);
+        }
+
+        .jump-button .jump-icon {
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+        @media (max-width: 768px) {
+            .metric-card {
+                padding: 40px 20px;
+            }
+
+            .progress-dots {
+                right: 15px;
+            }
+
+            .dot {
+                width: 10px;
+                height: 10px;
+            }
+
+            .nav-arrow {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .nav-arrow.prev {
+                left: 15px;
+            }
+
+            .nav-arrow.next {
+                right: 70px;
+            }
+
+            .keyboard-hint {
+                display: none;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="stars" id="stars"></div>
+
+    <div id="app">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <span>加载中...</span>
+        </div>
+    </div>
+
+    <script>
+        // 数据
+        const reportData = {{ data_json | default('{}') }};
+
+        // 创建星星背景
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // 解析AI文本为指标卡片
+        function parseAIText(aiText) {
+            const sections = [];
+            const summary = reportData.summary || {};
+
+            // 图标映射表
+            const iconMap = {
+                '提交次数': '💫',
+                '提交': '💫',
+                '代码行数': '🌈',
+                '代码': '🌈',
+                '净增代码': '🌈',
+                '项目数量': '🚀',
+                '项目': '🚀',
+                '参与项目': '🚀',
+                '编程语言': '💻',
+                '语言': '💻',
+                '主要语言': '💻',
+                '高效时段': '🌙',
+                '时段': '🌙',
+                '时间': '🌙',
+                '黄金时段': '🌙',
+                '重构比例': '🎯',
+                '重构': '🎯',
+                '精简': '🎯'
+            };
+
+            // 根据type自动匹配图标
+            function getIconForType(type) {
+                for (const [key, icon] of Object.entries(iconMap)) {
+                    if (type.includes(key)) {
+                        return icon;
+                    }
+                }
+                return '📊'; // 默认图标
+            }
+
+            // 如果有AI文本，尝试解析XML格式
+            if (aiText) {
+                try {
+                    // 提取<graphs>标签内容
+                    const graphsMatch = aiText.match(/<graphs>([\s\S]*?)<\/graphs>/);
+                    if (graphsMatch) {
+                        const graphsContent = graphsMatch[1];
+                        // 提取所有<graph>标签
+                        const graphMatches = graphsContent.match(/<graph>([\s\S]*?)<\/graph>/g);
+
+                        if (graphMatches && graphMatches.length > 0) {
+                            graphMatches.forEach(graphXml => {
+                                // 解析每个字段
+                                const typeMatch = graphXml.match(/<type>(.*?)<\/type>/);
+                                const valueMatch = graphXml.match(/<value>(.*?)<\/value>/);
+                                const titleMatch = graphXml.match(/<title>(.*?)<\/title>/);
+                                const contentMatch = graphXml.match(/<content>(.*?)<\/content>/s);
+
+                                if (typeMatch && valueMatch && titleMatch && contentMatch) {
+                                    const type = typeMatch[1].trim();
+                                    sections.push({
+                                        label: type,
+                                        icon: getIconForType(type), // 自动匹配图标
+                                        value: valueMatch[1].trim(),
+                                        title: titleMatch[1].trim(),
+                                        description: contentMatch[1].trim()
+                                    });
+                                }
+                            });
+
+                            if (sections.length > 0) {
+                                console.log(`成功解析 ${sections.length} 个指标卡片`);
+                                return sections;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('XML解析失败，尝试旧格式:', e);
+                }
+
+                // 尝试旧的Markdown格式解析（兼容旧数据）
+                const parts = aiText.split(/#{3,4}\s+/).filter(s => s.trim());
+
+                parts.forEach((part, index) => {
+                    const lines = part.trim().split('\n');
+                    const title = lines[0].replace(/#{1,2}\s*/, '').trim();
+                    const content = lines.slice(1).join('\n').trim();
+
+                    // 根据标题匹配对应的数据
+                    let icon = '📊';
+                    let value = '';
+                    let label = title;
+
+                    if (title.includes('提交') || title.includes('热忱')) {
+                        icon = '💫';
+                        value = summary.total_commits || 0;
+                        label = '总提交次数';
+                    } else if (title.includes('代码') || title.includes('行')) {
+                        icon = '🌈';
+                        value = summary.net_lines || 0;
+                        label = '净增代码行数';
+                    } else if (title.includes('项目') || title.includes('探索')) {
+                        icon = '🚀';
+                        value = reportData.projects?.length || 0;
+                        label = '参与项目数';
+                    } else if (title.includes('深夜') || title.includes('时间')) {
+                        icon = '🌙';
+                        value = '23:00';
+                        label = '黄金时段';
+                    } else if (title.includes('重构') || title.includes('精简')) {
+                        icon = '🎯';
+                        value = '23%';
+                        label = '重构比例';
+                    }
+
+                    sections.push({
+                        icon,
+                        value,
+                        label,
+                        title: label,
+                        description: content
+                    });
+                });
+            }
+
+            // 如果AI文本解析失败或不足，使用默认指标
+            if (sections.length === 0) {
+                sections.push(
+                    {
+                        icon: '💫',
+                        value: summary.total_commits || 0,
+                        label: '总提交次数',
+                        title: '总提交次数',
+                        description: `这一年，你用${summary.total_commits || 0}次提交在编程的世界里书写了一段传奇。新增${summary.total_additions || 0}行代码，删除${summary.total_deletions || 0}行过往，净增长${summary.net_lines || 0}行的积累——每一行都承载着你的创意与智慧。`
+                    },
+                    {
+                        icon: '🌈',
+                        value: summary.net_lines || 0,
+                        label: '净增代码行数',
+                        title: '净增代码行数',
+                        description: `这是你技术成长的巍峨丰碑。${summary.total_additions || 0}行新增的代码，构筑起产品的血肉；而${summary.total_deletions || 0}行的删除，更是你追求优雅与简洁的证明。大规模创造与勇敢舍弃的结合，正是大师级程序员的标志。`
+                    },
+                    {
+                        icon: '🚀',
+                        value: reportData.projects?.length || 0,
+                        label: '参与项目数',
+                        title: '参与项目数',
+                        description: `在${reportData.projects?.length || 0}个不同项目的经历中纵横驰骋，证明你不仅是深耕某一领域的专家，更是具备全局视野的团队协作者。多点开花，重点突破，每次提交都是技术边界的一次拓展。`
+                    }
+                );
+
+                // 添加语言统计
+                if (reportData.languages?.top_languages?.length > 0) {
+                    const topLang = reportData.languages.top_languages[0];
+                    sections.push({
+                        icon: '💻',
+                        value: topLang.name,
+                        label: '主要编程语言',
+                        title: '主要编程语言',
+                        description: `以${topLang.name}为主要武器，在编程的世界里探索。你的技术栈，是你探索世界的地图，每一次提交都是对技术边界的勇敢突破。`
+                    });
+                }
+            }
+
+            return sections;
+        }
+
+        // 渲染页面
+        function render() {
+            const app = document.getElementById('app');
+            createStars();
+
+            const summary = reportData.summary || {};
+            const meta = reportData.meta || {};
+            const aiText = reportData.ai_text;
+
+            const sections = parseAIText(aiText);
+
+            let html = '<div class="scroll-container">';
+
+            // 标题屏
+            html += `
+                <div class="screen title-screen">
+                    <h1>🎨 你的代码年度报告</h1>
+                    <div class="subtitle">${meta.year || new Date().getFullYear()} 年度回顾</div>
+                    <div class="author-name">${meta.author || '开发者'}</div>
+                </div>
+            `;
+
+            // 指标卡片屏
+            sections.forEach((section, index) => {
+                html += `
+                    <div class="screen">
+                        <div class="metric-card">
+                            <div class="metric-header">
+                                <div class="metric-icon">${section.icon}</div>
+                                <div class="metric-value">${section.value}</div>
+                                <div class="metric-label">${section.label}</div>
+                            </div>
+                            <div class="metric-content">
+                                <div class="metric-title">${section.title}</div>
+                                <div class="metric-description">
+                                    ${formatDescription(section.description)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // 结尾屏
+            html += `
+                <div class="screen">
+                    <div class="metric-card ending-card">
+                        <div class="metric-icon">✨</div>
+                        <h2>星光不问赶路人，时光不负有心人</h2>
+                        <p>
+                            这一年，你在代码的世界里书写了传奇<br>
+                            愿你在新的一年里，继续燃烧激情<br>
+                            在代码的世界里书写更多震撼人心的篇章
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            html += '</div>';
+
+            // 进度指示器
+            html += '<div class="progress-dots">';
+            html += '<div class="dot active" data-index="0"><span class="dot-tooltip">标题</span></div>';
+            sections.forEach((section, index) => {
+                html += `<div class="dot" data-index="${index + 1}"><span class="dot-tooltip">${section.label}</span></div>`;
+            });
+            html += '<div class="dot" data-index="' + (sections.length + 1) + '"><span class="dot-tooltip">结尾</span></div>';
+            html += '</div>';
+
+            // 导航箭头
+            html += '<div class="nav-arrow prev" id="prevArrow">‹</div>';
+            html += '<div class="nav-arrow next" id="nextArrow">›</div>';
+
+            // 自动播放控制
+            html += '<div class="autoplay-control" id="autoplayBtn" title="自动播放">▶</div>';
+
+            // 进度条
+            html += '<div class="progress-bar" id="progressBar"></div>';
+
+            // 倒计时动画
+            html += '<div class="countdown-container" id="countdownContainer">';
+            html += '<div class="countdown-ring">';
+            html += '<svg viewBox="0 0 100 100">';
+            html += '<circle class="bg-ring" cx="50" cy="50" r="45"></circle>';
+            html += '<circle class="progress-ring" id="countdownRing" cx="50" cy="50" r="45" ';
+            html += 'stroke-dasharray="283" stroke-dashoffset="0"></circle>';
+            html += '</svg>';
+            html += '<div class="countdown-number" id="countdownNumber">5</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // 跳转按钮
+            html += '<button class="jump-button" id="jumpButton">';
+            html += '<span class="jump-icon">📊</span>查看完整报告';
+            html += '</button>';
+
+            app.innerHTML = html;
+
+            // 绑定增强的滚动事件
+            initEnhancedScrollSpy(sections.length + 2); // +2 是标题屏和结尾屏
+        }
+
+        // 格式化描述文本（保留换行和格式）
+        function formatDescription(text) {
+            if (!text) return '';
+
+            // 转换Markdown语法
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+            // 保留段落
+            const paragraphs = text.split('\n\n');
+            return paragraphs.map(p => `<p>${p}</p>`).join('');
+        }
+
+        // 增强的滚动监听
+        function initEnhancedScrollSpy(totalScreens) {
+            const container = document.querySelector('.scroll-container');
+            const dots = document.querySelectorAll('.dot');
+            const screens = document.querySelectorAll('.screen');
+            const prevArrow = document.getElementById('prevArrow');
+            const nextArrow = document.getElementById('nextArrow');
+            const autoplayBtn = document.getElementById('autoplayBtn');
+            const progressBar = document.getElementById('progressBar');
+            const jumpButton = document.getElementById('jumpButton');
+            const countdownContainer = document.getElementById('countdownContainer');
+            const countdownRing = document.getElementById('countdownRing');
+            const countdownNumber = document.getElementById('countdownNumber');
+
+            // 检查元素是否存在
+            if (!container || !screens.length) {
+                console.error('Required elements not found');
+                return;
+            }
+
+            console.log('Initializing scroll spy with', totalScreens, 'screens');
+
+            let currentIndex = 0;
+            let isAutoplaying = false;
+            let autoplayInterval = null;
+            let countdownInterval = null; // 倒计时动画定时器
+            let isScrolling = false;
+            let touchStartY = 0;
+            let touchEndY = 0;
+            let autoplayTargetIndex = 0; // 自动播放的目标索引
+
+            // 更新导航状态
+            function updateNavigation(index) {
+                currentIndex = index;
+
+                // 更新进度指示器
+                dots.forEach(d => d.classList.remove('active'));
+                dots[index]?.classList.add('active');
+
+                // 更新进度条
+                const progress = ((index + 1) / totalScreens) * 100;
+                progressBar.style.width = progress + '%';
+
+                // 更新导航箭头显示状态
+                prevArrow.classList.toggle('hidden', index === 0);
+                nextArrow.classList.toggle('hidden', index === totalScreens - 1);
+
+                // 如果到达最后一屏且没有在自动播放，显示跳转按钮
+                if (index === totalScreens - 1 && !isAutoplaying && jumpButton) {
+                    jumpButton.classList.add('show');
+                } else if (index !== totalScreens - 1 && jumpButton) {
+                    jumpButton.classList.remove('show');
+                }
+            }
+
+            // 导航到指定屏幕
+            function navigateTo(index, smooth = true) {
+                if (index < 0 || index >= totalScreens) {
+                    console.warn('Invalid screen index:', index, 'total:', totalScreens);
+                    return;
+                }
+
+                if (!screens[index]) {
+                    console.error('Screen not found at index:', index);
+                    return;
+                }
+
+                isScrolling = true;
+
+                if (smooth) {
+                    screens[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    screens[index].scrollIntoView({ behavior: 'auto', block: 'start' });
+                }
+
+                // 等待滚动完成
+                setTimeout(() => {
+                    isScrolling = false;
+                    updateNavigation(index);
+                }, 1000);
+            }
+
+            // 点击指示器跳转
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    stopAutoplay();
+                    const index = parseInt(dot.dataset.index);
+                    navigateTo(index);
+                });
+            });
+
+            // 导航箭头点击
+            prevArrow.addEventListener('click', () => {
+                stopAutoplay();
+                navigateTo(currentIndex - 1);
+            });
+
+            nextArrow.addEventListener('click', () => {
+                stopAutoplay();
+                navigateTo(currentIndex + 1);
+            });
+
+            // 自动播放功能
+            function startAutoplay() {
+                if (isAutoplaying) {
+                    console.log('Already autoplaying');
+                    return;
+                }
+
+                console.log('Starting autoplay');
+                isAutoplaying = true;
+                autoplayTargetIndex = 0; // 重置播放目标索引
+                autoplayBtn.innerHTML = '⏸';
+                autoplayBtn.classList.add('playing');
+                autoplayBtn.title = '暂停播放';
+
+                // 显示倒计时动画
+                if (countdownContainer) {
+                    countdownContainer.classList.add('show');
+                }
+
+                // 隐藏跳转按钮
+                if (jumpButton) {
+                    jumpButton.classList.remove('show');
+                }
+
+                // 清除旧的定时器（如果存在）
+                if (autoplayInterval) {
+                    clearInterval(autoplayInterval);
+                }
+
+                // 启动倒计时动画
+                let countdown = 5;
+                const circumference = 2 * Math.PI * 45; // r=45
+
+                // 立即更新一次倒计时
+                updateCountdown(countdown, circumference);
+
+                // 每100毫秒更新一次倒计时动画
+                countdownInterval = setInterval(() => {
+                    countdown -= 0.1;
+                    if (countdown <= 0) {
+                        countdown = 5;
+                    }
+                    updateCountdown(countdown, circumference);
+                }, 100);
+
+                // 倒计时更新函数
+                function updateCountdown(value, circumference) {
+                    if (countdownRing && countdownNumber) {
+                        const offset = circumference - (value / 5) * circumference;
+                        countdownRing.style.strokeDashoffset = offset;
+                        countdownNumber.textContent = Math.ceil(value);
+                    }
+                }
+
+                autoplayInterval = setInterval(() => {
+                    // 使用独立的目标索引，不依赖currentIndex
+                    autoplayTargetIndex += 1;
+
+                    console.log('Autoplay tick: target=' + autoplayTargetIndex + ', total=' + totalScreens);
+
+                    // 检查是否已经超出范围
+                    if (autoplayTargetIndex >= totalScreens) {
+                        console.log('Autoplay: reached end, stopping');
+                        // 播放完成，停止自动播放并显示跳转按钮
+                        clearInterval(countdownInterval);
+                        clearInterval(autoplayInterval);
+                        autoplayInterval = null;
+                        stopAutoplay();
+                        if (jumpButton) {
+                            jumpButton.classList.add('show');
+                        }
+                        return;
+                    }
+
+                    // 导航到目标屏幕
+                    console.log('Autoplay: navigating to', autoplayTargetIndex);
+                    navigateTo(autoplayTargetIndex);
+                }, 5000); // 每5秒切换一次
+            }
+
+            function stopAutoplay() {
+                if (!isAutoplaying) {
+                    return;
+                }
+
+                console.log('Stopping autoplay');
+
+                // 隐藏倒计时动画
+                if (countdownContainer) {
+                    countdownContainer.classList.remove('show');
+                }
+                isAutoplaying = false;
+                autoplayBtn.innerHTML = '▶';
+                autoplayBtn.classList.remove('playing');
+                autoplayBtn.title = '自动播放';
+
+                if (autoplayInterval) {
+                    clearInterval(autoplayInterval);
+                    autoplayInterval = null;
+                }
+
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                    countdownInterval = null;
+                }
+
+                // 清理鼠标悬停定时器
+                if (mouseHoverTimer) {
+                    clearTimeout(mouseHoverTimer);
+                    mouseHoverTimer = null;
+                }
+            }
+
+            // 自动播放按钮点击
+            autoplayBtn.addEventListener('click', () => {
+                if (isAutoplaying) {
+                    stopAutoplay();
+                } else {
+                    startAutoplay();
+                }
+            });
+
+            // 键盘导航
+            document.addEventListener('keydown', (e) => {
+                switch(e.key) {
+                    case 'ArrowDown':
+                    case 'ArrowRight':
+                    case 'PageDown':
+                        e.preventDefault();
+                        stopAutoplay();
+                        navigateTo(currentIndex + 1);
+                        break;
+                    case 'ArrowUp':
+                    case 'ArrowLeft':
+                    case 'PageUp':
+                        e.preventDefault();
+                        stopAutoplay();
+                        navigateTo(currentIndex - 1);
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        stopAutoplay();
+                        navigateTo(0);
+                        break;
+                    case 'End':
+                        e.preventDefault();
+                        stopAutoplay();
+                        navigateTo(totalScreens - 1);
+                        break;
+                    case ' ':
+                        e.preventDefault();
+                        if (isAutoplaying) {
+                            stopAutoplay();
+                        } else {
+                            startAutoplay();
+                        }
+                        break;
+                }
+            });
+
+            // 触摸手势支持
+            container.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            container.addEventListener('touchmove', (e) => {
+                // 防止过度滚动
+                const scrollTop = container.scrollTop;
+                const scrollHeight = container.scrollHeight;
+                const clientHeight = container.clientHeight;
+
+                if ((scrollTop <= 0 && e.touches[0].clientY > touchStartY) ||
+                    (scrollTop + clientHeight >= scrollHeight && e.touches[0].clientY < touchStartY)) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            container.addEventListener('touchend', (e) => {
+                touchEndY = e.changedTouches[0].clientY;
+                handleSwipe();
+            }, { passive: true });
+
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                const diff = touchStartY - touchEndY;
+
+                if (Math.abs(diff) < swipeThreshold) return;
+
+                stopAutoplay();
+
+                if (diff > 0) {
+                    // 上滑，下一屏
+                    navigateTo(currentIndex + 1);
+                } else {
+                    // 下滑，上一屏
+                    navigateTo(currentIndex - 1);
+                }
+            }
+
+            // 滚动时更新指示器
+            let scrollTimeout = null;
+            container.addEventListener('scroll', () => {
+                if (isScrolling) return;
+
+                // 使用防抖来避免频繁更新
+                if (scrollTimeout) return;
+
+                scrollTimeout = setTimeout(() => {
+                    scrollTimeout = null;
+
+                    const containerCenter = container.scrollTop + container.offsetHeight / 2;
+
+                    screens.forEach((screen, index) => {
+                        const screenCenter = screen.offsetTop + screen.offsetHeight / 2;
+                        if (Math.abs(containerCenter - screenCenter) < container.offsetHeight / 2) {
+                            if (currentIndex !== index) {
+                                updateNavigation(index);
+                            }
+                        }
+                    });
+                }, 100);
+            }, { passive: true });
+
+            // 鼠标滚轮优化
+            let wheelTimeout = null;
+            let wheelAccumulator = 0;
+
+            container.addEventListener('wheel', (e) => {
+                // 不阻止默认行为，让浏览器处理
+                // 但暂停自动播放
+                if (isAutoplaying) {
+                    stopAutoplay();
+                }
+
+                // 累积滚动量
+                wheelAccumulator += e.deltaY;
+
+                if (wheelTimeout) return;
+
+                wheelTimeout = setTimeout(() => {
+                    wheelTimeout = null;
+
+                    // 根据累积滚动量决定方向
+                    if (Math.abs(wheelAccumulator) > 50) {
+                        if (wheelAccumulator > 0) {
+                            navigateTo(currentIndex + 1);
+                        } else {
+                            navigateTo(currentIndex - 1);
+                        }
+                        wheelAccumulator = 0;
+                    }
+                }, 100);
+            }, { passive: true });
+
+            // 初始化导航状态
+            updateNavigation(0);
+
+            // 页面加载后自动开始播放
+            setTimeout(() => {
+                startAutoplay();
+            }, 1000);
+
+            // 跳转按钮点击事件
+            if (jumpButton) {
+                jumpButton.addEventListener('click', () => {
+                    // 获取当前页面的路径（包含author信息）
+                    const currentPath = window.location.pathname;
+
+                    // 跳转到classic模板（完整报告页面）
+                    window.location.href = `${currentPath}?style=classic`;
+                });
+            }
+
+            let mouseHoverTimer = null; // 鼠标悬停定时器
+            let mouseHoverCountdown = 5; // 悬停时的倒计时值
+
+            // 鼠标悬停时暂停自动播放
+            container.addEventListener('mouseenter', () => {
+                if (isAutoplaying && autoplayInterval) {
+                    console.log('Mouse enter: pausing autoplay');
+                    // 临时暂停
+                    clearInterval(autoplayInterval);
+                    autoplayInterval = null;
+
+                    // 保存当前倒计时值
+                    if (countdownNumber) {
+                        mouseHoverCountdown = parseInt(countdownNumber.textContent) || 5;
+                    }
+                }
+            });
+
+            container.addEventListener('mouseleave', () => {
+                // 只有在自动播放状态且未播放完成时才恢复
+                if (isAutoplaying && autoplayTargetIndex < totalScreens - 1) {
+                    console.log('Mouse leave: resuming autoplay from target', autoplayTargetIndex);
+
+                    // 清除可能存在的旧定时器
+                    if (mouseHoverTimer) {
+                        clearTimeout(mouseHoverTimer);
+                        mouseHoverTimer = null;
+                    }
+
+                    // 使用保存的倒计时值继续，而不是重置为5秒
+                    const resumeDelay = mouseHoverCountdown * 1000;
+
+                    mouseHoverTimer = setTimeout(() => {
+                        if (!isAutoplaying) return;
+
+                        // 使用独立的目标索引，不依赖currentIndex
+                        autoplayTargetIndex += 1;
+
+                        console.log('Autoplay tick (resume): target=' + autoplayTargetIndex + ', total=' + totalScreens);
+
+                        // 检查是否已经超出范围
+                        if (autoplayTargetIndex >= totalScreens) {
+                            console.log('Autoplay: reached end, stopping');
+                            stopAutoplay();
+                            if (jumpButton) {
+                                jumpButton.classList.add('show');
+                            }
+                            return;
+                        }
+
+                        // 导航到目标屏幕
+                        console.log('Autoplay: navigating to', autoplayTargetIndex);
+                        navigateTo(autoplayTargetIndex);
+
+                        // 导航后，重新启动正常的5秒定时器
+                        if (isAutoplaying) {
+                            autoplayInterval = setInterval(() => {
+                                autoplayTargetIndex += 1;
+
+                                console.log('Autoplay tick: target=' + autoplayTargetIndex + ', total=' + totalScreens);
+
+                                if (autoplayTargetIndex >= totalScreens) {
+                                    console.log('Autoplay: reached end, stopping');
+                                    clearInterval(autoplayInterval);
+                                    autoplayInterval = null;
+                                    stopAutoplay();
+                                    if (jumpButton) {
+                                        jumpButton.classList.add('show');
+                                    }
+                                    return;
+                                }
+
+                                console.log('Autoplay: navigating to', autoplayTargetIndex);
+                                navigateTo(autoplayTargetIndex);
+                            }, 5000);
+                        }
+                    }, resumeDelay);
+                }
+            });
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', render);
+    </script>
+</body>
+</html>

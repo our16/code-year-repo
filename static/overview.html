@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>团队代码年度报告 - 在线查看</title>
+    <link rel="stylesheet" href="/static/css/overview.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 团队代码年度报告</h1>
+            <p class="subtitle">在线查看系统</p>
+            <div class="header-actions">
+                <button id="generateBtn" class="generate-btn" onclick="generateReports()">
+                    🔄 生成报告
+                </button>
+                <button id="rerunBtn" class="rerun-btn" onclick="completelyRerun()">
+                    🔃 完全重跑
+                </button>
+                <button id="logoutBtn" class="logout-btn" onclick="logout()">
+                    🚪 退出登录
+                </button>
+            </div>
+        </div>
+
+        <!-- 进度卡片 -->
+        <div class="progress-card" id="progressCard" style="display: none;">
+            <h3>🔄 报告生成进度</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">准备中...</div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="value" id="total-authors">-</div>
+                <div class="label">贡献者</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="total-commits">-</div>
+                <div class="label">总提交次数</div>
+            </div>
+        </div>
+
+        <!-- 批量操作栏 -->
+        <div class="bulk-actions" id="bulkActions" style="display: none;">
+            <div class="selection-info">
+                已选择 <strong id="selectedCount">0</strong> 位作者
+            </div>
+            <div class="action-buttons">
+                <button class="action-btn btn-send" onclick="sendSelectedReports()">
+                    📤 发送报告链接
+                </button>
+                <button class="action-btn btn-cancel" onclick="clearSelection()">
+                    取消选择
+                </button>
+            </div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="搜索作者姓名..." onkeyup="filterAuthors()">
+            <label class="select-all-checkbox">
+                <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                <span>全选</span>
+            </label>
+        </div>
+
+        <div class="authors-grid" id="authorsGrid">
+            <div class="loading">加载中...</div>
+        </div>
+    </div>
+
+    <script src="/static/js/overview.js"></script>
+</body>
+</html>

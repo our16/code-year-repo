@@ -35,7 +35,6 @@ ENV/
 .git_scan_cache
 # Reports
 reports/
-*.html
 
 # Config files (keep examples)
 config/config.yaml

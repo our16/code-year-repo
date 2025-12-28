@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码年度报告 - {{ year }}</title>
+    <style>
+        :root {
+            --primary-color: {{ primary_color | default('#667eea') }};
+            --secondary-color: {{ secondary_color | default('#764ba2') }};
+            --accent-color: {{ accent_color | default('#f093fb') }};
+            --bg-color: #0f0f1e;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-radius: 20px;
+            margin-bottom: 60px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .hero h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero .subtitle {
+            font-size: 1.3em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-card h3 {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card .value {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .description {
+            color: var(--text-secondary);
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chart-section h2 {
+            margin-bottom: 30px;
+            font-size: 2em;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+
+        /* Language Distribution */
+        .language-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .language-tag {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .language-tag .percentage {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.85em;
+        }
+
+        /* Calendar Heatmap */
+        .heatmap-container {
+            margin-top: 30px;
+        }
+
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(53, 1fr);
+            gap: 3px;
+        }
+
+        .heatmap-cell {
+            aspect-ratio: 1;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .heatmap-cell:hover {
+            transform: scale(1.5);
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        /* 默认淡色 - 未工作日 */
+        .heatmap-cell.level-0 {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* 工作日 - 根据提交次数颜色加深 */
+        .heatmap-cell.level-1 { background: rgba(102, 126, 234, 0.25); }
+        .heatmap-cell.level-2 { background: rgba(102, 126, 234, 0.45); }
+        .heatmap-cell.level-3 { background: rgba(102, 126, 234, 0.65); }
+        .heatmap-cell.level-4 { background: rgba(102, 126, 234, 0.9); }
+
+        /* Tooltip */
+        .heatmap-tooltip {
+            position: fixed;
+            background: rgba(15, 15, 30, 0.95);
+            border: 1px solid rgba(102, 126, 234, 0.5);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 0.9em;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            min-width: 200px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .heatmap-tooltip.visible {
+            opacity: 1;
+        }
+
+        .heatmap-tooltip .tooltip-date {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+            font-size: 1em;
+        }
+
+        .heatmap-tooltip .tooltip-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .heatmap-tooltip .tooltip-stat {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+        }
+
+        .heatmap-tooltip .tooltip-stat .value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .heatmap-tooltip .tooltip-stat.night-commit .value {
+            color: #f093fb;
+        }
+
+        /* AI Text Section */
+        .ai-text-section {
+            background: linear-gradient(135deg,
+                rgba(102, 126, 234, 0.1) 0%,
+                rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 15px;
+            padding: 50px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ai-text-section h2 {
+            margin-bottom: 30px;
+            font-size: 2em;
+            color: var(--primary-color);
+        }
+
+        .ai-text-section .content {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: var(--text-primary);
+        }
+
+        .ai-text-section .content h3 {
+            color: var(--accent-color);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .ai-text-section .content p {
+            margin-bottom: 15px;
+        }
+
+        /* AI生成指标卡片样式 */
+        .metric-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-icon {
+            font-size: 3rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-label {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .metric-content {
+            padding: 0 10px;
+        }
+
+        .metric-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric-title::before {
+            content: '"';
+            font-size: 1.5em;
+            opacity: 0.5;
+        }
+
+        .metric-title::after {
+            content: '"';
+            font-size: 1.5em;
+            opacity: 0.5;
+        }
+
+        .metric-description {
+            font-size: 1.1rem;
+            line-height: 2;
+            color: var(--text-primary);
+        }
+
+        .metric-description strong {
+            color: var(--primary-color);
+            font-weight: 600;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Projects List */
+        .projects-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .project-item {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .project-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .project-item h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .project-item .stats {
+            display: flex;
+            gap: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 60px;
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 1.2em;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .heatmap {
+                grid-template-columns: repeat(26, 1fr);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>🎨 你的代码年度报告</h1>
+            <div class="subtitle">{{ year }}年度回顾</div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>总提交次数</h3>
+                <div class="value" id="total-commits">-</div>
+                <div class="description">全年代码提交节奏</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>净增代码行</h3>
+                <div class="value" id="net-lines">-</div>
+                <div class="description">创造的价值体现</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>参与项目</h3>
+                <div class="value" id="project-count">-</div>
+                <div class="description">技术探索广度</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>代码删除</h3>
+                <div class="value" id="deletions">-</div>
+                <div class="description">重构与优化的艺术</div>
+            </div>
+        </div>
+
+        <!-- AI Generated Text -->
+        <div class="ai-text-section">
+            <h2>💌 AI为您撰写的年度总结</h2>
+            <div class="content">
+                {{ ai_text | safe }}
+            </div>
+        </div>
+
+        <!-- Languages Chart -->
+        <div class="chart-section">
+            <h2>💻 编程语言分布</h2>
+            <div class="language-list" id="language-list">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- Calendar Heatmap -->
+        <div class="chart-section">
+            <h2>📅 提交热力图</h2>
+            <div class="heatmap-container">
+                <div class="heatmap" id="heatmap">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+            <!-- Tooltip元素 -->
+            <div class="heatmap-tooltip" id="heatmap-tooltip"></div>
+        </div>
+
+        <!-- Projects -->
+        <div class="chart-section">
+            <h2>🚀 项目贡献</h2>
+            <div class="projects-list" id="projects-list">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>✨ 用代码改变世界，让每一次提交都更有意义</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                生成时间: <span id="generate-time"></span>
+            </p>
+        </div>
+    </div>
+
+    <!-- 数据存储（使用type="application/json"避免执行） -->
+    <script id="report-data" type="application/json">
+{{ data_json | default('{}') }}
+    </script>
+
+    <script>
+        // 从隐藏的script块读取数据
+        const data = JSON.parse(document.getElementById('report-data').textContent);
+
+        // 格式化数字
+        function formatNumber(num) {
+            if (num >= 10000) {
+                return (num / 10000).toFixed(1) + 'w';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            return num.toString();
+        }
+
+        // 初始化统计数据
+        function initStats() {
+            const summary = data.summary || {};
+
+            document.getElementById('total-commits').textContent =
+                formatNumber(summary.total_commits || 0);
+            document.getElementById('net-lines').textContent =
+                formatNumber(summary.net_lines || 0);
+            document.getElementById('project-count').textContent =
+                (data.projects || []).length;
+            document.getElementById('deletions').textContent =
+                formatNumber(summary.total_deletions || 0);
+        }
+
+        // 初始化语言列表
+        function initLanguages() {
+            const languages = data.languages || {};
+            const topLanguages = languages.top_languages || [];
+
+            const container = document.getElementById('language-list');
+            container.innerHTML = topLanguages.map(lang => `
+                <div class="language-tag">
+                    <span>${lang.name}</span>
+                    <span class="percentage">${lang.percentage}%</span>
+                </div>
+            `).join('');
+        }
+
+        // 初始化热力图
+        function initHeatmap() {
+            const timeDist = data.time_distribution || {};
+            const heatmapData = timeDist.calendar_heatmap || [];
+
+            const container = document.getElementById('heatmap');
+            const tooltip = document.getElementById('heatmap-tooltip');
+
+            if (heatmapData.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary);">暂无数据</p>';
+                return;
+            }
+
+            // 渲染完整的365天热力图
+            const heatmapHTML = heatmapData.map((cell, index) => {
+                const level = cell.level || 0;
+                return `<div class="heatmap-cell level-${level}"
+                            data-index="${index}"
+                            data-date="${cell.date}"
+                            data-count="${cell.count}"
+                            data-additions="${cell.additions || 0}"
+                            data-deletions="${cell.deletions || 0}"
+                            data-latest-time="${cell.latest_time || ''}">
+                        </div>`;
+            }).join('');
+
+            container.innerHTML = heatmapHTML;
+
+            // 添加事件监听器
+            const cells = container.querySelectorAll('.heatmap-cell');
+            cells.forEach(cell => {
+                cell.addEventListener('mouseenter', (e) => showTooltip(e, cell, tooltip));
+                cell.addEventListener('mouseleave', () => hideTooltip(tooltip));
+                cell.addEventListener('mousemove', (e) => moveTooltip(e, tooltip));
+            });
+        }
+
+        // 显示tooltip
+        function showTooltip(event, cell, tooltip) {
+            const date = cell.dataset.date;
+            const count = parseInt(cell.dataset.count);
+            const additions = parseInt(cell.dataset.additions);
+            const deletions = parseInt(cell.dataset.deletions);
+            const latestTime = cell.dataset.latestTime;
+
+            // 判断是否为夜间提交（晚6点-次日早6点）
+            const isNightCommit = latestTime && (
+                latestTime >= '18:00:00' || latestTime <= '06:00:00'
+            );
+
+            const formattedDate = new Date(date).toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
+
+            let statsHTML = '';
+            if (count > 0) {
+                statsHTML = `
+                    <div class="tooltip-stats">
+                        <div class="tooltip-stat">
+                            <span>提交次数</span>
+                            <span class="value">${count} 次</span>
+                        </div>
+                        <div class="tooltip-stat">
+                            <span>新增代码</span>
+                            <span class="value">+${additions}</span>
+                        </div>
+                        <div class="tooltip-stat">
+                            <span>删除代码</span>
+                            <span class="value">-${deletions}</span>
+                        </div>
+                        ${latestTime ? `
+                            <div class="tooltip-stat ${isNightCommit ? 'night-commit' : ''}">
+                                <span>最晚提交</span>
+                                <span class="value">${latestTime}${isNightCommit ? ' 🌙' : ''}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else {
+                statsHTML = `
+                    <div class="tooltip-stats">
+                        <div class="tooltip-stat">
+                            <span>状态</span>
+                            <span class="value">无提交记录</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            tooltip.innerHTML = `
+                <div class="tooltip-date">${formattedDate}</div>
+                ${statsHTML}
+            `;
+
+            tooltip.classList.add('visible');
+            moveTooltip(event, tooltip);
+        }
+
+        // 隐藏tooltip
+        function hideTooltip(tooltip) {
+            tooltip.classList.remove('visible');
+        }
+
+        // 移动tooltip
+        function moveTooltip(event, tooltip) {
+            const offset = 15;
+            let left = event.clientX + offset;
+            let top = event.clientY + offset;
+
+            // 防止超出屏幕
+            const tooltipRect = tooltip.getBoundingClientRect();
+            if (left + tooltipRect.width > window.innerWidth) {
+                left = event.clientX - tooltipRect.width - offset;
+            }
+            if (top + tooltipRect.height > window.innerHeight) {
+                top = event.clientY - tooltipRect.height - offset;
+            }
+
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+        }
+
+        // 初始化项目列表
+        function initProjects() {
+            const projects = data.projects || [];
+
+            const container = document.getElementById('projects-list');
+
+            if (projects.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary);">暂无数据</p>';
+                return;
+            }
+
+            container.innerHTML = projects.map(project => `
+                <div class="project-item">
+                    <h4>${project.name}</h4>
+                    <div class="stats">
+                        <span>📝 ${project.commits} 次提交</span>
+                        <span>➕ ${project.additions} 行新增</span>
+                        <span>➖ ${project.deletions} 行删除</span>
+                        <span>📊 净增 ${project.net_lines} 行</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 初始化生成时间
+        function initGenerateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+            document.getElementById('generate-time').textContent = timeStr;
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initStats();
+            initLanguages();
+            initHeatmap();
+            initProjects();
+            initGenerateTime();
+        });
+
+        // 数字动画效果
+        function animateValue(element, start, end, duration) {
+            const startTime = performance.now();
+
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                const current = Math.floor(start + (end - start) * progress);
+                element.textContent = formatNumber(current);
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                }
+            }
+
+            requestAnimationFrame(update);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代码年度报告 - {{ year }}</title>
+    <style>
+        :root {
+            --primary-color: {{ primary_color | default('#667eea') }};
+            --secondary-color: {{ secondary_color | default('#764ba2') }};
+            --accent-color: {{ accent_color | default('#f093fb') }};
+            --bg-color: #0f0f1e;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 章节 - 全屏滚动效果 */
+        .chapter {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            position: relative;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .chapter.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chapter-content {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* 序章 */
+        .intro-chapter {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            text-align: center;
+        }
+
+        .intro-chapter h1 {
+            font-size: 4em;
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .intro-chapter .subtitle {
+            font-size: 1.8em;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease 0.2s backwards;
+        }
+
+        .intro-chapter .year {
+            font-size: 6em;
+            font-weight: bold;
+            margin: 40px 0;
+            opacity: 0.3;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        /* 数据卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-card .icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .stat-card h3 {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .stat-card .value {
+            font-size: 3.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .description {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        /* 故事章节 */
+        .story-chapter {
+            background: linear-gradient(180deg, var(--bg-color) 0%, rgba(102, 126, 234, 0.1) 50%, var(--bg-color) 100%);
+        }
+
+        .story-chapter h2 {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .story-content {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 60px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 1.2em;
+            line-height: 2;
+        }
+
+        .story-content h3 {
+            color: var(--accent-color);
+            margin: 30px 0 20px;
+            font-size: 1.5em;
+        }
+
+        .story-content p {
+            margin-bottom: 20px;
+        }
+
+        /* 编程语言 */
+        .language-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin: 60px 0;
+        }
+
+        .language-tag {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 20px 40px;
+            border-radius: 30px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .language-tag:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .language-tag .percentage {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+
+        /* 时间轴 */
+        .timeline {
+            position: relative;
+            padding: 40px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+        }
+
+        .timeline-item {
+            display: flex;
+            justify-content: flex-end;
+            padding-right: 60px;
+            position: relative;
+            margin-bottom: 40px;
+            width: 50%;
+            margin-left: auto;
+        }
+
+        .timeline-item:nth-child(odd) {
+            justify-content: flex-start;
+            padding-right: 0;
+            padding-left: 60px;
+            margin-left: 0;
+            margin-right: auto;
+            width: 50%;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 20px;
+            width: 16px;
+            height: 16px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .timeline-item:nth-child(odd)::before {
+            right: auto;
+            left: -8px;
+        }
+
+        .timeline-content {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+        }
+
+        .timeline-content h4 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        /* 项目卡片 */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+
+        .project-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .project-card h4 {
+            color: var(--primary-color);
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .project-card .stats {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .project-card .stat {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+        }
+
+        .project-card .stat .value {
+            color: var(--text-primary);
+            font-weight: bold;
+        }
+
+        /* 尾声 */
+        .outro-chapter {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--accent-color) 100%);
+            text-align: center;
+        }
+
+        .outro-chapter h2 {
+            font-size: 3em;
+            margin-bottom: 30px;
+        }
+
+        .outro-chapter .message {
+            font-size: 1.5em;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+
+        /* 导航点 */
+        .nav-dots {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-dot:hover, .nav-dot.active {
+            background: var(--primary-color);
+            transform: scale(1.3);
+        }
+
+        /* 动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.05);
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .intro-chapter h1 {
+                font-size: 2.5em;
+            }
+
+            .intro-chapter .year {
+                font-size: 4em;
+            }
+
+            .chapter {
+                padding: 40px 20px;
+            }
+
+            .story-content {
+                padding: 30px;
+            }
+
+            .nav-dots {
+                display: none;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-item {
+                width: 100%;
+                padding-left: 60px;
+                padding-right: 0;
+                margin-left: 0;
+            }
+
+            .timeline-item:nth-child(odd) {
+                width: 100%;
+                padding-left: 60px;
+                padding-right: 0;
+            }
+
+            .timeline-item::before {
+                left: 12px;
+            }
+
+            .timeline-item:nth-child(odd)::before {
+                left: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航点 -->
+    <div class="nav-dots" id="navDots"></div>
+
+    <!-- 序章 -->
+    <section class="chapter intro-chapter" data-chapter="intro">
+        <div class="chapter-content">
+            <h1>🎨 你的代码年度报告</h1>
+            <div class="year">{{ year }}</div>
+            <div class="subtitle">一段属于你的技术旅程</div>
+        </div>
+    </section>
+
+    <!-- 第一章：基础数据 -->
+    <section class="chapter" data-chapter="stats">
+        <div class="chapter-content">
+            <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.5em;">📊 年度贡献概览</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="icon">💻</div>
+                    <h3>总提交次数</h3>
+                    <div class="value" id="total-commits">-</div>
+                    <div class="description">每一次提交都是成长的足迹</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">✨</div>
+                    <h3>净增代码行</h3>
+                    <div class="value" id="net-lines">-</div>
+                    <div class="description">用代码创造价值</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">🚀</div>
+                    <h3>参与项目</h3>
+                    <div class="value" id="project-count">-</div>
+                    <div class="description">在多个领域探索</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">🔥</div>
+                    <h3>代码删除</h3>
+                    <div class="value" id="deletions">-</div>
+                    <div class="description">重构与优化的艺术</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第二章：AI年度总结 -->
+    <section class="chapter story-chapter" data-chapter="story">
+        <div class="chapter-content">
+            <h2>💌 AI为你撰写的年度总结</h2>
+            <div class="story-content">
+                {{ ai_text | safe }}
+            </div>
+        </div>
+    </section>
+
+    <!-- 第三章：编程语言 -->
+    <section class="chapter" data-chapter="languages">
+        <div class="chapter-content">
+            <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.5em;">💻 你的技术栈</h2>
+            <div class="language-list" id="language-list">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 第四章：项目贡献 -->
+    <section class="chapter" data-chapter="projects">
+        <div class="chapter-content">
+            <h2 style="text-align: center; margin-bottom: 40px; font-size: 2.5em;">🚀 项目贡献</h2>
+            <div class="project-grid" id="project-grid">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 尾声 -->
+    <section class="chapter outro-chapter" data-chapter="outro">
+        <div class="chapter-content">
+            <h2>🎉 感谢这一年的努力</h2>
+            <p class="message">
+                每一行代码都是通往未来的阶梯<br>
+                继续保持热爱，继续创造<br>
+                最好的代码，永远是下一行
+            </p>
+            <p style="font-size: 0.9em; opacity: 0.8;">
+                生成时间: <span id="generate-time"></span>
+            </p>
+        </div>
+    </section>
+
+    <script>
+        // 数据
+        const data = {{ data_json | default('{}') }};
+
+        // 格式化数字
+        function formatNumber(num) {
+            if (num >= 10000) {
+                return (num / 10000).toFixed(1) + 'w';
+            } else if (num >= 1000) {
+                return (num / 1000).toFixed(1) + 'k';
+            }
+            return num.toString();
+        }
+
+        // 初始化统计数据
+        function initStats() {
+            const summary = data.summary || {};
+
+            document.getElementById('total-commits').textContent =
+                formatNumber(summary.total_commits || 0);
+            document.getElementById('net-lines').textContent =
+                formatNumber(summary.net_lines || 0);
+            document.getElementById('project-count').textContent =
+                (data.projects || []).length;
+            document.getElementById('deletions').textContent =
+                formatNumber(summary.total_deletions || 0);
+        }
+
+        // 初始化语言列表
+        function initLanguages() {
+            const languages = data.languages || {};
+            const topLanguages = languages.top_languages || [];
+
+            const container = document.getElementById('language-list');
+            container.innerHTML = topLanguages.map(lang => `
+                <div class="language-tag">
+                    <span>${lang.name}</span>
+                    <span class="percentage">${lang.percentage}%</span>
+                </div>
+            `).join('');
+        }
+
+        // 初始化项目列表
+        function initProjects() {
+            const projects = data.projects || [];
+
+            const container = document.getElementById('project-grid');
+
+            if (projects.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">暂无数据</p>';
+                return;
+            }
+
+            container.innerHTML = projects.map(project => `
+                <div class="project-card">
+                    <h4>${project.name}</h4>
+                    <div class="stats">
+                        <div class="stat">
+                            <span>📝 提交次数</span>
+                            <span class="value">${project.commits}</span>
+                        </div>
+                        <div class="stat">
+                            <span>➕ 新增代码</span>
+                            <span class="value">${formatNumber(project.additions)}</span>
+                        </div>
+                        <div class="stat">
+                            <span>➖ 删除代码</span>
+                            <span class="value">${formatNumber(project.deletions)}</span>
+                        </div>
+                        <div class="stat">
+                            <span>📊 净增代码</span>
+                            <span class="value">${formatNumber(project.net_lines)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 初始化生成时间
+        function initGenerateTime() {
+            const meta = data.meta || {};
+            const generatedAt = meta.generated_at || new Date().toISOString();
+            const timeStr = new Date(generatedAt).toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+            document.getElementById('generate-time').textContent = timeStr;
+        }
+
+        // 章节可见性检测
+        function handleScroll() {
+            const chapters = document.querySelectorAll('.chapter');
+            const navDots = document.querySelectorAll('.nav-dot');
+
+            chapters.forEach((chapter, index) => {
+                const rect = chapter.getBoundingClientRect();
+                const isVisible = rect.top < window.innerHeight * 0.7 && rect.bottom > 0;
+
+                if (isVisible) {
+                    chapter.classList.add('visible');
+                    navDots.forEach(dot => dot.classList.remove('active'));
+                    navDots[index].classList.add('active');
+                }
+            });
+        }
+
+        // 创建导航点
+        function createNavDots() {
+            const chapters = document.querySelectorAll('.chapter');
+            const navDotsContainer = document.getElementById('navDots');
+
+            chapters.forEach((chapter, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'nav-dot';
+                dot.addEventListener('click', () => {
+                    chapter.scrollIntoView({ behavior: 'smooth' });
+                });
+                navDotsContainer.appendChild(dot);
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initStats();
+            initLanguages();
+            initProjects();
+            initGenerateTime();
+            createNavDots();
+
+            // 监听滚动
+            window.addEventListener('scroll', handleScroll);
+            handleScroll(); // 初始检查
+
+            // 数字动画效果
+            const values = document.querySelectorAll('.stat-card .value');
+            values.forEach(value => {
+                const finalValue = value.textContent;
+                const numValue = parseFloat(finalValue.replace(/[^\d.]/g, ''));
+
+                if (!isNaN(numValue)) {
+                    let current = 0;
+                    const increment = numValue / 50;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= numValue) {
+                            current = numValue;
+                            clearInterval(timer);
+                        }
+
+                        let displayValue = Math.floor(current);
+                        if (finalValue.includes('w')) {
+                            displayValue = (current / 10000).toFixed(1) + 'w';
+                        } else if (finalValue.includes('k')) {
+                            displayValue = (current / 1000).toFixed(1) + 'k';
+                        }
+
+                        value.textContent = displayValue;
+                    }, 30);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
