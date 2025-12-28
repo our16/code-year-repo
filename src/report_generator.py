@@ -50,6 +50,57 @@ class ReportGenerator:
             except Exception as e:
                 logger.warning(f"清理进度文件失败: {e}")
 
+    def _check_resume_progress(self):
+        """检查是否有续跑检查点"""
+        checkpoint_file = self.output_dir / '.resume_checkpoint.json'
+        if checkpoint_file.exists():
+            try:
+                with open(checkpoint_file, 'r', encoding='utf-8') as f:
+                    checkpoint_data = json.load(f)
+
+                # 检查是否有对应的进度文件
+                if self.progress_file.exists():
+                    with open(self.progress_file, 'r', encoding='utf-8') as f:
+                        progress = json.load(f)
+
+                    # 只有进度状态是generating时才续跑
+                    if progress.get('status') == 'generating':
+                        checkpoint_data['completed'] = progress.get('completed', 0)
+                        logger.info(f"发现续跑检查点，已完成 {checkpoint_data['completed']}/{checkpoint_data['total']} 个作者")
+                        return checkpoint_data
+                    else:
+                        # 进度已完成，删除检查点
+                        checkpoint_file.unlink()
+                        logger.info("历史任务已完成，清理检查点文件")
+                        return None
+                else:
+                    # 没有进度文件，删除检查点
+                    checkpoint_file.unlink()
+                    return None
+            except Exception as e:
+                logger.warning(f"读取检查点失败: {e}")
+                # 损坏的检查点文件，删除
+                try:
+                    checkpoint_file.unlink()
+                except:
+                    pass
+        return None
+
+    def _save_resume_checkpoint(self, author_data_map, total):
+        """保存Git采集后的检查点"""
+        checkpoint_file = self.output_dir / '.resume_checkpoint.json'
+        checkpoint_data = {
+            'author_data_map': author_data_map,
+            'total': total,
+            'timestamp': datetime.now().isoformat()
+        }
+        try:
+            with open(checkpoint_file, 'w', encoding='utf-8') as f:
+                json.dump(checkpoint_data, f, ensure_ascii=False, indent=2)
+            logger.info(f"已保存续跑检查点，共 {total} 位作者")
+        except Exception as e:
+            logger.warning(f"保存检查点失败: {e}")
+
     def load_config(self) -> dict:
         """加载配置文件"""
         if not self.config_path.exists():
@@ -87,71 +138,100 @@ class ReportGenerator:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
     def generate_all(self, progress_callback: Callable = None) -> bool:
-        """生成所有报告"""
+        """生成所有报告 - 支持智能续跑"""
         logger.info("开始生成报告")
-        
+
         config = self.load_config()
         if not config:
             return False
-        
+
         author_mapping = self.load_author_mapping()
-        
-        # 采集数据
-        collector_config = config.copy()
-        collector_config['authors'] = []
-        collector = GitDataCollector(collector_config)
-        
-        all_data = []
-        all_authors = set()
-        
-        for project in config.get('projects', []):
-            try:
-                project_data = collector.collect_project(project)
-                all_data.append(project_data)
-                for commit in project_data.get('commits', []):
-                    author_info = f"{commit['author']} <{commit['email']}>"
-                    all_authors.add(author_info)
-            except Exception as e:
-                logger.error(f"扫描项目失败: {str(e)}")
-        
-        if not all_data:
-            return False
-        
-        # 分组数据
-        mapped_authors = {}
-        for author_info in all_authors:
-            mapped_author = self.apply_author_mapping(author_info, author_mapping)
-            if mapped_author not in mapped_authors:
-                mapped_authors[mapped_author] = []
-            mapped_authors[mapped_author].append(author_info)
-        
-        author_data_map = {}
-        for mapped_author, original_authors in mapped_authors.items():
-            author_name = mapped_author.split('<')[0].strip()
-            author_projects = []
-            for project_data in all_data:
-                author_commits = []
-                for original_author in original_authors:
-                    orig_name = original_author.split('<')[0].strip()
-                    orig_email = original_author.split('<')[1].replace('>', '').strip() if '<' in original_author else ''
-                    commits = [c for c in project_data.get('commits', []) if c['author'] == orig_name and c['email'] == orig_email]
-                    author_commits.extend(commits)
-                if author_commits:
-                    author_projects.append({
-                        'project_name': project_data['project_name'],
-                        'path': project_data['path'],
-                        'commits': author_commits,
-                        'total_commits': len(author_commits),
-                        'language_stats': project_data.get('language_stats', {}),  # 添加语言统计
-                    })
-            if author_projects:
-                author_data_map[mapped_author] = author_projects
-        
-        # 生成报告
+
+        # 检查是否有续跑进度
+        resume_data = self._check_resume_progress()
+        start_index = 1  # 默认从头开始
+
+        if resume_data:
+            # 续跑模式：跳过Git采集，直接使用已有数据
+            logger.info(f"检测到续跑进度，将从第 {resume_data['completed'] + 1} 个作者继续生成LLM分析")
+            author_data_map = resume_data['author_data_map']
+            total = resume_data['total']
+            start_index = resume_data['completed'] + 1
+        else:
+            # 正常模式：完整的Git采集流程
+            collector_config = config.copy()
+            collector_config['authors'] = []
+            collector = GitDataCollector(collector_config)
+
+            all_data = []
+            all_authors = set()
+
+            logger.info("开始扫描Git仓库...")
+            for project in config.get('projects', []):
+                try:
+                    logger.info(f"  扫描项目: {project.get('name', project.get('path'))}")
+                    project_data = collector.collect_project(project)
+                    all_data.append(project_data)
+                    for commit in project_data.get('commits', []):
+                        author_info = f"{commit['author']} <{commit['email']}>"
+                        all_authors.add(author_info)
+                except Exception as e:
+                    logger.error(f"扫描项目失败: {str(e)}")
+
+            if not all_data:
+                logger.error("未采集到任何数据")
+                return False
+
+            logger.info(f"Git扫描完成，发现 {len(all_authors)} 位作者")
+
+            # 分组数据
+            mapped_authors = {}
+            for author_info in all_authors:
+                mapped_author = self.apply_author_mapping(author_info, author_mapping)
+                if mapped_author not in mapped_authors:
+                    mapped_authors[mapped_author] = []
+                mapped_authors[mapped_author].append(author_info)
+
+            author_data_map = {}
+            for mapped_author, original_authors in mapped_authors.items():
+                author_name = mapped_author.split('<')[0].strip()
+                author_projects = []
+                for project_data in all_data:
+                    author_commits = []
+                    for original_author in original_authors:
+                        orig_name = original_author.split('<')[0].strip()
+                        orig_email = original_author.split('<')[1].replace('>', '').strip() if '<' in original_author else ''
+                        commits = [c for c in project_data.get('commits', []) if c['author'] == orig_name and c['email'] == orig_email]
+                        author_commits.extend(commits)
+                    if author_commits:
+                        author_projects.append({
+                            'project_name': project_data['project_name'],
+                            'path': project_data['path'],
+                            'commits': author_commits,
+                            'total_commits': len(author_commits),
+                            'language_stats': project_data.get('language_stats', {}),  # 添加语言统计
+                        })
+                if author_projects:
+                    author_data_map[mapped_author] = author_projects
+
+            # 保存中间数据供续跑使用（仅在非续跑模式）
+            if not resume_data:
+                self._save_resume_checkpoint(author_data_map, len(author_data_map))
+                logger.info(f"数据采集完成，共 {len(author_data_map)} 位作者，准备生成LLM分析...")
+
+        # 生成报告（从start_index开始，支持续跑）
         analyzer = DataAnalyzer(config)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         report_index = {}
+
+        # 加载已存在的报告索引
+        if resume_data and resume_data.get('report_index'):
+            report_index = resume_data['report_index']
+        else:
+            report_index = {}
+
         total = len(author_data_map)
+        logger.info(f"开始生成报告，共 {total} 位作者，从第 {start_index} 位开始")
 
         # 初始化LLM客户端
         use_llm = config.get('llm', {}).get('api_key')
@@ -163,9 +243,13 @@ class ReportGenerator:
             except Exception as e:
                 logger.warning(f"LLM客户端初始化失败: {e}，将使用默认模板")
 
-        for idx, (author_info, author_projects) in enumerate(author_data_map.items(), 1):
+        # 转换为列表并切片（从start_index开始）
+        author_items = list(author_data_map.items())
+        for idx in range(start_index - 1, len(author_items)):
+            author_info, author_projects = author_items[idx]
             author_name = author_info.split('<')[0].strip()
-            logger.info(f"[{idx}/{total}] 生成报告: {author_name}")
+            current_idx = idx + 1
+            logger.info(f"[{current_idx}/{total}] 生成报告: {author_name}")
 
             analyzed_data = analyzer.analyze(author_projects)
 
@@ -216,9 +300,9 @@ class ReportGenerator:
             progress_data = {
                 'status': 'generating',
                 'total': total,
-                'completed': idx,
+                'completed': current_idx,
                 'current': f'正在生成 {author_name}',
-                'percentage': round(idx / total * 100, 1),
+                'percentage': round(current_idx / total * 100, 1),
                 'latest_author': author_name,
                 'latest_file': json_filename
             }
@@ -227,11 +311,20 @@ class ReportGenerator:
             # 调用回调函数
             if progress_callback:
                 progress_callback(progress_data)
-        
+
         # 保存索引
         with open(self.output_dir / 'report_index.json', 'w', encoding='utf-8') as f:
             json.dump(report_index, f, ensure_ascii=False, indent=2)
-        
+
+        # 任务完成，清理检查点文件
+        checkpoint_file = self.output_dir / '.resume_checkpoint.json'
+        if checkpoint_file.exists():
+            try:
+                checkpoint_file.unlink()
+                logger.info("已清理续跑检查点文件")
+            except Exception as e:
+                logger.warning(f"清理检查点文件失败: {e}")
+
         self.save_progress({'status': 'completed', 'total': total, 'completed': total, 'percentage': 100})
         logger.info(f"生成完成: {len(report_index)} 个报告")
         return True

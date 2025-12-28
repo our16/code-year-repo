@@ -22,11 +22,67 @@ async function generateReports() {
     const btn = document.getElementById('generateBtn');
 
     try {
-        // 禁用按钮
-        btn.disabled = true;
-        btn.textContent = '⏳ 生成中...';
+        // 首先检查是否有历史任务
+        const progressResponse = await fetch('/api/progress');
+        const progressData = await progressResponse.json();
 
-        // 发送生成请求
+        // 如果有未完成的任务，让用户选择
+        if (progressData.status === 'generating') {
+            const historyInfo = {
+                current: progressData.current || '未知',
+                percentage: progressData.percentage || 0,
+                completed: progressData.completed || 0,
+                total: progressData.total || 0
+            };
+
+            const userChoice = confirm(
+                `发现未完成的生成任务:\n` +
+                `当前进度: ${historyInfo.current}\n` +
+                `完成度: ${historyInfo.completed}/${historyInfo.total} (${historyInfo.percentage}%)\n\n` +
+                `点击"确定"继续生成\n` +
+                `点击"取消"重新开始`
+            );
+
+            if (!userChoice) {
+                // 用户选择重新开始
+                const restartResponse = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: 'restart' })
+                });
+
+                const restartResult = await restartResponse.json();
+                if (restartResult.success) {
+                    alert(restartResult.message);
+                    startGeneration(btn);
+                } else {
+                    alert('操作失败: ' + (restartResult.error || '未知错误'));
+                }
+                return;
+            } else {
+                // 用户选择继续
+                const continueResponse = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: 'continue' })
+                });
+
+                const continueResult = await continueResponse.json();
+                if (continueResult.success) {
+                    alert(continueResult.message);
+                    startGeneration(btn);
+                } else {
+                    alert('操作失败: ' + (continueResult.error || '未知错误'));
+                }
+                return;
+            }
+        }
+
+        // 没有历史任务，直接开始生成
         const response = await fetch('/api/generate', {
             method: 'POST',
             headers: {
@@ -38,12 +94,7 @@ async function generateReports() {
 
         if (result.success) {
             alert(result.message);
-            // 开始检查进度
-            checkProgress();
-            // 3秒后刷新页面
-            setTimeout(() => {
-                location.reload();
-            }, 3000);
+            startGeneration(btn);
         } else {
             alert('生成失败: ' + (result.error || '未知错误'));
             btn.disabled = false;
@@ -55,6 +106,37 @@ async function generateReports() {
         btn.disabled = false;
         btn.textContent = '🔄 生成报告';
     }
+}
+
+// 开始生成后的通用处理
+function startGeneration(btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ 生成中...';
+
+    // 开始检查进度
+    checkProgress();
+
+    // 提示用户
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+    `;
+    toast.textContent = '✨ 报告生成中，请稍候...';
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+        location.reload();
+    }, 3000);
 }
 
 // 加载作者数据

@@ -271,32 +271,112 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.send_json_response(response)
 
     def generate_report(self):
-        """生成报告数据 - 直接嵌入逻辑"""
+        """生成报告数据 - 支持续跑功能"""
         try:
             logger.info("收到生成报告请求")
 
-            def run_generation():
-                project_root = Path(__file__).parent.parent
-                generator = ReportGenerator(project_root)
+            # 读取请求数据
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                request_data = json.loads(post_data.decode('utf-8'))
+            else:
+                request_data = {}
 
-                def progress_callback(data):
-                    """进度回调"""
-                    logger.info(f"进度: {data['current']} - {data['percentage']}%")
-                    # 进度会自动保存到文件
+            # 获取操作类型：restart 或 continue
+            action = request_data.get('action', 'restart')
 
-                success = generator.generate_all(progress_callback)
-                logger.info(f"生成完成: {'成功' if success else '失败'}")
+            # 检查是否有历史进度
+            project_root = Path(__file__).parent.parent
+            progress_file = project_root / 'reports' / '.progress.json'
 
-            # 启动后台线程
-            thread = threading.Thread(target=run_generation, daemon=True)
-            thread.start()
+            has_history = False
+            history_info = None
 
-            # 返回成功响应
-            response = {
-                'success': True,
-                'message': '报告生成已启动，请稍后刷新页面查看结果'
-            }
-            self.send_json_response(response)
+            if progress_file.exists():
+                try:
+                    with open(progress_file, 'r', encoding='utf-8') as f:
+                        history_info = json.load(f)
+
+                    # 只处理未完成的任务
+                    if history_info.get('status') == 'generating':
+                        has_history = True
+                        logger.info(f"发现历史生成任务: {history_info.get('current', 'Unknown')}")
+                except Exception as e:
+                    logger.warning(f"读取历史进度失败: {e}")
+
+            # 根据操作类型处理
+            if has_history and action == 'continue':
+                # 继续历史任务
+                logger.info("继续历史生成任务")
+
+                response = {
+                    'success': True,
+                    'message': '正在继续历史生成任务',
+                    'has_history': True,
+                    'history_info': {
+                        'current': history_info.get('current', 'Unknown'),
+                        'percentage': history_info.get('percentage', 0),
+                        'total': history_info.get('total', 0),
+                        'completed': history_info.get('completed', 0)
+                    }
+                }
+                self.send_json_response(response)
+
+                # 启动继续生成线程
+                def continue_generation():
+                    generator = ReportGenerator(project_root)
+                    def progress_callback(data):
+                        logger.info(f"进度: {data['current']} - {data['percentage']}%")
+
+                    generator.generate_all(progress_callback)
+
+                thread = threading.Thread(target=continue_generation, daemon=True)
+                thread.start()
+
+            elif has_history and action == 'restart':
+                # 重新开始，删除历史进度
+                logger.info("重新开始生成，清除历史进度")
+                if progress_file.exists():
+                    progress_file.unlink()
+
+                def run_generation():
+                    generator = ReportGenerator(project_root)
+                    def progress_callback(data):
+                        logger.info(f"进度: {data['current']} - {data['percentage']}%")
+
+                    generator.generate_all(progress_callback)
+
+                thread = threading.Thread(target=run_generation, daemon=True)
+                thread.start()
+
+                response = {
+                    'success': True,
+                    'message': '已清除历史进度，重新开始生成',
+                    'has_history': True,
+                    'action': 'restarted'
+                }
+                self.send_json_response(response)
+
+            else:
+                # 没有历史任务或用户选择继续（无历史时正常开始）
+                def run_generation():
+                    generator = ReportGenerator(project_root)
+                    def progress_callback(data):
+                        logger.info(f"进度: {data['current']} - {data['percentage']}%")
+
+                    generator.generate_all(progress_callback)
+
+                thread = threading.Thread(target=run_generation, daemon=True)
+                thread.start()
+
+                response = {
+                    'success': True,
+                    'message': '报告生成已启动',
+                    'has_history': False
+                }
+                self.send_json_response(response)
+
             logger.info("生成报告请求已处理")
 
         except Exception as e:
@@ -308,10 +388,29 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_json_response(response)
 
     def serve_author_report(self, author_id):
-        """提供个人报告页面 - 实时加载"""
+        """提供个人报告页面 - 实时加载
+
+        支持的URL格式:
+        - /report/<author_id>           - 使用默认模板
+        - /report/<author_id>?style=interactive - 使用交互式滚动模板
+        - /report/<author_id>?style=story       - 使用故事模板
+        """
         # URL解码
         from urllib.parse import unquote
         author_id = unquote(author_id)
+
+        # 解析查询参数
+        parsed_path = urlparse(self.path)
+        query_params = parse_qs(parsed_path.query)
+        style = query_params.get('style', ['default'])[0]
+
+        # 根据style参数选择模板
+        template_map = {
+            'default': 'report.html',
+            'interactive': 'report_interactive.html',
+            'story': 'report_story.html'
+        }
+        template_name = template_map.get(style, 'report.html')
 
         # 实时重新加载报告数据
         reports_dir = Path(self.directory)
@@ -337,7 +436,7 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
                 # 读取JSON数据并渲染
                 with open(json_path, 'r', encoding='utf-8') as f:
                     report_data = json.load(f)
-                html = self.render_report_html(report_data)
+                html = self.render_report_html(report_data, template_name)
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html; charset=utf-8')
                 self.end_headers()
@@ -351,14 +450,22 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.send_header('Location', f'/static/no-data.html?author={author_name}')
         self.end_headers()
 
-    def render_report_html(self, data: dict) -> str:
-        """渲染报告HTML页面"""
+    def render_report_html(self, data: dict, template_name: str = 'report.html') -> str:
+        """渲染报告HTML页面
+
+        Args:
+            data: 报告数据
+            template_name: 模板文件名，支持 'report.html', 'report_interactive.html', 'report_story.html'
+        """
         # 读取模板（从项目根目录）
         project_root = Path(__file__).parent.parent
-        template_path = project_root / 'templates' / 'report.html'
+        template_path = project_root / 'templates' / template_name
         if not template_path.exists():
-            # 如果模板不存在，使用内嵌模板
-            return self.generate_embedded_report(data)
+            # 如果指定模板不存在，尝试使用默认模板
+            template_path = project_root / 'templates' / 'report.html'
+            if not template_path.exists():
+                # 如果默认模板也不存在，使用内嵌模板
+                return self.generate_embedded_report(data)
 
         with open(template_path, 'r', encoding='utf-8') as f:
             template = f.read()
@@ -369,11 +476,20 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         secondary_color = theme.get('secondary_color', '#764ba2')
         accent_color = theme.get('accent_color', '#f093fb')
 
+        # 获取作者信息
+        meta = data.get('meta', {})
+        author = meta.get('author', '开发者')
+        year = data.get('year', 2025)
+        summary = data.get('summary', {})
+
         # 将JSON数据直接输出到script标签中（作为textContent）
         # 不需要转义，因为不是JavaScript字符串字面量
         json_str = json.dumps(data, ensure_ascii=False, indent=2)
 
-        html = template.replace('{{ data_json | default(\'{}\') }}', json_str)
+        # 模板变量替换
+        html = template.replace('{{ author }}', author)
+        html = html.replace('{{ year }}', str(year))
+        html = html.replace('{{ data_json | default(\'{}\') }}', json_str)
         html = html.replace('{{ data_json }}', json_str)
         html = html.replace('{{ primary_color | default(\'#667eea\') }}', primary_color)
         html = html.replace('{{ primary_color }}', primary_color)
@@ -381,7 +497,6 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         html = html.replace('{{ secondary_color }}', secondary_color)
         html = html.replace('{{ accent_color | default(\'#f093fb\') }}', accent_color)
         html = html.replace('{{ accent_color }}', accent_color)
-        html = html.replace('{{ year }}', str(data.get('year', 2024)))
 
         # AI文案 - 需要处理 markdown
         ai_text = data.get('ai_text', None)
