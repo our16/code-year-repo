@@ -17,8 +17,9 @@ from pathlib import Path
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
-# 导入日志配置
+# 导入日志配置和报告生成器
 from logger_config import get_logger
+from report_generator import ReportGenerator
 
 logger = get_logger(__name__)
 
@@ -197,32 +198,21 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.send_json_response(response)
 
     def generate_report(self):
-        """生成报告数据"""
+        """生成报告数据 - 直接嵌入逻辑"""
         try:
             logger.info("收到生成报告请求")
 
-            # 在后台线程中运行生成脚本
             def run_generation():
                 project_root = Path(__file__).parent.parent
-                main_script = project_root / 'src' / 'generate_reports.py'
+                generator = ReportGenerator(project_root)
 
-                if main_script.exists():
-                    logger.info(f"开始执行生成脚本: {main_script}")
-                    # 执行生成脚本，使用encoding='utf-8'避免编码问题
-                    result = subprocess.run(
-                        [sys.executable, str(main_script)],
-                        capture_output=True,
-                        encoding='utf-8',
-                        errors='replace',
-                        cwd=str(project_root)
-                    )
-                    logger.info(f"生成脚本执行完成，返回码: {result.returncode}")
-                    if result.stdout:
-                        logger.info(f"输出: {result.stdout}")
-                    if result.stderr:
-                        logger.warning(f"错误输出: {result.stderr}")
-                else:
-                    logger.error(f"找不到生成脚本: {main_script}")
+                def progress_callback(data):
+                    """进度回调"""
+                    logger.info(f"进度: {data['current']} - {data['percentage']}%")
+                    # 进度会自动保存到文件
+
+                success = generator.generate_all(progress_callback)
+                logger.info(f"生成完成: {'成功' if success else '失败'}")
 
             # 启动后台线程
             thread = threading.Thread(target=run_generation, daemon=True)
@@ -277,47 +267,12 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(html.encode('utf-8'))
                 return
 
-        # 没有JSON文件，显示无数据提示
-        html = f"""<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>暂无数据</title>
-    <style>
-        body {{
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }}
-        .message {{
-            text-align: center;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-        }}
-        h1 {{ margin-bottom: 20px; }}
-        p {{ font-size: 1.2em; }}
-    </style>
-</head>
-<body>
-    <div class="message">
-        <h1>📊 暂无报告数据</h1>
-        <p>作者：{author_info.get('name', 'Unknown')}</p>
-    </div>
-</body>
-</html>
-"""
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html; charset=utf-8')
+        # 没有JSON文件，显示无数据提示页面
+        author_name = author_info.get('name', 'Unknown')
+        # 使用302重定向到静态HTML页面
+        self.send_response(302)
+        self.send_header('Location', f'/static/no-data.html?author={author_name}')
         self.end_headers()
-        self.wfile.write(html.encode('utf-8'))
 
     def render_report_html(self, data: dict) -> str:
         """渲染报告HTML页面"""
