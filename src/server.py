@@ -87,6 +87,65 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.generate_report()
             return
 
+        # API：发送报告链接
+        if path == '/api/send-reports':
+            self.send_reports()
+            return
+
+    def send_reports(self):
+        """发送报告链接API - 预留接口，目前只打印日志"""
+        try:
+            # 读取请求数据
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                request_data = json.loads(post_data.decode('utf-8'))
+            else:
+                request_data = {}
+
+            authors = request_data.get('authors', [])
+            timestamp = request_data.get('timestamp', '')
+
+            logger.info("=" * 60)
+            logger.info("📤 发送报告链接请求")
+            logger.info("=" * 60)
+            logger.info(f"发送时间: {timestamp}")
+            logger.info(f"发送数量: {len(authors)}")
+            logger.info(f"接收者列表:")
+
+            for idx, author in enumerate(authors, 1):
+                logger.info(f"  {idx}. {author.get('name', 'Unknown')}")
+                logger.info(f"     ID: {author.get('id', 'N/A')}")
+                logger.info(f"     报告链接: {author.get('reportUrl', 'N/A')}")
+
+            logger.info("=" * 60)
+            logger.info("💡 提示: 您可以在这里接入消息发送工具")
+            logger.info("   支持的工具: 钉钉机器人、企业微信、飞书、Slack等")
+            logger.info("=" * 60)
+
+            # 预留接口：未来可以在这里接入实际的发送逻辑
+            # 例如：
+            # - 钉钉机器人 webhook
+            # - 企业微信应用消息
+            # - 邮件发送
+            # - 短信通知
+
+            response = {
+                'success': True,
+                'message': f'已记录 {len(authors)} 份报告的发送信息',
+                'authors_count': len(authors),
+                'timestamp': timestamp
+            }
+
+        except Exception as e:
+            logger.error(f"发送报告失败: {str(e)}", exc_info=True)
+            response = {
+                'success': False,
+                'error': str(e)
+            }
+
+        self.send_json_response(response)
+
     def serve_static_file(self, relative_path):
         """提供静态文件服务"""
         # 首先尝试从项目根目录的static目录提供

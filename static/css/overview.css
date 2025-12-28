@@ -34,8 +34,11 @@ body {
     opacity: 0.9;
 }
 
-.generate-btn {
+.header-actions {
     margin-top: 20px;
+}
+
+.generate-btn {
     padding: 12px 30px;
     font-size: 1.1em;
     background: rgba(255, 255, 255, 0.2);
@@ -48,6 +51,82 @@ body {
 }
 
 .generate-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.generate-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 批量操作栏 */
+.bulk-actions {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 20px 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.selection-info {
+    font-size: 1.1em;
+    color: #333;
+}
+
+.selection-info strong {
+    color: #667eea;
+    font-size: 1.2em;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.action-btn {
+    padding: 10px 25px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-send {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-send:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-cancel {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-cancel:hover {
+    background: #e0e0e0;
+}
     background: rgba(255, 255, 255, 0.3);
     transform: scale(1.05);
 }
@@ -95,10 +174,13 @@ body {
     padding: 20px;
     margin-bottom: 40px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .search-box input {
-    width: 100%;
+    flex: 1;
     padding: 15px;
     font-size: 1.1em;
     border: 2px solid #e0e0e0;
@@ -110,6 +192,26 @@ body {
     border-color: #667eea;
 }
 
+.select-all-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.select-all-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.select-all-checkbox span {
+    font-weight: 500;
+    color: #555;
+}
+
 .authors-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -119,12 +221,10 @@ body {
 .author-card {
     background: white;
     border-radius: 15px;
-    padding: 30px;
+    padding: 0;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s, box-shadow 0.3s;
-    text-decoration: none;
-    color: inherit;
-    display: block;
+    position: relative;
 }
 
 .author-card:hover {
@@ -132,16 +232,49 @@ body {
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
 }
 
+.card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 20px 20px 0 20px;
+}
+
+.author-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    padding: 5px;
+}
+
+.author-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.author-checkbox span {
+    display: none;
+}
+
+.card-link {
+    flex: 1;
+    text-decoration: none;
+    color: inherit;
+}
+
 .author-card h3 {
     color: #667eea;
     font-size: 1.5em;
-    margin-bottom: 15px;
+    margin: 0;
 }
 
 .author-card .stats {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    padding: 0 20px;
+    margin-top: 15px;
 }
 
 .author-card .stat {
@@ -156,7 +289,7 @@ body {
 }
 
 .author-card .view-btn {
-    margin-top: 20px;
+    margin: 15px 20px 20px 20px;
     padding: 12px 24px;
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;

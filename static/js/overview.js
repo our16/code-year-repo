@@ -1,5 +1,8 @@
 // 团队总览页面 JavaScript
 
+// 选中的作者集合
+const selectedAuthors = new Set();
+
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     loadAuthorsData();
@@ -133,13 +136,25 @@ function displayAuthors(authors) {
 
 // 创建作者卡片
 function createAuthorCard(author) {
-    const card = document.createElement('a');
+    const card = document.createElement('div');
     card.className = 'author-card';
-    card.href = author.report_url;
+    card.dataset.authorId = author.id;
+    card.dataset.authorName = author.name;
 
     // 创建卡片内容
     card.innerHTML = `
-        <h3>${escapeHtml(author.name)}</h3>
+        <div class="card-header">
+            <label class="author-checkbox">
+                <input type="checkbox" class="author-select"
+                       value="${author.id}"
+                       data-author-name="${escapeHtml(author.name)}"
+                       onchange="updateSelection()">
+                <span></span>
+            </label>
+            <a href="${author.report_url}" class="card-link">
+                <h3>${escapeHtml(author.name)}</h3>
+            </a>
+        </div>
         <div class="stats">
             <div class="stat">
                 <span>提交次数</span>
@@ -177,13 +192,136 @@ function filterAuthors() {
     const cards = document.getElementsByClassName('author-card');
 
     for (let card of cards) {
-        const name = card.getElementsByTagName('h3')[0].textContent.toLowerCase();
+        const name = card.dataset.authorName.toLowerCase();
         if (name.indexOf(filter) > -1) {
             card.style.display = '';
         } else {
             card.style.display = 'none';
         }
     }
+}
+
+// 更新选择状态
+function updateSelection() {
+    const checkboxes = document.querySelectorAll('.author-select:checked');
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+
+    // 更新选中集合
+    selectedAuthors.clear();
+    checkboxes.forEach(cb => {
+        selectedAuthors.add(cb.value);
+    });
+
+    // 更新计数
+    selectedCount.textContent = selectedAuthors.size;
+
+    // 显示/隐藏批量操作栏
+    if (selectedAuthors.size > 0) {
+        bulkActions.style.display = 'flex';
+    } else {
+        bulkActions.style.display = 'none';
+    }
+
+    // 更新全选复选框状态
+    const allCheckboxes = document.querySelectorAll('.author-select');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    selectAllCheckbox.checked = allCheckboxes.length > 0 && selectedAuthors.size === allCheckboxes.length;
+    selectAllCheckbox.indeterminate = selectedAuthors.size > 0 && selectedAuthors.size < allCheckboxes.length;
+}
+
+// 全选/取消全选
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const allCheckboxes = document.querySelectorAll('.author-select');
+
+    allCheckboxes.forEach(cb => {
+        // 只操作可见的复选框
+        const card = cb.closest('.author-card');
+        if (card.style.display !== 'none') {
+            cb.checked = selectAllCheckbox.checked;
+        }
+    });
+
+    updateSelection();
+}
+
+// 清除选择
+function clearSelection() {
+    const allCheckboxes = document.querySelectorAll('.author-select');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+
+    allCheckboxes.forEach(cb => {
+        cb.checked = false;
+    });
+
+    selectAllCheckbox.checked = false;
+    selectAllCheckbox.indeterminate = false;
+
+    updateSelection();
+}
+
+// 发送选中的报告
+async function sendSelectedReports() {
+    if (selectedAuthors.size === 0) {
+        alert('请先选择要发送的报告');
+        return;
+    }
+
+    // 收集选中的作者信息
+    const selectedAuthorsData = [];
+    const checkboxes = document.querySelectorAll('.author-select:checked');
+
+    checkboxes.forEach(cb => {
+        const authorId = cb.value;
+        const authorName = cb.dataset.authorName;
+        const reportUrl = window.location.origin + '/report/' + encodeURIComponent(authorId);
+
+        selectedAuthorsData.push({
+            id: authorId,
+            name: authorName,
+            reportUrl: reportUrl
+        });
+    });
+
+    console.log('========== 发送报告链接 ==========');
+    console.log('发送数量:', selectedAuthorsData.length);
+    console.log('接收者:', selectedAuthorsData.map(a => a.name).join(', '));
+    console.log('');
+    console.log('报告链接列表:');
+    selectedAuthorsData.forEach((author, index) => {
+        console.log(`${index + 1}. ${author.name}`);
+        console.log(`   链接: ${author.reportUrl}`);
+    });
+    console.log('====================================');
+
+    // 调用后端API记录发送日志（预留接口）
+    try {
+        const response = await fetch('/api/send-reports', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                authors: selectedAuthorsData,
+                timestamp: new Date().toISOString()
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(`已准备发送 ${selectedAuthorsData.length} 份报告链接\n\n请查看服务器日志获取详细信息`);
+        } else {
+            alert(`操作已记录\n\n服务器日志中已输出详细信息，您可以稍后接入消息发送工具`);
+        }
+    } catch (error) {
+        console.error('发送失败:', error);
+        alert(`操作已记录（网络错误）\\n\n已将 ${selectedAuthorsData.length} 份报告信息输出到控制台和服务器日志`);
+    }
+
+    // 清除选择
+    clearSelection();
 }
 
 // HTML转义
