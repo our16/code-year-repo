@@ -124,7 +124,7 @@ class GitDataCollector:
                 if commit.parents:
                     # 获取与父提交的差异
                     parent = commit.parents[0]
-                    diff = parent.diff(commit, create_patch=True)
+                    diff = parent.diff(commit, create_patch=True, **{'unified': 0})
 
                     for diff_item in diff:
                         files_changed += 1
@@ -136,16 +136,46 @@ class GitDataCollector:
                             language_stats[lang] += 1
                             file_changes[file_path] += 1
 
-                        # 简化的行数统计
+                        # 更准确的行数统计
                         try:
                             diff_text = diff_item.diff.decode('utf-8', errors='ignore')
-                            additions += diff_text.count('+') - diff_text.count('+++')
-                            deletions += diff_text.count('-') - diff_text.count('---')
+                            lines = diff_text.split('\n')
+
+                            for line in lines:
+                                # 统计新增行（以+开头，但不是+++）
+                                if line.startswith('+') and not line.startswith('+++'):
+                                    additions += 1
+                                # 统计删除行（以-开头，但不是---）
+                                elif line.startswith('-') and not line.startswith('---'):
+                                    deletions += 1
                         except Exception:
                             pass
+                else:
+                    # 初始提交（没有父提交）
+                    try:
+                        # 统计所有新增文件
+                        for item in commit.tree.traverse():
+                            if item.type == 'blob':
+                                try:
+                                    data = item.data_stream.read()
+                                    # 简单估算：假设平均每行40个字符
+                                    lines = max(1, len(data.decode('utf-8', errors='ignore')) // 40)
+                                    additions += lines
+                                    files_changed += 1
+                                except Exception:
+                                    pass
+                    except Exception:
+                        pass
             except Exception as e:
-                print(f"      警告: 无法解析提交 {commit.hexsha[:8]} 的差异: {str(e)}")
-                continue
+                # 如果diff解析失败，尝试从stats中获取
+                try:
+                    stats = commit.stats.total
+                    additions += stats['insertions']
+                    deletions += stats['deletions']
+                    files_changed += stats['files']
+                except Exception:
+                    print(f"      警告: 无法解析提交 {commit.hexsha[:8]} 的差异: {str(e)}")
+                    continue
 
             # 保存提交数据
             commits_data.append({

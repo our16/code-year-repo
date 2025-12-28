@@ -417,6 +417,41 @@ def main():
 
     print(f"   [OK] 总览报告: index.html")
 
+    # 7. 生成报告索引（用于Web服务）
+    print("\n[7/7] 生成报告索引...")
+
+    # 收集所有报告的元数据
+    report_index = {}
+    for report in generated_reports:
+        author_id = f"{report['author']} <{report['email']}>"
+
+        # 重新分析该作者的数据以获取更多信息
+        author_projects = []
+        for author_info, projects in author_data_map.items():
+            if report['author'] in author_info:
+                author_projects = projects
+                break
+
+        if author_projects:
+            analyzed_data = analyzer.analyze(author_projects)
+            report_index[author_id] = {
+                'id': author_id,
+                'name': report['author'],
+                'email': report['email'],
+                'commits': analyzed_data['summary']['total_commits'],
+                'net_lines': analyzed_data['summary']['net_lines'],
+                'projects': len(analyzed_data['projects']),
+                'report_file': report['path'].name,
+                'generated_at': datetime.now().isoformat(),
+            }
+
+    # 保存索引文件
+    index_path = output_dir / 'report_index.json'
+    with open(index_path, 'w', encoding='utf-8') as f:
+        json.dump(report_index, f, ensure_ascii=False, indent=2)
+
+    print(f"   [OK] 索引文件: report_index.json")
+
     # 完成
     print("\n" + "=" * 60)
     print("[SUCCESS] 报告生成完成!")
@@ -425,10 +460,17 @@ def main():
     print(f"\n报告目录: {output_dir.absolute()}")
     print(f"\n文件列表:")
     print(f"  - index.html (总览报告)")
+    print(f"  - report_index.json (报告索引)")
     for report in generated_reports:
         print(f"  - {report['path'].name} ({report['author']})")
 
-    print(f"\n请在浏览器中打开 index.html 查看总览报告\n")
+    print(f"\n" + "=" * 60)
+    print("启动Web服务查看报告:")
+    print("=" * 60)
+    print(f"  python server.py")
+    print(f"  或")
+    print(f"  python server.py --port 8080")
+    print(f"\n然后在浏览器中打开显示的地址\n")
 
 
 if __name__ == '__main__':
