@@ -92,6 +92,23 @@ class LLMClient:
         from datetime import datetime
         current_date = datetime.now().strftime('%Y年%m月%d日')
 
+        # 计算年度寄语的数据特征标签
+        avg_commits_per_month = summary.get('avg_commits_per_month', 0)
+        commit_feature = '日均提交' if avg_commits_per_month > 100 else '稳健积累'
+
+        refactor_ratio = code_quality.get('refactor_ratio', 0)
+        code_style = '追求完美' if refactor_ratio > 20 else '务实高效'
+
+        best_hour = time_dist.get('best_period', {}).get('hour', 12)
+        # 处理best_hour可能是字符串的情况
+        try:
+            best_hour_int = int(best_hour) if isinstance(best_hour, (int, str)) and str(best_hour).isdigit() else 12
+        except:
+            best_hour_int = 12
+        work_habit = '深夜奋斗' if best_hour_int >= 22 or best_hour_int <= 5 else '高效自律'
+
+        project_scope = '多点开花' if project_count >= 5 else '深耕细作'
+
         prompt = f"""
 请根据以下代码年度数据，生成一份温暖、富有感染力的年度总结文案。
 
@@ -156,6 +173,25 @@ class LLMClient:
 <title>精简的艺术</title>
 <content>你的重构比例达到{code_quality.get('refactor_ratio', 0)}%，这震撼的数字透露出你作为顶级程序员的核心理念——极致的完美主义。你不满足于"能用就行"，而是执着追求"用得完美"。近四分之一的时间用于重构，说明你不仅在创造价值，更在用心雕琢每一个细节。</content>
 </graph>
+
+<graph>
+<type>年度寄语</type>
+<value>致敬</value>
+<title>写给明天的你</title>
+<content>请根据以下数据特征，生成一段极具个性化和感染力的年度寄语（50字以内）：
+
+【提交特征】{commit_feature}
+【代码风格】{code_style}
+【工作习惯】{work_habit}
+【项目广度】{project_scope}
+
+要求：
+1. 结合上述特征，避免模板化
+2. 用诗意的语言，但要具体到TA的特点
+3. 可以用"星光不问赶路人"、"代码如诗"等比喻，但不要千篇一律
+4. 体现对TA这一年的认可和未来的期许
+5. 50字以内，精炼有力</content>
+</graph>
 </graphs>
 ```
 
@@ -165,7 +201,8 @@ class LLMClient:
 3. 每个指标卡片包含type、value、title、content四个字段（不需要icon字段，图标由前端自动匹配）
 4. content字段中的文案要温暖、有感染力，避免枯燥的数据罗列
 5. title字段要有诗意和感染力
-6. type字段的可选值：提交次数、代码行数、项目数量、编程语言、高效时段、重构比例等
+6. type字段的可选值：提交次数、代码行数、项目数量、编程语言、高效时段、重构比例、年度寄语等
+7. **年度寄语卡片**的content必须根据实际数据特征生成，避免固定模板，要做到千人千面
 
 现在请根据实际数据，生成上述格式的XML输出：
 """
@@ -176,12 +213,17 @@ class LLMClient:
         summary = data.get('summary', {})
         languages = data.get('languages', {})
         projects = data.get('projects', [])
+        time_dist = data.get('time_distribution', {})
+        code_quality = data.get('code_quality', {})
 
         top_lang = languages.get('top_languages', [])[:3]
         lang_names = [l['name'] for l in top_lang]
 
         project_count = len(projects)
         top_project = projects[0] if projects else {}
+
+        # 个性化结尾语生成
+        ending = self._generate_personalized_ending(summary, time_dist, code_quality, project_count, lang_names)
 
         text = f"""
 # 💌 致过去的一年：你的代码，你的诗篇
@@ -202,11 +244,107 @@ class LLMClient:
 
 ## 精简的艺术
 
-特别值得一提的是，你的 **{data.get('code_quality', {}).get('refactor_ratio', 0)}%** 的提交用于重构和优化，这展现了你对代码质量的追求和对系统可持续性的思考。
+特别值得一提的是，你的 **{code_quality.get('refactor_ratio', 0)}%** 的提交用于重构和优化，这展现了你对代码质量的追求和对系统可持续性的思考。
 
 ---
 
-*继续用代码书写你的故事吧！*
+{ending}
 """
 
         return text
+
+    def _generate_personalized_ending(self, summary, time_dist, code_quality, project_count, lang_names):
+        """生成个性化结尾语
+
+        根据用户的数据特征生成定制化的结尾语，避免千篇一律
+        """
+        avg_commits = summary.get('avg_commits_per_month', 0)
+        refactor_ratio = code_quality.get('refactor_ratio', 0)
+        best_hour = time_dist.get('best_period', {}).get('hour', 12)
+        total_commits = summary.get('total_commits', 0)
+
+        endings = []
+
+        # 高产型开发者
+        if avg_commits > 100:
+            endings.append([
+                f"这一年，你用 **{total_commits}** 次提交诠释了什么叫「极致输出」。星光不问赶路人，你的代码早已铺就通往明天的路。",
+                f"**{total_commits}** 次提交，是你写给代码最深情的诗行。时光不负有心人，愿你的每一次敲击键盘，都成为点亮未来的星光。",
+                f"以 **{avg_commits:.0f}** 次月均提交的节奏，你在代码的世界里一往无前。星光不问赶路人，时光定不负你这份坚持。"
+            ])
+        elif avg_commits > 50:
+            endings.append([
+                f"稳健的 **{total_commits}** 次提交，见证了你一年来的成长与突破。代码如诗，你用坚持续写着属于自己的篇章。",
+                f"**{avg_commits:.0f}** 次月均提交，不多不少，恰是你的节奏。愿你在代码的世界里继续从容前行，时光终不负你。"
+            ])
+        else:
+            endings.append([
+                f"虽然提交次数只有 **{total_commits}** 次，但每一次都凝聚着你的思考与匠心。代码不在多，在于精——你的每一步都算数。",
+                f"**{total_commits}** 次提交，少而精。这一年你用代码书写的故事，或许不喧哗，却足够深刻。时光会记得所有用心的创作。"
+            ])
+
+        # 完美主义者
+        if refactor_ratio > 25:
+            endings[-1].append(
+                f"**{refactor_ratio}%** 的重构占比，暴露了你作为「代码艺术家」的本色。你在追求完美的路上孤独前行，但时光终将证明——那些被你精心雕琢的代码，会成为他人仰望的星空。"
+            )
+        elif refactor_ratio > 15:
+            endings[-1].extend([
+                f"近 **{int(refactor_ratio)}%** 的时间用于重构，这份对完美的执着让人敬佩。你的代码不只是功能实现，更是艺术品——时光不负匠心。",
+                f"在 **{refactor_ratio}%** 重构比例背后，是你对代码质量的极致追求。星光不问赶路人，你的每一行精雕细琢的代码，都在为未来铺路。"
+            ])
+
+        # 深夜奋斗者
+        if best_hour >= 22 or best_hour <= 5:
+            endings[-1].extend([
+                f"**深夜 {best_hour}点** 是你的创作高峰，静谧的深夜里，只有你和代码在对话。那些深夜敲下的代码，带着特别的温度——星光不问赶路人，时光终不负夜行者。",
+                f"当世界沉睡时，你在 **{best_hour}点** 依然在用代码编织梦想。星光不问赶路人，你的每一份深夜坚持，都将成为照亮前路的灯塔。",
+            ])
+        elif best_hour >= 19:
+            endings[-1].append(
+                f"**{best_hour}点** 的黄昏与夜晚，见证了你的奋斗时光。星光不问赶路人，愿你每一个夜晚的代码，都成为通往明天的阶梯。"
+            )
+        else:
+            endings[-1].append(
+                f"在 **{best_hour}点** 的高效时段，你展现了自律的工作节奏。星光不问赶路人，愿你的每一步都走得坚定而从容。"
+            )
+
+        # 多项目达人
+        if project_count >= 5:
+            endings[-1].extend([
+                f"纵横 **{project_count}** 个项目，你是代码世界的「探索者」。星光不问赶路人，愿你在技术的征途上继续乘风破浪。",
+                f"一年参与 **{project_count}** 个项目，你的足迹遍布多个领域。时光不负有心人，愿这份广度成为你独特的优势。",
+            ])
+        elif project_count >= 3:
+            ends = [
+                f"在 **{project_count}** 个项目中留下你的代码，既有深度又有广度。星光不问赶路人，愿你在每个项目上都收获成长。",
+                f"**{project_count}** 个项目的历练，让你成为更全面的开发者。时光会记得你在每个项目中留下的印记。",
+            ]
+            if len(endings[-1]) < 3:
+                endings[-1].extend(ends)
+            else:
+                endings[-1].extend(ends[:1])
+
+        # 技术专精者
+        if len(lang_names) == 1:
+            endings[-1].append(
+                f"一年深耕 **{lang_names[0]}**，你在单一领域做到了极致。星光不问赶路人，愿你的专业成为最锋利的武器，劈开所有技术难题。"
+            )
+        elif len(lang_names) >= 3:
+            endings[-1].append(
+                f"熟练运用 **{len(lang_names)}** 种语言，你是真正的「技术多面手」。星光不问赶路人，愿你的技术栈成为探索世界的罗盘。"
+            )
+
+        # 选择最后一个列表，然后随机选择一句
+        import random
+        if endings:
+            options = endings[-1]
+            return random.choice(options)
+
+        # 默认结尾
+        defaults = [
+            "*星光不问赶路人，时光不负有心人。愿你在代码的世界里继续书写精彩！*",
+            "*代码如诗，你是最美的诗人。继续用热爱书写你的故事吧！*",
+            "*每一行代码都是你成长的脚印。愿星光常伴，时光不负，继续前行！*",
+        ]
+        return random.choice(defaults)

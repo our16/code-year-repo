@@ -750,7 +750,7 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_json_response(response)
 
     def completely_rerun(self):
-        """完全重跑 - 清除所有进度和检查点，从头开始生成"""
+        """完全重跑 - 清除所有进度、检查点和缓存，从头开始生成"""
         try:
             logger.info("=" * 60)
             logger.info("收到完全重跑请求")
@@ -781,7 +781,18 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
                 except Exception as e:
                     logger.warning(f"删除检查点文件失败: {e}")
 
-            # 3. 删除所有旧报告文件
+            # 3. 删除Git扫描缓存
+            cache_dir = project_root / '.git_scan_cache'
+            if cache_dir.exists():
+                try:
+                    import shutil
+                    shutil.rmtree(cache_dir)
+                    deleted_files.append('Git扫描缓存')
+                    logger.info(f"已删除Git扫描缓存: {cache_dir}")
+                except Exception as e:
+                    logger.warning(f"删除Git扫描缓存失败: {e}")
+
+            # 4. 删除所有旧报告文件
             if reports_dir.exists():
                 json_files = list(reports_dir.glob('*.json'))
                 report_count = 0
@@ -798,7 +809,7 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
                     logger.info(f"已删除 {report_count} 个报告文件")
 
             logger.info("=" * 60)
-            logger.info("完全重跑：已清除所有历史数据")
+            logger.info("完全重跑：已清除所有历史数据和缓存")
             logger.info(f"删除的文件: {', '.join(deleted_files)}")
             logger.info("=" * 60)
 

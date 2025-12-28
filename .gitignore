@@ -32,7 +32,7 @@ ENV/
 *.swp
 *.swo
 *~
-
+.git_scan_cache
 # Reports
 reports/
 *.html
