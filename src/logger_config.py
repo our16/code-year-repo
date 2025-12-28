@@ -29,7 +29,7 @@ def setup_logger(name: str = 'code-year-report', level=logging.INFO):
         return logger
 
     # 创建控制台handler
-    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler = logging.StreamHandler(sys.stderr)
     console_handler.setLevel(level)
 
     # 创建格式化器

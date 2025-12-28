@@ -18,7 +18,6 @@ sys.path.insert(0, str(src_path))
 
 # 初始化logger（必须在导入server之前）
 from src.logger_config import setup_logger
-setup_logger()
 logger = setup_logger()
 
 from src.server import start_server

@@ -1,264 +1,207 @@
-# 代码年度报告生成器
+# Code Year Report Generator
 
-一个用于生成团队和个人代码年度报告的工具，支持从Git仓库中提取数据并生成精美的可视化报告。
+团队代码年度报告生成和查看系统
 
-## ✨ 特性
+## 快速开始
 
-- 📊 自动分析Git仓库数据
-- 👥 支持多作者报告生成
-- 🎨 精美的可视化展示（类似QQ音乐年度报告）
-- 🤖 支持AI生成个性化文案
-- 🔗 作者名字映射功能
-- 📈 生成进度实时显示
-- 💻 纯静态文件+API架构
+### 方式一：使用批处理脚本（推荐）
 
-## 📁 项目结构
+双击 `start.bat` 启动服务器：
+- 自动停止占用8000端口的旧进程
+- 使用Anaconda Python启动服务器
+- 打开浏览器访问 http://localhost:8000
 
-```
-.
-├── start_server.py             # 主程序入口 - 启动Web服务
-├── config/                     # 配置文件目录
-│   ├── config.yaml            # 主配置文件
-│   ├── config.example.yaml    # 配置文件示例
-│   ├── author_mapping.yaml    # 作者映射配置
-│   └── author_mapping.example.yaml  # 作者映射示例
-├── src/                        # Python源代码目录
-│   ├── git_collector.py       # Git数据采集
-│   ├── data_analyzer.py       # 数据分析
-│   ├── llm_client.py          # LLM客户端
-│   ├── config_loader.py       # 配置加载
-│   ├── server.py              # Web服务器
-│   └── report_generator.py    # 报告生成（已废弃）
-├── static/                     # 静态资源
-│   ├── overview.html          # 总览页面
-│   ├── css/
-│   │   └── overview.css       # 样式文件
-│   └── js/
-│       └── overview.js        # JavaScript
-├── templates/                  # HTML模板
-│   ├── report.html            # 标准报告模板
-│   └── report_story.html      # 逐页展示模板（推荐）
-└── reports/                    # 生成的报告目录
-    ├── report_index.json      # 报告索引
-    └── *.json                 # 作者报告数据
-```
-
-## 🚀 快速开始
-
-### 1. 安装依赖
+### 方式二：命令行启动
 
 ```bash
-pip install pyyaml jinja2
+# 使用Anaconda Python（推荐）
+C:\tools\Anaconda3\python.exe start_server.py
+
+# 或指定端口
+C:\tools\Anaconda3\python.exe start_server.py --port 8001
+
+# 或指定报告目录
+C:\tools\Anaconda3\python.exe start_server.py --dir ./reports
 ```
 
-### 2. 配置文件
+### 访问地址
 
-复制示例配置并根据实际情况修改：
+启动后可以通过以下地址访问：
+- 本地访问：http://localhost:8000
+- 网络访问：http://192.168.3.31:8000
 
-```bash
-cp config/config.example.yaml config/config.yaml
-cp config/author_mapping.example.yaml config/author_mapping.yaml
+## 功能说明
+
+### Web界面功能
+
+1. **查看总览页面** - 访问根路径显示所有作者的报告列表
+2. **生成报告** - 点击"🔄 生成报告"按钮自动生成所有作者的年度报告
+3. **查看个人报告** - 点击作者卡片查看详细的年度代码报告
+4. **实时进度** - 报告生成过程中显示实时进度条
+
+### API端点
+
+- `GET /api/authors` - 获取所有作者列表
+- `GET /api/author/<id>` - 获取特定作者的详细数据
+- `GET /api/progress` - 获取报告生成进度
+- `POST /api/generate` - 触发报告生成
+- `GET /report/<id>` - 查看个人报告页面
+
+## 项目结构
+
+```
+code-year-report/
+├── start_server.py          # Web服务器启动脚本（唯一根目录Python文件）
+├── start.bat                 # Windows批处理启动脚本
+├── src/                      # 所有Python源代码
+│   ├── server.py            # Web服务器核心逻辑
+│   ├── logger_config.py     # 全局日志配置
+│   ├── report_generator.py  # 报告生成器
+│   ├── git_collector.py     # Git数据采集
+│   ├── data_analyzer.py     # 数据分析
+│   └── llm_client.py        # LLM集成
+├── static/                   # 静态资源
+│   ├── overview.html        # 总览页面
+│   ├── report.html          # 报告页面模板
+│   └── css/, js/            # 样式和脚本
+├── templates/                # HTML模板
+├── config/                   # 配置文件目录
+│   ├── config.yaml          # 主配置（项目路径、年份、API密钥等）
+│   ├── author_mapping.yaml  # 作者名称映射
+│   └── *.example.yaml       # 配置示例文件
+└── reports/                  # 生成的报告目录
+    ├── *.json               # 各作者的年度报告（JSON格式）
+    └── .progress.json       # 生成进度文件（被系统自动排除）
 ```
 
-编辑 `config/config.yaml`:
+## 配置说明
+
+### 1. 主配置文件 (config/config.yaml)
 
 ```yaml
-projects:
-  - path: "F:/project/your-project"
-    name: "your-project"
-
+# 报告年份
 report_year: 2025
 
-# 留空表示包含所有作者
-authors:
+# Git项目列表
+projects:
+  - path: "F:/project/project1"
+    name: "Project 1"
+  - path: "F:/project/project2"
+    name: "Project 2"
 
-# LLM配置（可选）
-llm:
-  provider: "openai"
-  model: "gpt-4"
-  api_key: "your-api-key-here"
-```
-
-编辑 `config/author_mapping.yaml`（可选）:
-
-```yaml
-# 统一不同格式的作者名字
-"Monge" : "Monge(中文名) <monge@example.com>"
-"monge" : "Monge(中文名) <monge@example.com>"
-```
-
-### 3. 启动Web服务
-
-```bash
-python start_server.py
-```
-
-或指定端口：
-
-```bash
-python start_server.py --port 8080
-```
-
-### 4. 访问报告
-
-在浏览器中打开：
-- 本地访问：`http://localhost:8000`
-- 网络访问：`http://your-ip:8000`
-
-## 📊 数据流程
-
-```
-Git仓库 → src/server.py → JSON数据 → Web界面
-          (数据采集+API服务)
-```
-
-### start_server.py 功能
-
-- 主程序入口
-- 启动Web服务器
-- 可以通过Web UI触发数据生成
-
-### src/server.py 功能
-
-- 提供HTTP服务
-- API接口：
-  - `GET /api/authors` - 获取作者列表
-  - `GET /api/author/<id>` - 获取作者数据
-  - `GET /api/progress` - 获取生成进度
-  - `POST /api/generate` - 生成报告数据
-- 渲染HTML报告页面
-- 提供静态资源服务
-
-## 🎨 UI特性
-
-### 总览页面
-
-- 显示所有贡献者
-- 搜索功能
-- 进度条显示（如果正在生成）
-- 卡片动画效果
-
-### 个人报告（两种模板）
-
-1. **标准模板** (`report.html`)
-   - 单页展示所有数据
-   - 热力图、图表等可视化
-
-2. **故事模板** (`report_story.html`) - 推荐
-   - 逐页展示效果
-   - 类似QQ音乐年度报告
-   - 滚动动画
-   - 章节导航
-
-## 🔧 高级配置
-
-### 作者名字映射
-
-解决同一个作者有多个名字的问题：
-
-```yaml
-# config/author_mapping.yaml
-"John Doe" : "John Doe <john@example.com>"
-"john.doe@example.com" : "John Doe <john@example.com>"
-"J. Doe" : "John Doe <john@example.com>"
-```
-
-支持多种匹配方式：
-- 完全匹配：`"Name <email>"`
-- 仅名字：`"Name"`
-- 仅邮箱：`"email@example.com"`
-
-### LLM文案生成
-
-在 `config/config.yaml` 中配置：
-
-```yaml
+# 可选：LLM配置（用于生成年度总结）
 llm:
   provider: "openai"  # 或 "anthropic"
+  api_key: "your-api-key"
   model: "gpt-4"
-  api_key: "sk-..."
-  base_url: "https://api.openai.com/v1"  # 可选
+
+# 可选：作者过滤
+authors:
+  - "John Doe <john@example.com>"
 ```
 
-跳过LLM：
+### 2. 作者映射配置 (config/author_mapping.yaml)
 
-```bash
-python main.py --no-llm
+将不同的作者名称格式统一为标准格式：
+
+```yaml
+"Monge": "Monge(中文名) <monge@example.com>"
+"monge": "Monge(中文名) <monge@example.com>"
+"monge@example.com": "Monge(中文名) <monge@example.com>"
 ```
 
-## 📦 生成的文件
+## 工作原理
 
-运行 `python main.py` 后，在 `reports/` 目录生成：
+### 报告数据加载
 
-```
-reports/
-├── report_index.json              # 索引文件
-├── AuthorName_2025.json          # 作者报告数据
-├── AuthorName2_2025.json
-└── ...
-```
+系统会自动扫描 `reports/*.json` 目录：
+1. 读取所有JSON文件（个人报告）
+2. 排除系统文件（`.progress.json`、`report_index.json`）
+3. 动态构建作者列表和索引
 
-JSON文件结构：
+### 报告生成流程
 
-```json
-{
-  "meta": {
-    "author": "作者名",
-    "email": "email@example.com",
-    "author_id": "作者ID",
-    "year": 2025,
-    "generated_at": "2025-12-28T..."
-  },
-  "summary": {
-    "total_commits": 1000,
-    "net_lines": 50000,
-    ...
-  },
-  "languages": {...},
-  "projects": [...],
-  "ai_text": "AI生成的文案...",
-  "theme": {...}
-}
-```
+1. 点击"生成报告"按钮
+2. 系统扫描配置的Git仓库
+3. 收集所有提交记录
+4. 按作者分组并应用名称映射
+5. 分析代码变更数据（提交次数、代码行数等）
+6. 生成每人一份的JSON报告
+7. 实时显示生成进度
 
-## 🎯 使用场景
+### 日志输出
 
-1. **团队年度总结**
-   - 展示团队整体贡献
-   - 个人成就展示
+所有日志输出到 `stderr`，包括：
+- 系统启动日志
+- 报告加载日志（每个加载的报告都会显示）
+- 报告生成进度
+- 错误和警告信息
 
-2. **个人技术回顾**
-   - 查看自己的代码提交
-   - 分析编程语言使用
-   - 回顾项目参与情况
+## 常见问题
 
-3. **技术团队建设**
-   - 增强团队凝聚力
-   - 技术成长可视化
+### 问题：访问 http://localhost:8000 返回 404
 
-## 📝 注意事项
+**原因**：旧的服务进程还在运行，端口被占用
 
-- `.gitignore` 已配置，不会提交配置文件和生成的报告
-- `novels/` 目录是小说内容，禁止分析和修改
-- 所有Python代码在 `src/` 目录
-- HTML/JS/CSS 在 `static/` 和 `templates/` 目录
+**解决**：
+1. 双击 `start.bat`（会自动清理旧进程）
+2. 或手动运行：
+   ```bash
+   netstat -ano | findstr :8000
+   taskkill /F /PID <进程ID>
+   ```
 
-## 🔍 故障排查
+### 问题：日志输出中文乱码
 
-### 问题：找不到Git仓库
+**原因**：Windows控制台编码问题
 
-检查 `config/config.yaml` 中的路径是否正确。
+**影响**：仅影响终端显示，不影响实际功能。系统功能正常，JSON数据和Web页面中文显示正常。
 
-### 问题：LLM调用失败
+### 问题：生成的报告不显示
 
-- 检查API key是否正确
-- 检查网络连接
-- 使用 `--no-llm` 跳过LLM
+**原因**：报告目录为空或没有JSON文件
 
-### 问题：作者名字不统一
+**解决**：
+1. 检查 `config/config.yaml` 中的项目路径是否正确
+2. 检查Git仓库是否有提交记录
+3. 点击"生成报告"按钮重新生成
 
-配置 `config/author_mapping.yaml` 统一名字。
+## 技术栈
 
-## 📄 许可证
+- **后端**：Python 3.13+ (http.server)
+- **前端**：原生HTML/CSS/JavaScript
+- **数据格式**：JSON
+- **版本控制**：Git
+- **日志系统**：Python logging (stderr)
+- **可选**：LLM集成（OpenAI/Anthropic API）
 
-MIT License
+## 更新日志
+
+### 最新更新 (2025-12-28)
+
+1. **修复数据加载逻辑**
+   - 从固定的 `report_index.json` 改为动态扫描所有 `*.json` 文件
+   - 自动排除 `.progress.json` 和 `report_index.json`
+   - 每个作者一份独立的JSON报告
+
+2. **修复日志输出**
+   - 使用 `stderr` 而非 `stdout` 避免缓冲问题
+   - 添加报告加载日志
+   - 完善错误处理
+
+3. **简化启动流程**
+   - 提供 `start.bat` 批处理脚本
+   - 自动清理占用端口的旧进程
+   - 支持Anaconda Python
+
+## 开发文档
+
+更多技术文档请查看 `md/` 目录：
+- `UI交互优化方案.md` - UI优化方案
+- `STRUCTURE_FINAL.md` - 项目结构说明
+- `SERVER_GUIDE.md` - 服务器开发指南
+- `LOGGER_FIX.md` - 日志系统修复说明
+
+## 许可证
+
+内部项目 - 仅供团队使用

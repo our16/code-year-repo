@@ -119,10 +119,15 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_error(404, "File not found")
 
     def send_authors_api(self):
-        """发送作者列表API"""
+        """发送作者列表API - 实时加载报告数据"""
+        # 实时重新加载报告数据
+        reports_dir = Path(self.directory)
+        report_data = load_report_data(reports_dir)
+        logger.info(f"API调用：实时加载了 {len(report_data)} 个报告")
+
         authors = []
 
-        for author_id, data in self.report_data.items():
+        for author_id, data in report_data.items():
             authors.append({
                 'id': author_id,
                 'name': data.get('name', 'Unknown'),
@@ -144,10 +149,14 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.send_json_response(response)
 
     def send_author_data(self, author_id):
-        """发送特定作者的JSON数据"""
+        """发送特定作者的JSON数据 - 实时加载"""
+        # 实时重新加载报告数据
+        reports_dir = Path(self.directory)
+        report_data = load_report_data(reports_dir)
+
         # 查找作者的JSON文件
         author_info = None
-        for aid, data in self.report_data.items():
+        for aid, data in report_data.items():
             if aid == author_id or data.get('name') == author_id:
                 author_info = data
                 break
@@ -173,7 +182,7 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.send_json_response(report_data)
 
     def send_progress_api(self):
-        """发送生成进度API"""
+        """发送生成进度API - 实时加载"""
         # 读取进度文件（如果存在）
         project_root = Path(__file__).parent.parent
         progress_file = project_root / 'reports' / '.progress.json'
@@ -187,11 +196,16 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             except:
                 pass
 
+        # 实时加载当前报告数量
+        reports_dir = Path(self.directory)
+        report_data = load_report_data(reports_dir)
+        total_reports = len(report_data)
+
         # 默认返回完成状态
         response = {
             'status': 'completed',
-            'total': len(self.report_data),
-            'completed': len(self.report_data),
+            'total': total_reports,
+            'completed': total_reports,
             'current': 'All reports generated',
             'percentage': 100
         }
@@ -235,14 +249,18 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_json_response(response)
 
     def serve_author_report(self, author_id):
-        """提供个人报告页面"""
+        """提供个人报告页面 - 实时加载"""
         # URL解码
         from urllib.parse import unquote
         author_id = unquote(author_id)
 
+        # 实时重新加载报告数据
+        reports_dir = Path(self.directory)
+        report_data = load_report_data(reports_dir)
+
         # 查找作者信息
         author_info = None
-        for aid, data in self.report_data.items():
+        for aid, data in report_data.items():
             if aid == author_id or data.get('name') == author_id or data.get('id') == author_id:
                 author_info = data
                 break
@@ -292,17 +310,73 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         secondary_color = theme.get('secondary_color', '#764ba2')
         accent_color = theme.get('accent_color', '#f093fb')
 
-        html = template.replace('{{ data_json }}', json.dumps(data, ensure_ascii=False))
+        # 将JSON数据直接输出到script标签中（作为textContent）
+        # 不需要转义，因为不是JavaScript字符串字面量
+        json_str = json.dumps(data, ensure_ascii=False, indent=2)
+
+        html = template.replace('{{ data_json | default(\'{}\') }}', json_str)
+        html = html.replace('{{ data_json }}', json_str)
+        html = html.replace('{{ primary_color | default(\'#667eea\') }}', primary_color)
         html = html.replace('{{ primary_color }}', primary_color)
+        html = html.replace('{{ secondary_color | default(\'#764ba2\') }}', secondary_color)
         html = html.replace('{{ secondary_color }}', secondary_color)
+        html = html.replace('{{ accent_color | default(\'#f093fb\') }}', accent_color)
         html = html.replace('{{ accent_color }}', accent_color)
         html = html.replace('{{ year }}', str(data.get('year', 2024)))
 
-        # AI文案
-        ai_text = data.get('ai_text') or '暂无AI文案'
-        html = html.replace('{{ ai_text }}', ai_text)
+        # AI文案 - 需要处理 markdown
+        ai_text = data.get('ai_text', None)
+        if ai_text:
+            # 将markdown转换为HTML（简单处理）
+            import re
+            # 转换换行
+            ai_text_html = ai_text.replace('\n\n', '</p><p>').replace('\n', '<br>')
+            ai_text_html = f'<p>{ai_text_html}</p>'
+            # 处理标题
+            ai_text_html = re.sub(r'<p># (.*?)</p>', r'<h3>\1</h3>', ai_text_html)
+            ai_text_html = re.sub(r'<p>## (.*?)</p>', r'<h4>\1</h4>', ai_text_html)
+            ai_text_html = re.sub(r'<p>### (.*?)</p>', r'<h5>\1</h5>', ai_text_html)
+        else:
+            # 使用默认文案
+            ai_text_html = self._get_default_ai_text(data)
+
+        html = html.replace('{{ ai_text | safe }}', ai_text_html)
+        html = html.replace('{{ ai_text }}', ai_text_html)
 
         return html
+
+    def _get_default_ai_text(self, data: dict) -> str:
+        """生成默认AI文案"""
+        summary = data.get('summary', {})
+        languages = data.get('languages', {})
+        projects = data.get('projects', [])
+
+        top_lang = languages.get('top_languages', [])[:3]
+        lang_names = [l['name'] for l in top_lang] if top_lang else ['多种语言']
+
+        project_count = len(projects)
+        top_project = projects[0] if projects else {}
+
+        text = f"""
+        <h3>💌 致过去的一年：你的代码，你的诗篇</h3>
+
+        <p>在冰冷的数字背后，是你一整年的热忱、思考和创造。</p>
+
+        <h4>年初的Flag，是写在晨光里的序章</h4>
+
+        <p>每一个早起的清晨，每一个静谧的深夜，键盘敲击出的不只是代码，更是你解决问题的决心。那些 <strong>{summary.get('total_commits', 0)}</strong> 次的提交，是你与复杂问题一次次交锋的勋章。新增的 <strong>{summary.get('total_additions', 0)}</strong> 行代码，构筑起产品的血肉；而删除的 <strong>{summary.get('total_deletions', 0)}</strong> 行，更是你追求优雅与简洁的证明。</p>
+
+        <h4>你的技术栈，是你探索世界的地图</h4>
+
+        <p>这一年，你在 <strong>{', '.join(lang_names)}</strong> 的世界里探索。参与 <strong>{project_count}</strong> 个不同项目的经历，证明你不仅是深耕某一领域的专家，更是具备全局视野的团队协作者。在 <strong>{top_project.get('name', '核心项目')}</strong> 中的 <strong>{top_project.get('commits', 0)}</strong> 次提交，记录了你在这个项目上的深度投入。</p>
+
+        <h4>精简的艺术</h4>
+
+        <p>特别值得一提的是，你的重构提交展现了你对代码质量的追求和对系统可持续性的思考。</p>
+
+        <p><em>继续用代码书写你的故事吧！</em></p>
+        """
+        return text
 
     def generate_embedded_report(self, data: dict) -> str:
         """生成内嵌的HTML报告"""
