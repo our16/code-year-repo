@@ -12,7 +12,10 @@ import socket
 import sys
 import subprocess
 import threading
-from datetime import datetime
+import uuid
+import hashlib
+import time
+from datetime import datetime, timedelta
 from pathlib import Path
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
@@ -23,6 +26,10 @@ from report_generator import ReportGenerator
 
 logger = get_logger(__name__)
 
+# 会话存储（生产环境应使用Redis等）
+SESSION_STORE = {}
+SESSION_TIMEOUT = 3600 * 24  # 24小时
+
 
 class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
     """自定义HTTP请求处理器"""
@@ -30,6 +37,64 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, report_data=None, **kwargs):
         self.report_data = report_data or {}
         super().__init__(*args, **kwargs)
+
+    def create_session(self, username):
+        """创建会话"""
+        session_id = str(uuid.uuid4())
+        expiry_time = datetime.now() + timedelta(seconds=SESSION_TIMEOUT)
+
+        SESSION_STORE[session_id] = {
+            'username': username,
+            'created_at': datetime.now(),
+            'expiry_time': expiry_time
+        }
+
+        logger.info(f"创建会话: {username} - {session_id}")
+        return session_id
+
+    def validate_session(self, session_id):
+        """验证会话"""
+        if not session_id or session_id not in SESSION_STORE:
+            return False
+
+        session = SESSION_STORE[session_id]
+
+        # 检查是否过期
+        if datetime.now() > session['expiry_time']:
+            del SESSION_STORE[session_id]
+            logger.info(f"会话已过期: {session_id}")
+            return False
+
+        # 更新过期时间
+        session['expiry_time'] = datetime.now() + timedelta(seconds=SESSION_TIMEOUT)
+        return True
+
+    def check_session(self):
+        """检查请求的会话"""
+        # 从Cookie中获取sessionId
+        cookie_header = self.headers.get('Cookie')
+        if not cookie_header:
+            return False
+
+        # 解析Cookie
+        cookies = {}
+        for cookie in cookie_header.split(';'):
+            cookie = cookie.strip()
+            if '=' in cookie:
+                key, value = cookie.split('=', 1)
+                cookies[key.strip()] = value.strip()
+
+        session_id = cookies.get('sessionId')
+        return self.validate_session(session_id)
+
+    def require_login(self):
+        """要求登录，返回False表示需要重定向到登录页"""
+        # 如果是report路径，不需要登录
+        if self.path.startswith('/report/'):
+            return True
+
+        # 检查会话
+        return self.check_session()
 
     def check_admin_auth(self):
         """检查admin认证"""
@@ -116,16 +181,22 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         path = parsed_path.path
         query_params = parse_qs(parsed_path.query)
 
-        # 检查是否可以在无认证的情况下访问
-        if self.can_access_without_auth(path):
-            # 继续处理请求（不需要认证）
-            pass
-        # 其他所有路径都需要admin认证
-        elif not self.check_admin_auth():
-            self.send_auth_required()
+        # 登录页面不需要认证
+        if path == '/login' or path == '/login.html':
+            self.serve_static_file('static/login.html')
             return
-        # 根路径需要admin认证
-        elif path == '/' or path == '/index.html':
+
+        # 检查登录态（除了report路径和静态资源）
+        if not self.require_login():
+            # 未登录，重定向到登录页
+            self.send_response(302)
+            redirect_url = f'/login?redirect={path}'
+            self.send_header('Location', redirect_url)
+            self.end_headers()
+            return
+
+        # 根路径 - 重定向到总览页
+        if path == '/' or path == '/index.html':
             self.serve_static_file('static/overview.html')
             return
 
@@ -157,7 +228,7 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.serve_static_file(path.lstrip('/'))
             return
 
-        # 个人报告页面（渲染HTML）
+        # 个人报告页面（渲染HTML）- 不需要登录
         if path.startswith('/report/'):
             author_id = path.split('/')[-1]
             # URL解码
@@ -171,13 +242,26 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         """处理POST请求"""
-        # POST请求都需要admin认证
-        if not self.check_admin_auth():
-            self.send_auth_required()
-            return
-
         parsed_path = urlparse(self.path)
         path = parsed_path.path
+
+        # 登录API不需要认证
+        if path == '/api/login':
+            self.handle_login()
+            return
+
+        # 验证会话API不需要认证
+        if path == '/api/validate-session':
+            self.handle_validate_session()
+            return
+
+        # 其他POST请求需要登录
+        if not self.require_login():
+            self.send_json_response({
+                'success': False,
+                'message': '请先登录'
+            })
+            return
 
         # API：生成报告
         if path == '/api/generate':
@@ -193,6 +277,110 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         if path == '/api/send-reports':
             self.send_reports()
             return
+
+    def handle_login(self):
+        """处理登录请求"""
+        try:
+            # 读取请求数据
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                request_data = json.loads(post_data.decode('utf-8'))
+            else:
+                request_data = {}
+
+            username = request_data.get('username', '')
+            password = request_data.get('password', '')
+
+            # 从配置文件读取admin账号密码
+            from pathlib import Path
+            import yaml
+            config_path = Path(__file__).parent.parent / 'config' / 'config.yaml'
+
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                admin_config = config.get('admin', {})
+                admin_username = admin_config.get('username', 'admin')
+                admin_password = admin_config.get('password', 'admin')
+            else:
+                admin_username = 'admin'
+                admin_password = 'admin'
+
+            # 验证用户名和密码
+            if username == admin_username and password == admin_password:
+                # 创建会话
+                session_id = self.create_session(username)
+
+                # 设置Cookie
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Set-Cookie', f'sessionId={session_id}; Path=/; HttpOnly; SameSite=Lax')
+                self.end_headers()
+
+                response = {
+                    'success': True,
+                    'message': '登录成功',
+                    'sessionId': session_id,
+                    'username': username
+                }
+                self.wfile.write(json.dumps(response, ensure_ascii=False).encode('utf-8'))
+                logger.info(f"用户登录成功: {username}")
+            else:
+                self.send_response(401)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+
+                response = {
+                    'success': False,
+                    'message': '用户名或密码错误'
+                }
+                self.wfile.write(json.dumps(response, ensure_ascii=False).encode('utf-8'))
+                logger.warning(f"登录失败: {username}")
+
+        except Exception as e:
+            logger.error(f"登录处理错误: {e}")
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            response = {
+                'success': False,
+                'message': '服务器错误'
+            }
+            self.wfile.write(json.dumps(response, ensure_ascii=False).encode('utf-8'))
+
+    def handle_validate_session(self):
+        """验证会话"""
+        try:
+            # 读取请求数据
+            content_length = int(self.headers.get('Content-Length', 0))
+            if content_length > 0:
+                post_data = self.rfile.read(content_length)
+                request_data = json.loads(post_data.decode('utf-8'))
+            else:
+                request_data = {}
+
+            session_id = request_data.get('sessionId', '')
+
+            if self.validate_session(session_id):
+                session = SESSION_STORE.get(session_id, {})
+                self.send_json_response({
+                    'success': True,
+                    'valid': True,
+                    'username': session.get('username', '')
+                })
+            else:
+                self.send_json_response({
+                    'success': True,
+                    'valid': False
+                })
+
+        except Exception as e:
+            logger.error(f"会话验证错误: {e}")
+            self.send_json_response({
+                'success': False,
+                'valid': False
+            })
 
     def send_reports(self):
         """发送报告链接API - 预留接口，目前只打印日志"""

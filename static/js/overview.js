@@ -687,6 +687,27 @@ async function completelyRerun() {
         `;
         toast.textContent = `❌ ${error.message}`;
         document.body.appendChild(toast);
+
         setTimeout(() => toast.remove(), 3000);
+    }
+}
+
+// 退出登录
+async function logout() {
+    if (!confirm('确定要退出登录吗？')) {
+        return;
+    }
+
+    try {
+        // 清除本地存储的会话信息
+        localStorage.removeItem('sessionId');
+        localStorage.removeItem('username');
+
+        // 跳转到登录页
+        window.location.href = '/login';
+    } catch (error) {
+        console.error('退出登录失败:', error);
+        // 即使出错也跳转到登录页
+        window.location.href = '/login';
     }
 }

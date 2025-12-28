@@ -39,7 +39,8 @@ body {
 }
 
 .generate-btn,
-.rerun-btn {
+.rerun-btn,
+.logout-btn {
     padding: 12px 30px;
     font-size: 1.1em;
     background: rgba(255, 255, 255, 0.2);
@@ -53,7 +54,8 @@ body {
 }
 
 .generate-btn:hover,
-.rerun-btn:hover {
+.rerun-btn:hover,
+.logout-btn:hover {
     background: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
@@ -63,6 +65,14 @@ body {
 .rerun-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.logout-btn {
+    background: rgba(150, 150, 150, 0.2);
+}
+
+.logout-btn:hover {
+    background: rgba(150, 150, 150, 0.4);
 }
 
 .rerun-btn {
