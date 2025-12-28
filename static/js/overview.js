@@ -4,17 +4,66 @@
 const selectedAuthors = new Set();
 
 // 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function() {
-    // 重置生成按钮状态（防止页面刷新后按钮仍处于禁用状态）
-    const generateBtn = document.getElementById('generateBtn');
-    if (generateBtn) {
-        generateBtn.disabled = false;
-        generateBtn.textContent = '🔄 生成报告';
+document.addEventListener('DOMContentLoaded', async function() {
+    // 检查系统状态（任务状态 + 文件状态）
+    try {
+        const statusResponse = await fetch('/api/system-status');
+        const statusData = await statusResponse.json();
+
+        const generateBtn = document.getElementById('generateBtn');
+        const rerunBtn = document.getElementById('rerunBtn');
+
+        if (!generateBtn || !rerunBtn) {
+            loadAuthorsData();
+            return;
+        }
+
+        console.log('系统状态:', statusData);
+
+        // 如果有正在进行的任务，自动显示进度条并禁用按钮
+        if (statusData.has_progress) {
+            console.log('检测到正在进行的任务，自动显示进度条');
+
+            // 禁用所有按钮并显示"生成中"
+            generateBtn.disabled = true;
+            generateBtn.textContent = '⏳ 生成中...';
+            rerunBtn.disabled = true;
+            rerunBtn.textContent = '⏳ 生成中...';
+
+            // 获取进度详情并显示
+            const progressResponse = await fetch('/api/progress');
+            const progressData = await progressResponse.json();
+            displayProgress(progressData);
+
+            // 开始轮询进度更新
+            checkProgress();
+        } else {
+            // 没有正在进行的任务，启用按钮
+            generateBtn.disabled = false;
+            rerunBtn.disabled = false;
+
+            // 根据是否有旧报告显示不同文本
+            if (statusData.has_old_reports) {
+                generateBtn.textContent = `🔄 重新生成报告 (旧: ${statusData.old_report_count}个)`;
+            } else {
+                generateBtn.textContent = '🔄 生成报告';
+            }
+        }
+    } catch (error) {
+        console.error('检查系统状态失败:', error);
+        // 出错时也要重置按钮状态
+        const generateBtn = document.getElementById('generateBtn');
+        const rerunBtn = document.getElementById('rerunBtn');
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.textContent = '🔄 生成报告';
+        }
+        if (rerunBtn) {
+            rerunBtn.disabled = false;
+        }
     }
 
     loadAuthorsData();
-    // 页面加载时不检查进度，避免显示旧的进度条
-    // checkProgress();
 });
 
 // 生成报告
@@ -22,12 +71,15 @@ async function generateReports() {
     const btn = document.getElementById('generateBtn');
 
     try {
-        // 首先检查是否有历史任务
-        const progressResponse = await fetch('/api/progress');
-        const progressData = await progressResponse.json();
+        // 首先检查系统状态（任务状态 + 文件状态）
+        const statusResponse = await fetch('/api/system-status');
+        const statusData = await statusResponse.json();
 
-        // 如果有未完成的任务，让用户选择
-        if (progressData.status === 'generating') {
+        // 如果有正在进行的任务，让用户选择
+        if (statusData.has_progress) {
+            const progressResponse = await fetch('/api/progress');
+            const progressData = await progressResponse.json();
+
             const historyInfo = {
                 current: progressData.current || '未知',
                 percentage: progressData.percentage || 0,
@@ -56,7 +108,7 @@ async function generateReports() {
                 const restartResult = await restartResponse.json();
                 if (restartResult.success) {
                     alert(restartResult.message);
-                    startGeneration(btn);
+                    startGeneration();
                 } else {
                     alert('操作失败: ' + (restartResult.error || '未知错误'));
                 }
@@ -74,7 +126,7 @@ async function generateReports() {
                 const continueResult = await continueResponse.json();
                 if (continueResult.success) {
                     alert(continueResult.message);
-                    startGeneration(btn);
+                    startGeneration();
                 } else {
                     alert('操作失败: ' + (continueResult.error || '未知错误'));
                 }
@@ -82,23 +134,70 @@ async function generateReports() {
             }
         }
 
-        // 没有历史任务，直接开始生成
-        const response = await fetch('/api/generate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
+        // 没有正在进行的任务，检查是否有旧报告
+        if (statusData.has_old_reports) {
+            const userChoice = confirm(
+                `发现 ${statusData.old_report_count} 个旧报告文件\n\n` +
+                `点击"确定"删除旧报告并重新生成\n` +
+                `点击"取消"保留旧报告并追加新报告`
+            );
+
+            if (userChoice) {
+                // 删除旧报告并重新生成
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: 'restart' })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    startGeneration();
+                } else {
+                    alert('生成失败: ' + (result.error || '未知错误'));
+                    btn.disabled = false;
+                    btn.textContent = '🔄 生成报告';
+                }
+            } else {
+                // 保留旧报告，开始新任务
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    startGeneration();
+                } else {
+                    alert('生成失败: ' + (result.error || '未知错误'));
+                    btn.disabled = false;
+                    btn.textContent = '🔄 生成报告';
+                }
             }
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            alert(result.message);
-            startGeneration(btn);
         } else {
-            alert('生成失败: ' + (result.error || '未知错误'));
-            btn.disabled = false;
-            btn.textContent = '🔄 生成报告';
+            // 没有旧报告，直接开始生成
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert(result.message);
+                startGeneration();
+            } else {
+                alert('生成失败: ' + (result.error || '未知错误'));
+                btn.disabled = false;
+                btn.textContent = '🔄 生成报告';
+            }
         }
     } catch (error) {
         console.error('生成失败:', error);
@@ -109,9 +208,15 @@ async function generateReports() {
 }
 
 // 开始生成后的通用处理
-function startGeneration(btn) {
-    btn.disabled = true;
-    btn.textContent = '⏳ 生成中...';
+function startGeneration() {
+    const generateBtn = document.getElementById('generateBtn');
+    const rerunBtn = document.getElementById('rerunBtn');
+
+    // 禁用两个按钮
+    generateBtn.disabled = true;
+    generateBtn.textContent = '⏳ 生成中...';
+    rerunBtn.disabled = true;
+    rerunBtn.textContent = '⏳ 生成中...';
 
     // 开始检查进度（自动轮询，不再自动刷新页面）
     checkProgress();
@@ -190,6 +295,17 @@ function displayProgress(progress) {
     if (progress.status === 'completed') {
         // 完成时显示完成消息
         progressText.textContent = '✅ 报告生成完成！页面将自动刷新...';
+
+        // 重新启用所有按钮
+        const generateBtn = document.getElementById('generateBtn');
+        const rerunBtn = document.getElementById('rerunBtn');
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.textContent = '🔄 生成报告';
+        }
+        if (rerunBtn) {
+            rerunBtn.disabled = false;
+        }
 
         // 3秒后刷新页面以加载新报告
         setTimeout(() => {
@@ -490,4 +606,87 @@ function stopPollingForUpdates() {
 function showError(message) {
     const grid = document.getElementById('authorsGrid');
     grid.innerHTML = `<div class="loading">${message}</div>`;
+}
+
+// 完全重跑
+async function completelyRerun() {
+    if (!confirm('⚠️ 完全重跑将清除以下内容：\n\n• 所有进度文件\n• 续跑检查点\n• 所有已生成的报告文件\n\n确定要从头开始生成吗？')) {
+        return;
+    }
+
+    const btn = document.getElementById('rerunBtn');
+    const generateBtn = document.getElementById('generateBtn');
+
+    try {
+        // 禁用两个按钮
+        btn.disabled = true;
+        generateBtn.disabled = true;
+
+        // 发送完全重跑请求
+        const response = await fetch('/api/completely-rerun', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // 显示成功提示
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            toast.textContent = `✅ 已清除历史数据，从头开始生成`;
+
+            if (data.deleted_files && data.deleted_files.length > 0) {
+                toast.textContent += `\n\n已删除: ${data.deleted_files.join(', ')}`;
+            }
+
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+
+            // 更新按钮状态
+            btn.textContent = '⏳ 生成中...';
+            generateBtn.textContent = '⏳ 生成中...';
+
+            // 开始显示进度
+            checkProgress();
+        } else {
+            throw new Error(data.error || '完全重跑失败');
+        }
+    } catch (error) {
+        console.error('完全重跑失败:', error);
+
+        // 恢复按钮状态
+        btn.disabled = false;
+        generateBtn.disabled = false;
+
+        // 显示错误提示
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff6b6b;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+        `;
+        toast.textContent = `❌ ${error.message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
 }

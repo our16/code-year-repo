@@ -31,14 +31,101 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.report_data = report_data or {}
         super().__init__(*args, **kwargs)
 
+    def check_admin_auth(self):
+        """检查admin认证"""
+        # 获取Authorization头
+        auth_header = self.headers.get('Authorization')
+
+        if not auth_header:
+            return False
+
+        # 检查Basic Auth
+        if auth_header.startswith('Basic '):
+            import base64
+            try:
+                # 解码base64
+                encoded = auth_header.split(' ')[1]
+                decoded = base64.b64decode(encoded).decode('utf-8')
+                username, password = decoded.split(':', 1)
+
+                # 从配置文件读取admin账号密码
+                from pathlib import Path
+                config_path = Path(__file__).parent.parent / 'config' / 'config.yaml'
+                if config_path.exists():
+                    import yaml
+                    with open(config_path, 'r', encoding='utf-8') as f:
+                        config = yaml.safe_load(f)
+
+                    admin_config = config.get('admin', {})
+                    admin_username = admin_config.get('username', 'admin')
+                    admin_password = admin_config.get('password', 'admin')
+
+                    return username == admin_username and password == admin_password
+            except Exception as e:
+                logger.warning(f"认证检查失败: {e}")
+
+        return False
+
+    def is_referer_from_report(self):
+        """检查请求是否来自report页面"""
+        referer = self.headers.get('Referer')
+
+        if not referer:
+            return False
+
+        # 检查referer是否包含/report/
+        return '/report/' in referer
+
+    def can_access_without_auth(self, path):
+        """判断是否可以在无认证的情况下访问"""
+        # 报告页面本身不需要认证
+        if path.startswith('/report/'):
+            return True
+
+        # 如果请求来自report页面，允许访问静态资源
+        if self.is_referer_from_report():
+            # 静态资源（CSS, JS, favicon等）
+            if path.startswith('/static/'):
+                return True
+            # 模板文件
+            if path.startswith('/templates/'):
+                return True
+
+        return False
+
+    def send_auth_required(self):
+        """发送需要认证的响应"""
+        self.send_response(401)
+        self.send_header('WWW-Authenticate', 'Basic realm="Code Report Admin"')
+        self.send_header('Content-type', 'text/html; charset=utf-8')
+        self.end_headers()
+        html_content = """
+<html>
+<head><title>401 Unauthorized</title></head>
+<body>
+<h1>401 Unauthorized</h1>
+<p>需要管理员权限访问此页面</p>
+</body>
+</html>
+        """.encode('utf-8')
+        self.wfile.write(html_content)
+
     def do_GET(self):
         """处理GET请求"""
         parsed_path = urlparse(self.path)
         path = parsed_path.path
         query_params = parse_qs(parsed_path.query)
 
-        # 根路径：显示总览页面
-        if path == '/' or path == '/index.html':
+        # 检查是否可以在无认证的情况下访问
+        if self.can_access_without_auth(path):
+            # 继续处理请求（不需要认证）
+            pass
+        # 其他所有路径都需要admin认证
+        elif not self.check_admin_auth():
+            self.send_auth_required()
+            return
+        # 根路径需要admin认证
+        elif path == '/' or path == '/index.html':
             self.serve_static_file('static/overview.html')
             return
 
@@ -60,6 +147,11 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_progress_api()
             return
 
+        # API：获取系统状态
+        if path == '/api/system-status':
+            self.send_system_status_api()
+            return
+
         # 静态资源：CSS、JS等
         if path.startswith('/static/'):
             self.serve_static_file(path.lstrip('/'))
@@ -79,12 +171,22 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         """处理POST请求"""
+        # POST请求都需要admin认证
+        if not self.check_admin_auth():
+            self.send_auth_required()
+            return
+
         parsed_path = urlparse(self.path)
         path = parsed_path.path
 
         # API：生成报告
         if path == '/api/generate':
             self.generate_report()
+            return
+
+        # API：完全重跑
+        if path == '/api/completely-rerun':
+            self.completely_rerun()
             return
 
         # API：发送报告链接
@@ -270,6 +372,43 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         }
         self.send_json_response(response)
 
+    def send_system_status_api(self):
+        """发送系统状态API - 检查任务状态和文件状态"""
+        project_root = Path(__file__).parent.parent
+        progress_file = project_root / 'reports' / '.progress.json'
+        reports_dir = project_root / 'reports'
+
+        # 检查进度文件
+        has_progress = False
+        task_status = None
+        if progress_file.exists():
+            try:
+                with open(progress_file, 'r', encoding='utf-8') as f:
+                    progress = json.load(f)
+                task_status = progress.get('status')
+                if task_status == 'generating':
+                    has_progress = True
+            except:
+                pass
+
+        # 检查是否有旧的报告文件
+        has_old_reports = False
+        old_report_count = 0
+        if reports_dir.exists():
+            # 统计JSON报告文件数量（排除.开头的隐藏文件）
+            json_files = list(reports_dir.glob('*.json'))
+            old_report_count = len([f for f in json_files if not f.name.startswith('.')])
+            has_old_reports = old_report_count > 0
+
+        response = {
+            'task_status': task_status,  # 'generating', 'completed', 或 None
+            'has_progress': has_progress,
+            'has_old_reports': has_old_reports,
+            'old_report_count': old_report_count,
+            'can_generate': not has_progress  # 只有在没有任务进行时才能生成
+        }
+        self.send_json_response(response)
+
     def generate_report(self):
         """生成报告数据 - 支持续跑功能"""
         try:
@@ -335,10 +474,27 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
                 thread.start()
 
             elif has_history and action == 'restart':
-                # 重新开始，删除历史进度
-                logger.info("重新开始生成，清除历史进度")
+                # 重新开始，删除历史进度和旧报告文件
+                logger.info("重新开始生成，清除历史进度和旧报告文件")
+
+                # 删除进度文件
                 if progress_file.exists():
                     progress_file.unlink()
+
+                # 删除旧的报告文件
+                reports_dir = project_root / 'reports'
+                if reports_dir.exists():
+                    # 删除所有JSON报告文件（但保留隐藏文件如.progress.json）
+                    json_files = list(reports_dir.glob('*.json'))
+                    deleted_count = 0
+                    for json_file in json_files:
+                        if not json_file.name.startswith('.'):
+                            try:
+                                json_file.unlink()
+                                deleted_count += 1
+                            except Exception as e:
+                                logger.warning(f"删除旧报告文件失败 {json_file}: {e}")
+                    logger.info(f"已删除 {deleted_count} 个旧报告文件")
 
                 def run_generation():
                     generator = ReportGenerator(project_root)
@@ -352,14 +508,32 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
                 response = {
                     'success': True,
-                    'message': '已清除历史进度，重新开始生成',
+                    'message': '已清除历史进度和旧报告，重新开始生成',
                     'has_history': True,
                     'action': 'restarted'
                 }
                 self.send_json_response(response)
 
             else:
-                # 没有历史任务或用户选择继续（无历史时正常开始）
+                # 没有历史任务，开始新任务（需要删除旧报告文件）
+                logger.info("开始新的生成任务")
+
+                # 删除旧的报告文件
+                reports_dir = project_root / 'reports'
+                if reports_dir.exists():
+                    # 删除所有JSON报告文件（但保留隐藏文件）
+                    json_files = list(reports_dir.glob('*.json'))
+                    deleted_count = 0
+                    for json_file in json_files:
+                        if not json_file.name.startswith('.'):
+                            try:
+                                json_file.unlink()
+                                deleted_count += 1
+                            except Exception as e:
+                                logger.warning(f"删除旧报告文件失败 {json_file}: {e}")
+                    if deleted_count > 0:
+                        logger.info(f"已删除 {deleted_count} 个旧报告文件")
+
                 def run_generation():
                     generator = ReportGenerator(project_root)
                     def progress_callback(data):
@@ -381,6 +555,85 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
         except Exception as e:
             logger.error(f"生成报告失败: {str(e)}", exc_info=True)
+            response = {
+                'success': False,
+                'error': str(e)
+            }
+            self.send_json_response(response)
+
+    def completely_rerun(self):
+        """完全重跑 - 清除所有进度和检查点，从头开始生成"""
+        try:
+            logger.info("=" * 60)
+            logger.info("收到完全重跑请求")
+            logger.info("=" * 60)
+
+            project_root = Path(__file__).parent.parent
+            reports_dir = project_root / 'reports'
+
+            # 1. 删除进度文件
+            progress_file = reports_dir / '.progress.json'
+            deleted_files = []
+
+            if progress_file.exists():
+                try:
+                    progress_file.unlink()
+                    deleted_files.append('.progress.json')
+                    logger.info("已删除进度文件")
+                except Exception as e:
+                    logger.warning(f"删除进度文件失败: {e}")
+
+            # 2. 删除续跑检查点文件
+            checkpoint_file = reports_dir / '.resume_checkpoint.json'
+            if checkpoint_file.exists():
+                try:
+                    checkpoint_file.unlink()
+                    deleted_files.append('.resume_checkpoint.json')
+                    logger.info("已删除续跑检查点文件")
+                except Exception as e:
+                    logger.warning(f"删除检查点文件失败: {e}")
+
+            # 3. 删除所有旧报告文件
+            if reports_dir.exists():
+                json_files = list(reports_dir.glob('*.json'))
+                report_count = 0
+                for json_file in json_files:
+                    if not json_file.name.startswith('.'):
+                        try:
+                            json_file.unlink()
+                            report_count += 1
+                        except Exception as e:
+                            logger.warning(f"删除报告文件失败 {json_file}: {e}")
+
+                if report_count > 0:
+                    deleted_files.append(f"{report_count} 个报告文件")
+                    logger.info(f"已删除 {report_count} 个报告文件")
+
+            logger.info("=" * 60)
+            logger.info("完全重跑：已清除所有历史数据")
+            logger.info(f"删除的文件: {', '.join(deleted_files)}")
+            logger.info("=" * 60)
+
+            # 启动全新生成任务
+            def run_generation():
+                generator = ReportGenerator(project_root)
+                def progress_callback(data):
+                    logger.info(f"进度: {data['current']} - {data['percentage']}%")
+
+                generator.generate_all(progress_callback)
+
+            thread = threading.Thread(target=run_generation, daemon=True)
+            thread.start()
+
+            response = {
+                'success': True,
+                'message': '已清除所有进度和报告，从头开始生成',
+                'deleted_files': deleted_files
+            }
+            self.send_json_response(response)
+
+        except Exception as e:
+            logger.error(f"完全重跑失败: {str(e)}", exc_info=True)
             response = {
                 'success': False,
                 'error': str(e)
@@ -772,6 +1025,34 @@ def start_server(port: int = 8000, reports_dir: str = './reports'):
     if not report_data:
         logger.warning("没有找到任何报告数据，请通过Web界面生成报告")
         # 不退出，继续启动服务器
+
+    # 检查是否有未完成的任务，自动续跑
+    progress_file = reports_path / '.progress.json'
+    if progress_file.exists():
+        try:
+            with open(progress_file, 'r', encoding='utf-8') as f:
+                progress = json.load(f)
+
+            if progress.get('status') == 'generating':
+                logger.info("=" * 60)
+                logger.info("检测到未完成的生成任务，自动续跑")
+                logger.info("=" * 60)
+                logger.info(f"任务进度: {progress.get('completed', 0)}/{progress.get('total', 0)}")
+
+                # 在后台线程中自动续跑
+                def auto_resume():
+                    try:
+                        project_root = Path(__file__).parent.parent
+                        generator = ReportGenerator(project_root)
+                        generator.generate_all()
+                    except Exception as e:
+                        logger.error(f"自动续跑失败: {e}")
+
+                resume_thread = threading.Thread(target=auto_resume, daemon=True)
+                resume_thread.start()
+                logger.info("已在后台启动自动续跑任务")
+        except Exception as e:
+            logger.warning(f"检查进度文件失败: {e}")
 
     # 创建请求处理器
     def handler(*args):

@@ -38,7 +38,8 @@ body {
     margin-top: 20px;
 }
 
-.generate-btn {
+.generate-btn,
+.rerun-btn {
     padding: 12px 30px;
     font-size: 1.1em;
     background: rgba(255, 255, 255, 0.2);
@@ -48,17 +49,29 @@ body {
     cursor: pointer;
     transition: all 0.3s;
     backdrop-filter: blur(10px);
+    margin: 0 5px;
 }
 
-.generate-btn:hover {
+.generate-btn:hover,
+.rerun-btn:hover {
     background: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
 }
 
-.generate-btn:disabled {
+.generate-btn:disabled,
+.rerun-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.rerun-btn {
+    background: rgba(255, 100, 100, 0.2);
+    border-color: rgba(255, 100, 100, 0.4);
+}
+
+.rerun-btn:hover {
+    background: rgba(255, 100, 100, 0.3);
 }
 
 /* 批量操作栏 */

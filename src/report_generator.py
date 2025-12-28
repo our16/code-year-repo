@@ -86,7 +86,7 @@ class ReportGenerator:
                     pass
         return None
 
-    def _save_resume_checkpoint(self, author_data_map, total):
+    def _save_resume_checkpoint(self, author_data_map, total, report_index=None):
         """保存Git采集后的检查点"""
         checkpoint_file = self.output_dir / '.resume_checkpoint.json'
         checkpoint_data = {
@@ -94,6 +94,9 @@ class ReportGenerator:
             'total': total,
             'timestamp': datetime.now().isoformat()
         }
+        # 如果有已生成的报告索引，也保存进去
+        if report_index:
+            checkpoint_data['report_index'] = report_index
         try:
             with open(checkpoint_file, 'w', encoding='utf-8') as f:
                 json.dump(checkpoint_data, f, ensure_ascii=False, indent=2)
@@ -153,10 +156,11 @@ class ReportGenerator:
 
         if resume_data:
             # 续跑模式：跳过Git采集，直接使用已有数据
-            logger.info(f"检测到续跑进度，将从第 {resume_data['completed'] + 1} 个作者继续生成LLM分析")
+            completed = int(resume_data.get('completed', 0))
+            logger.info(f"检测到续跑进度，将从第 {completed + 1} 个作者继续生成LLM分析")
             author_data_map = resume_data['author_data_map']
-            total = resume_data['total']
-            start_index = resume_data['completed'] + 1
+            total = int(resume_data.get('total', 0))
+            start_index = completed + 1
         else:
             # 正常模式：完整的Git采集流程
             collector_config = config.copy()
@@ -225,12 +229,15 @@ class ReportGenerator:
         report_index = {}
 
         # 加载已存在的报告索引
-        if resume_data and resume_data.get('report_index'):
-            report_index = resume_data['report_index']
+        if resume_data:
+            # 续跑模式：从检查点恢复已生成的报告索引
+            report_index = resume_data.get('report_index', {})
+            if report_index:
+                logger.info(f"从检查点恢复了 {len(report_index)} 个已生成的报告")
         else:
             report_index = {}
 
-        total = len(author_data_map)
+        total = int(len(author_data_map))  # 确保total是整数
         logger.info(f"开始生成报告，共 {total} 位作者，从第 {start_index} 位开始")
 
         # 初始化LLM客户端
@@ -307,6 +314,9 @@ class ReportGenerator:
                 'latest_file': json_filename
             }
             self.save_progress(progress_data)
+
+            # 同时更新续跑检查点，保存已生成的报告索引
+            self._save_resume_checkpoint(author_data_map, total, report_index)
 
             # 调用回调函数
             if progress_callback:

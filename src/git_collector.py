@@ -191,13 +191,23 @@ class GitDataCollector:
                 'deletions': max(0, deletions),
             })
 
+        # 获取分支名（处理detached HEAD状态）
+        try:
+            branch = repo.active_branch.name
+        except Exception:
+            # detached HEAD状态，尝试从HEAD获取
+            try:
+                branch = repo.head.commit.hexsha[:8]
+            except Exception:
+                branch = 'HEAD'
+
         return {
             'project_name': project_name,
             'path': repo_path,
             'commits': commits_data,
             'language_stats': dict(language_stats),
             'total_commits': len(commits_data),
-            'branch': repo.active_branch.name if repo.active_branch else 'HEAD',
+            'branch': branch,
         }
 
     def collect_all(self) -> List[Dict[str, Any]]:
