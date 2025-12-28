@@ -24,38 +24,53 @@ class LLMClient:
             return self._get_default_text(data)
 
         try:
-            return self._generate_with_anthropic(data)
+            # 使用 OpenAI-compatible API（支持所有兼容 OpenAI 协议的服务）
+            return self._generate_with_openai_compatible(data)
         except Exception as e:
             print(f"LLM生成失败，使用默认文案: {str(e)}")
             return self._get_default_text(data)
 
-    def _generate_with_anthropic(self, data: Dict[str, Any]) -> str:
-        """使用Anthropic生成文案"""
+    def _generate_with_openai_compatible(self, data: Dict[str, Any]) -> str:
+        """使用 OpenAI-compatible API 生成文案（支持本地LLM服务）"""
         try:
-            import anthropic
+            from openai import OpenAI
 
-            client = anthropic.Anthropic(api_key=self.api_key)
+            # 创建客户端，支持自定义 base_url
+            client_kwargs = {'api_key': self.api_key}
+            if self.base_url:
+                # 确保base_url包含/v1路径
+                base_url = self.base_url.rstrip('/')
+                if not base_url.endswith('/v1'):
+                    base_url = f"{base_url}/v1"
+                client_kwargs['base_url'] = base_url
+
+            print(f"client_kwargs:{client_kwargs}")
+            client = OpenAI(**client_kwargs)
 
             prompt = self._build_prompt(data)
 
-            response = client.messages.create(
+            response = client.chat.completions.create(
                 model=self.model,
-                max_tokens=2000,
-                temperature=0.8,
                 messages=[
+                    {
+                        "role": "system",
+                        "content": "你是一位专业的技术写作专家，擅长用温暖、富有感染力的语言描述程序员的工作成果。"
+                    },
                     {
                         "role": "user",
                         "content": prompt
                     }
-                ]
+                ],
+                temperature=0.8,
+                max_tokens=2000,
             )
 
-            return response.content[0].text
+            return response.choices[0].message.content
 
         except ImportError:
-            raise Exception("请安装 anthropic 库: pip install anthropic")
+            raise Exception("请安装 openai 库: pip install openai")
         except Exception as e:
-            raise Exception(f"Anthropic调用失败: {str(e)}")
+            raise Exception(f"OpenAI-compatible API 调用失败: {str(e)}")
 
     def _build_prompt(self, data: Dict[str, Any]) -> str:
         """构建LLM提示词"""
