@@ -171,16 +171,31 @@ class ReportGenerator:
             all_authors = set()
 
             logger.info("开始扫描Git仓库...")
-            for project in config.get('projects', []):
-                try:
-                    logger.info(f"  扫描项目: {project.get('name', project.get('path'))}")
-                    project_data = collector.collect_project(project)
-                    all_data.append(project_data)
-                    for commit in project_data.get('commits', []):
-                        author_info = f"{commit['author']} <{commit['email']}>"
-                        all_authors.add(author_info)
-                except Exception as e:
-                    logger.error(f"扫描项目失败: {str(e)}")
+
+            # 根据项目数量决定使用并发还是串行模式
+            projects = config.get('projects', [])
+            max_workers = config.get('max_workers', 4)
+
+            if len(projects) > 1 and max_workers > 1:
+                # 使用并发模式
+                logger.info(f"使用并发扫描模式（并发数: {max_workers}）")
+                all_data = collector.collect_all_parallel()
+            else:
+                # 使用串行模式
+                logger.info("使用串行扫描模式")
+                for project in projects:
+                    try:
+                        logger.info(f"  扫描项目: {project.get('name', project.get('path'))}")
+                        project_data = collector.collect_project(project)
+                        all_data.append(project_data)
+                    except Exception as e:
+                        logger.error(f"扫描项目失败: {str(e)}")
+
+            # 收集所有作者
+            for project_data in all_data:
+                for commit in project_data.get('commits', []):
+                    author_info = f"{commit['author']} <{commit['email']}>"
+                    all_authors.add(author_info)
 
             if not all_data:
                 logger.error("未采集到任何数据")

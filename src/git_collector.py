@@ -9,6 +9,8 @@ import git
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 
 
 class GitDataCollector:
@@ -18,6 +20,10 @@ class GitDataCollector:
         self.config = config
         self.authors = config.get('authors', [])
         self.report_year = config.get('report_year', 2024)
+        # 并发配置：从配置文件读取最大并发数，默认为4
+        self.max_workers = config.get('max_workers', 4)
+        # 线程锁，用于保护日志输出
+        self.log_lock = threading.Lock()
 
     def _is_target_author(self, commit: git.Commit) -> bool:
         """判断提交是否属于目标作者"""
@@ -211,7 +217,7 @@ class GitDataCollector:
         }
 
     def collect_all(self) -> List[Dict[str, Any]]:
-        """采集所有项目的数据"""
+        """采集所有项目的数据（串行模式）"""
         all_data = []
 
         for project in self.config.get('projects', []):
@@ -222,4 +228,54 @@ class GitDataCollector:
                 print(f"错误: 采集项目 {project.get('name')} 失败: {str(e)}")
                 continue
 
+        return all_data
+
+    def collect_all_parallel(self) -> List[Dict[str, Any]]:
+        """并发采集所有项目的数据
+
+        使用线程池并发处理多个项目，提升大型仓库的扫描速度。
+        每个项目的扫描在独立线程中执行，充分利用多核CPU和IO等待时间。
+
+        Returns:
+            所有项目的采集数据列表
+        """
+        projects = self.config.get('projects', [])
+        if not projects:
+            return []
+
+        # 如果项目数量少，使用串行模式
+        if len(projects) <= 1:
+            return self.collect_all()
+
+        all_data = []
+        failed_projects = []
+
+        # 使用线程池并发采集
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            # 提交所有采集任务
+            future_to_project = {
+                executor.submit(self.collect_project, project): project
+                for project in projects
+            }
+
+            # 使用as_completed按完成顺序处理结果
+            for future in as_completed(future_to_project):
+                project = future_to_project[future]
+                try:
+                    project_data = future.result()
+                    with self.log_lock:
+                        print(f"✓ 完成扫描: {project.get('name', project.get('path'))}")
+                    all_data.append(project_data)
+                except Exception as e:
+                    with self.log_lock:
+                        print(f"✗ 扫描失败: {project.get('name', project.get('path'))} - {str(e)}")
+                    failed_projects.append(project)
+
+        # 输出失败的项目
+        if failed_projects:
+            print(f"\n警告: {len(failed_projects)} 个项目扫描失败:")
+            for project in failed_projects:
+                print(f"  - {project.get('name', project.get('path'))}")
+
+        print(f"\n并发扫描完成: 成功 {len(all_data)}/{len(projects)} 个项目")
         return all_data
