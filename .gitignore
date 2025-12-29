@@ -37,9 +37,6 @@ ENV/
 reports/
 
 # Config files (keep examples)
-config/config.yaml
-config/author_mapping.yaml
-
 # OS
 .DS_Store
 Thumbs.db
