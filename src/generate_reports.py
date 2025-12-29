@@ -49,7 +49,7 @@ def load_author_mapping(mapping_path: str) -> Dict[str, str]:
     return mapping
 
 
-def generate_single_report(author_info, author_projects, author_data_map, config, analyzer, llm_client, output_dir):
+def generate_single_report(author_info, author_projects, author_data_map, config, analyzer, llm_client, output_dir, max_file_size_mb=1):
     """生成单个作者的报告（用于并发处理）
 
     Returns:
@@ -63,8 +63,8 @@ def generate_single_report(author_info, author_projects, author_data_map, config
     # 生成UUID作为访问标识
     author_uuid = str(uuid.uuid4())
 
-    # 分析数据
-    analyzed_data = analyzer.analyze(author_projects)
+    # 分析数据（限制详细提交记录数量以控制文件大小）
+    analyzed_data = analyzer.analyze(author_projects, max_commits=1000)
 
     # 生成AI文案
     ai_text = None
@@ -98,10 +98,105 @@ def generate_single_report(author_info, author_projects, author_data_map, config
     json_filename = f"{author_uuid}.json"
     json_path = output_dir / json_filename
 
-    with open(json_path, 'w', encoding='utf-8') as f:
+    # 先写入临时文件检查大小
+    temp_path = output_dir / f"{author_uuid}.json.tmp"
+    with open(temp_path, 'w', encoding='utf-8') as f:
         json.dump(report_data, f, ensure_ascii=False, indent=2)
 
+    # 检查文件大小
+    file_size_mb = temp_path.stat().st_size / (1024 * 1024)
+    max_file_size_bytes = max_file_size_mb * 1024 * 1024
+
+    # 如果文件超过1MB，分片存储
+    if temp_path.stat().st_size > max_file_size_bytes:
+        print(f"      警告: JSON文件过大 ({file_size_mb:.2f}MB)，启用分片存储...")
+
+        # 创建分片：将每个项目的commits单独存储
+        chunk_files = []
+
+        for project_idx, project in enumerate(report_data.get('projects', [])):
+            commits = project.get('commits', [])
+
+            if not commits:
+                continue
+
+            # 计算这个项目的commits大小
+            project_data = {
+                'project_name': project.get('name', ''),
+                'commits': commits
+            }
+            project_json = json.dumps(project_data, ensure_ascii=False, indent=2)
+            project_size = len(project_json.encode('utf-8'))
+
+            # 如果单个项目的commits也很大，进一步分片
+            if project_size > max_file_size_bytes:
+                # 将commits分成多个文件，每个文件不超过限制
+                commits_per_chunk = max_commits or 500
+                num_chunks = (len(commits) + commits_per_chunk - 1) // commits_per_chunk
+
+                for chunk_idx in range(num_chunks):
+                    start_idx = chunk_idx * commits_per_chunk
+                    end_idx = min(start_idx + commits_per_chunk, len(commits))
+                    chunk_commits = commits[start_idx:end_idx]
+
+                    chunk_data = {
+                        'project_name': project.get('name', ''),
+                        'chunk_index': chunk_idx,
+                        'total_chunks': num_chunks,
+                        'commits': chunk_commits
+                    }
+
+                    chunk_filename = f"{author_uuid}_p{project_idx}_c{chunk_idx}.json"
+                    chunk_path = output_dir / chunk_filename
+
+                    with open(chunk_path, 'w', encoding='utf-8') as f:
+                        json.dump(chunk_data, f, ensure_ascii=False, indent=2)
+
+                    chunk_files.append(chunk_filename)
+                    chunk_size_mb = chunk_path.stat().st_size / (1024 * 1024)
+                    print(f"      分片 {chunk_filename}: {chunk_size_mb:.2f}MB ({len(chunk_commits)} commits)")
+
+                # 在主文件中标记已分片
+                project['commits_chunked'] = True
+                project['commits_chunks'] = [
+                    f"{author_uuid}_p{project_idx}_c{i}.json"
+                    for i in range(num_chunks)
+                ]
+                project['commits'] = []  # 清空主文件中的commits
+            else:
+                # 单个项目大小合适，单独存储
+                chunk_filename = f"{author_uuid}_p{project_idx}.json"
+                chunk_path = output_dir / chunk_filename
+
+                with open(chunk_path, 'w', encoding='utf-8') as f:
+                    json.dump(project_data, f, ensure_ascii=False, indent=2)
+
+                chunk_files.append(chunk_filename)
+                chunk_size_mb = chunk_path.stat().st_size / (1024 * 1024)
+                print(f"      分片 {chunk_filename}: {chunk_size_mb:.2f}MB ({len(commits)} commits)")
+
+                # 在主文件中标记
+                project['commits_chunked'] = True
+                project['commits_chunk_file'] = chunk_filename
+                project['commits'] = []
+
+        # 更新主文件的meta信息
+        report_data['meta']['chunked'] = True
+        report_data['meta']['chunk_files'] = chunk_files
+        report_data['meta']['total_chunks'] = len(chunk_files)
+
+        # 重新写入主文件（现在应该很小了）
+        with open(temp_path, 'w', encoding='utf-8') as f:
+            json.dump(report_data, f, ensure_ascii=False, indent=2)
+
+        file_size_mb = temp_path.stat().st_size / (1024 * 1024)
+        print(f"      主文件 {json_filename}: {file_size_mb:.2f}MB (包含 {len(chunk_files)} 个分片)")
+
+    # 重命名为正式文件
+    temp_path.rename(json_path)
+
     report_data['meta']['json_file'] = json_filename
+    report_data['meta']['file_size_mb'] = round(file_size_mb, 2)
 
     # UUID映射信息
     uuid_mapping_info = {
@@ -400,6 +495,14 @@ def main():
     with open(uuid_mapping_path, 'w', encoding='utf-8') as f:
         json.dump(uuid_mapping, f, ensure_ascii=False, indent=2)
     print(f"   [OK] UUID映射: uuid_mapping.json")
+
+    # 统计文件大小
+    total_size = sum(
+        (output_dir / info['json_file']).stat().st_size
+        for info in report_index.values()
+        if (output_dir / info['json_file']).exists()
+    )
+    print(f"   [OK] JSON文件: {len(generated_reports)} 个文件，总大小 {total_size / (1024*1024):.2f}MB")
 
     # 更新进度为完成
     save_progress(progress_file, {

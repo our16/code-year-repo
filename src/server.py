@@ -468,29 +468,46 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_error(404, "File not found")
 
     def send_authors_api(self):
-        """发送作者列表API - 实时加载报告数据"""
-        # 实时重新加载报告数据
-        reports_dir = Path(self.directory)
-        report_data = load_report_data(reports_dir)
-        # logger.info(f"API调用：实时加载了 {len(report_data)} 个报告")
-
+        """发送作者列表API - 从JSON文件读取"""
         authors = []
 
-        for key, data in report_data.items():
-            # 如果有UUID则使用UUID，否则使用key（author_id）
-            access_id = data.get('uuid', key)
-            authors.append({
-                'uuid': data.get('uuid', ''),  # 可能为空（旧报告）
-                'name': data.get('name', 'Unknown'),
-                'email': data.get('email', ''),
-                'commits': data.get('commits', 0),
-                'net_lines': data.get('net_lines', 0),
-                'projects': data.get('projects', 0),
-                'report_url': f"/report/{access_id}",  # 使用UUID或author_id
-            })
+        # 从JSON索引文件读取
+        reports_dir = Path(self.directory)
+        index_file = reports_dir / 'report_index.json'
 
-        # 按提交数排序
-        authors.sort(key=lambda x: x['commits'], reverse=True)
+        if index_file.exists():
+            try:
+                with open(index_file, 'r', encoding='utf-8') as f:
+                    report_index = json.load(f)
+
+                for uuid, data in report_index.items():
+                    authors.append({
+                        'uuid': uuid,
+                        'name': data.get('name', 'Unknown'),
+                        'email': data.get('email', ''),
+                        'commits': data.get('commits', 0),
+                        'net_lines': data.get('net_lines', 0),
+                        'projects': data.get('projects', 0),
+                        'report_url': f"/report/{uuid}",
+                    })
+
+                logger.info(f"从索引文件加载了 {len(authors)} 个报告")
+            except Exception as e:
+                logger.error(f"读取索引文件失败: {e}")
+        else:
+            # 回退到扫描JSON文件
+            report_data = load_report_data(reports_dir)
+            for key, data in report_data.items():
+                access_id = data.get('uuid', key)
+                authors.append({
+                    'uuid': data.get('uuid', ''),
+                    'name': data.get('name', 'Unknown'),
+                    'email': data.get('email', ''),
+                    'commits': data.get('commits', 0),
+                    'net_lines': data.get('net_lines', 0),
+                    'projects': data.get('projects', 0),
+                    'report_url': f"/report/{access_id}",
+                })
 
         response = {
             'total': len(authors),
@@ -500,22 +517,36 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         self.send_json_response(response)
 
     def send_author_data(self, access_id):
-        """发送特定作者的JSON数据 - 支持UUID或author_id"""
-        # 实时重新加载报告数据
+        """发送特定作者的JSON数据 - 从JSON文件读取"""
         reports_dir = Path(self.directory)
-        report_data = load_report_data(reports_dir)
 
-        # 通过access_id查找作者（可能是UUID或author_id）
-        author_info = report_data.get(access_id)
-        if not author_info:
-            self.send_error(404, "Author not found")
-            return
+        # 优先从索引文件查找
+        index_file = reports_dir / 'report_index.json'
+        json_file = None
 
-        # 读取完整的JSON文件
-        json_file = author_info.get('json_file')
+        if index_file.exists():
+            try:
+                with open(index_file, 'r', encoding='utf-8') as f:
+                    report_index = json.load(f)
+
+                author_info = report_index.get(access_id)
+                if author_info:
+                    json_file = author_info.get('json_file')
+            except Exception as e:
+                logger.error(f"读取索引文件失败: {e}")
+
+        # 如果索引中没有，尝试扫描JSON文件
         if not json_file:
-            self.send_error(404, "Report file not found")
-            return
+            old_data = load_report_data(reports_dir)
+            author_info = old_data.get(access_id)
+            if not author_info:
+                self.send_error(404, "Author not found")
+                return
+
+            json_file = author_info.get('json_file')
+            if not json_file:
+                self.send_error(404, "Report file not found")
+                return
 
         json_path = Path(self.directory) / json_file
         if not json_path.exists():
@@ -525,7 +556,64 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         with open(json_path, 'r', encoding='utf-8') as f:
             report_data = json.load(f)
 
+        # 如果报告已分片，加载所有分片数据
+        if report_data.get('meta', {}).get('chunked'):
+            report_data = self._load_chunked_report(report_data, reports_dir)
+
         self.send_json_response(report_data)
+
+    def _load_chunked_report(self, report_data: dict, reports_dir: Path) -> dict:
+        """加载分片报告的完整数据
+
+        Args:
+            report_data: 主报告数据（包含meta信息）
+            reports_dir: 报告目录
+
+        Returns:
+            合并后的完整报告数据
+        """
+        try:
+            meta = report_data.get('meta', {})
+            chunk_files = meta.get('chunk_files', [])
+
+            # 按项目分组加载分片
+            for project_idx, project in enumerate(report_data.get('projects', [])):
+                if not project.get('commits_chunked'):
+                    continue
+
+                # 如果有多个分片
+                if 'commits_chunks' in project:
+                    chunks = project['commits_chunks']
+                    all_commits = []
+
+                    for chunk_file in chunks:
+                        chunk_path = reports_dir / chunk_file
+                        if chunk_path.exists():
+                            with open(chunk_path, 'r', encoding='utf-8') as f:
+                                chunk_data = json.load(f)
+                                all_commits.extend(chunk_data.get('commits', []))
+
+                    project['commits'] = all_commits
+                    # 保留分片信息，方便前端了解
+                    project['loaded_from_chunks'] = True
+
+                # 如果只有一个分片文件
+                elif 'commits_chunk_file' in project:
+                    chunk_file = project['commits_chunk_file']
+                    chunk_path = reports_dir / chunk_file
+
+                    if chunk_path.exists():
+                        with open(chunk_path, 'r', encoding='utf-8') as f:
+                            chunk_data = json.load(f)
+                            project['commits'] = chunk_data.get('commits', [])
+                            project['loaded_from_chunk'] = True
+
+            return report_data
+
+        except Exception as e:
+            logger.error(f"加载分片数据失败: {e}")
+            # 如果加载失败，至少返回主数据
+            return report_data
 
     def send_progress_api(self):
         """发送生成进度API - 实时加载"""
@@ -837,7 +925,7 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             self.send_json_response(response)
 
     def serve_author_report(self, access_id):
-        """提供个人报告页面 - 支持UUID或author_id
+        """提供个人报告页面 - 从JSON文件读取
 
         支持的URL格式:
         - /report/<uuid>                    - 使用UUID访问（新报告）
@@ -865,38 +953,53 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         }
         template_name = template_map.get(style, 'report_story_scroll.html')
 
-        # 实时重新加载报告数据
+        # 从JSON文件读取报告
         reports_dir = Path(self.directory)
-        report_data = load_report_data(reports_dir)
+        report_data = None
 
-        # 通过access_id查找作者信息（可能是UUID或author_id）
-        author_info = report_data.get(access_id)
-        if not author_info:
-            self.send_error(404, "Author not found")
-            return
+        # 优先从索引文件查找
+        index_file = reports_dir / 'report_index.json'
+        json_file = None
 
-        # 查找JSON文件
-        json_file = author_info.get('json_file')
+        if index_file.exists():
+            try:
+                with open(index_file, 'r', encoding='utf-8') as f:
+                    report_index = json.load(f)
 
+                author_info = report_index.get(access_id)
+                if author_info:
+                    json_file = author_info.get('json_file')
+            except Exception as e:
+                logger.error(f"读取索引文件失败: {e}")
+
+        # 如果索引中没有，尝试扫描JSON文件
+        if not json_file:
+            old_data = load_report_data(reports_dir)
+            author_info = old_data.get(access_id)
+            if author_info:
+                json_file = author_info.get('json_file')
+
+        # 读取JSON文件
         if json_file:
             json_path = Path(self.directory) / json_file
             if json_path.exists():
-                # 读取JSON数据并渲染
                 with open(json_path, 'r', encoding='utf-8') as f:
                     report_data = json.load(f)
-                html = self.render_report_html(report_data, template_name)
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html; charset=utf-8')
-                self.end_headers()
-                self.wfile.write(html.encode('utf-8'))
-                return
 
-        # 没有JSON文件，显示无数据提示页面
-        author_name = author_info.get('name', 'Unknown')
-        # 使用302重定向到静态HTML页面
-        self.send_response(302)
-        self.send_header('Location', f'/static/no-data.html?author={author_name}')
-        self.end_headers()
+                # 如果报告已分片，加载所有分片数据
+                if report_data.get('meta', {}).get('chunked'):
+                    report_data = self._load_chunked_report(report_data, reports_dir)
+
+        # 渲染报告
+        if report_data:
+            html = self.render_report_html(report_data, template_name)
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(html.encode('utf-8'))
+            return
+        else:
+            self.send_error(404, "Report not found")
 
     def render_report_html(self, data: dict, template_name: str = 'report.html') -> str:
         """渲染报告HTML页面
@@ -1329,7 +1432,7 @@ def start_server(port: int = 8000, reports_dir: str = './reports'):
     # 加载报告数据
     logger.info("加载报告数据...")
     report_data = load_report_data(reports_path)
-    logger.info(f"找到 {len(report_data)} 个报告")
+    logger.info(f"找到 {len(report_data)} 个JSON报告文件")
 
     if not report_data:
         logger.warning("没有找到任何报告数据，请通过Web界面生成报告")

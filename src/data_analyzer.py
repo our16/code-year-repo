@@ -17,8 +17,13 @@ class DataAnalyzer:
         self.config = config
         self.report_year = config.get('report_year', 2024)
 
-    def analyze(self, projects_data: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """分析所有项目数据"""
+    def analyze(self, projects_data: List[Dict[str, Any]], max_commits: int = None) -> Dict[str, Any]:
+        """分析所有项目数据
+
+        Args:
+            projects_data: 项目数据列表
+            max_commits: 最大提交记录数，用于控制JSON文件大小
+        """
 
         # 聚合数据
         all_commits = []
@@ -28,6 +33,10 @@ class DataAnalyzer:
         for project_data in projects_data:
             project_name = project_data['project_name']
             commits = project_data.get('commits', [])
+
+            # 如果设置了max_commits，只保留最近的提交
+            if max_commits and len(commits) > max_commits:
+                commits = commits[:max_commits]
 
             all_commits.extend(commits)
             project_commits[project_name] = commits
