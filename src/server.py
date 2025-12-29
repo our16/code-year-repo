@@ -1275,8 +1275,8 @@ def load_report_data(reports_dir: Path) -> dict:
     """加载报告索引数据 - 扫描所有作者JSON文件"""
     report_data = {}
 
-    # 排除的文件：进度文件和索引文件
-    excluded_files = {'.progress.json', 'report_index.json'}
+    # 排除的文件：进度文件、索引文件和检查点文件
+    excluded_files = {'.progress.json', 'report_index.json', '.resume_checkpoint.json'}
 
     # 扫描所有JSON文件
     for json_file in reports_dir.glob('*.json'):
