@@ -971,6 +971,11 @@
                 return;
             }
 
+            // 检查可选元素
+            if (!prevArrow || !nextArrow || !autoplayBtn || !progressBar) {
+                console.warn('Some optional elements not found, navigation features may be limited');
+            }
+
             console.log('Initializing scroll spy with', totalScreens, 'screens');
 
             let currentIndex = 0;
@@ -991,12 +996,18 @@
                 dots[index]?.classList.add('active');
 
                 // 更新进度条
-                const progress = ((index + 1) / totalScreens) * 100;
-                progressBar.style.width = progress + '%';
+                if (progressBar) {
+                    const progress = ((index + 1) / totalScreens) * 100;
+                    progressBar.style.width = progress + '%';
+                }
 
                 // 更新导航箭头显示状态
-                prevArrow.classList.toggle('hidden', index === 0);
-                nextArrow.classList.toggle('hidden', index === totalScreens - 1);
+                if (prevArrow) {
+                    prevArrow.classList.toggle('hidden', index === 0);
+                }
+                if (nextArrow) {
+                    nextArrow.classList.toggle('hidden', index === totalScreens - 1);
+                }
 
                 // 如果到达最后一屏且没有在自动播放，显示跳转按钮
                 if (index === totalScreens - 1 && !isAutoplaying && jumpButton) {
@@ -1044,17 +1055,21 @@
             });
 
             // 导航箭头点击
-            prevArrow.addEventListener('click', () => {
-                // 播放期间禁止点击
-                if (isAutoplaying) return;
-                navigateTo(currentIndex - 1);
-            });
+            if (prevArrow) {
+                prevArrow.addEventListener('click', () => {
+                    // 播放期间禁止点击
+                    if (isAutoplaying) return;
+                    navigateTo(currentIndex - 1);
+                });
+            }
 
-            nextArrow.addEventListener('click', () => {
-                // 播放期间禁止点击
-                if (isAutoplaying) return;
-                navigateTo(currentIndex + 1);
-            });
+            if (nextArrow) {
+                nextArrow.addEventListener('click', () => {
+                    // 播放期间禁止点击
+                    if (isAutoplaying) return;
+                    navigateTo(currentIndex + 1);
+                });
+            }
 
             // 自动播放功能
             function startAutoplay() {
@@ -1066,9 +1081,11 @@
                 console.log('Starting autoplay');
                 isAutoplaying = true;
                 autoplayTargetIndex = 0; // 重置播放目标索引
-                autoplayBtn.innerHTML = '⏸';
-                autoplayBtn.classList.add('playing');
-                autoplayBtn.title = '暂停播放';
+                if (autoplayBtn) {
+                    autoplayBtn.innerHTML = '⏸';
+                    autoplayBtn.classList.add('playing');
+                    autoplayBtn.title = '暂停播放';
+                }
 
                 // 显示倒计时动画
                 if (countdownContainer) {
@@ -1155,9 +1172,11 @@
                     countdownContainer.classList.remove('show');
                 }
                 isAutoplaying = false;
-                autoplayBtn.innerHTML = '▶';
-                autoplayBtn.classList.remove('playing');
-                autoplayBtn.title = '自动播放';
+                if (autoplayBtn) {
+                    autoplayBtn.innerHTML = '▶';
+                    autoplayBtn.classList.remove('playing');
+                    autoplayBtn.title = '自动播放';
+                }
 
                 // 启用交互（播放完成允许手动操作）
                 container.classList.remove('autoplay-active');
@@ -1174,13 +1193,15 @@
             }
 
             // 自动播放按钮点击
-            autoplayBtn.addEventListener('click', () => {
-                if (isAutoplaying) {
-                    stopAutoplay();
-                } else {
-                    startAutoplay();
-                }
-            });
+            if (autoplayBtn) {
+                autoplayBtn.addEventListener('click', () => {
+                    if (isAutoplaying) {
+                        stopAutoplay();
+                    } else {
+                        startAutoplay();
+                    }
+                });
+            }
 
             // 键盘导航
             document.addEventListener('keydown', (e) => {
