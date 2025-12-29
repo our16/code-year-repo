@@ -476,18 +476,15 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
         authors = []
 
-        for author_id, data in report_data.items():
-            # 优先使用UUID，如果没有则使用旧的author_id
-            access_id = data.get('uuid', author_id)
+        for author_uuid, data in report_data.items():
             authors.append({
-                'id': data.get('id', author_id),  # 保留原始id用于显示
-                'uuid': data.get('uuid', ''),  # 添加UUID字段
+                'uuid': author_uuid,  # UUID作为主要标识
                 'name': data.get('name', 'Unknown'),
                 'email': data.get('email', ''),
                 'commits': data.get('commits', 0),
                 'net_lines': data.get('net_lines', 0),
                 'projects': data.get('projects', 0),
-                'report_url': f"/report/{access_id}",  # 使用UUID访问
+                'report_url': f"/report/{author_uuid}",  # 使用UUID访问
             })
 
         # 按提交数排序
@@ -500,24 +497,14 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
         self.send_json_response(response)
 
-    def send_author_data(self, author_id):
-        """发送特定作者的JSON数据 - 实时加载"""
+    def send_author_data(self, author_uuid):
+        """发送特定作者的JSON数据 - 通过UUID查询"""
         # 实时重新加载报告数据
         reports_dir = Path(self.directory)
         report_data = load_report_data(reports_dir)
 
-        # 查找作者的JSON文件（支持UUID或旧ID）
-        author_info = None
-        for aid, data in report_data.items():
-            # 检查UUID匹配
-            if data.get('uuid') == author_id:
-                author_info = data
-                break
-            # 兼容旧的author_id
-            if aid == author_id or data.get('id') == author_id or data.get('name') == author_id:
-                author_info = data
-                break
-
+        # 通过UUID查找作者
+        author_info = report_data.get(author_uuid)
         if not author_info:
             self.send_error(404, "Author not found")
             return
@@ -847,19 +834,18 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             }
             self.send_json_response(response)
 
-    def serve_author_report(self, author_id):
-        """提供个人报告页面 - 实时加载
+    def serve_author_report(self, author_uuid):
+        """提供个人报告页面 - 通过UUID访问
 
         支持的URL格式:
-        - /report/<uuid>                  - 使用UUID访问（推荐）
-        - /report/<author_id>             - 使用旧ID访问（兼容）
-        - /report/<uuid>?style=interactive - 使用交互式滚动模板
-        - /report/<uuid>?style=story       - 使用故事模板
-        - /report/<uuid>?style=scroll      - 使用照片墙滚动模板（推荐）
+        - /report/<uuid>                    - 使用UUID访问
+        - /report/<uuid>?style=interactive  - 使用交互式滚动模板
+        - /report/<uuid>?style=story        - 使用故事模板
+        - /report/<uuid>?style=scroll       - 使用照片墙滚动模板（推荐）
         """
         # URL解码
         from urllib.parse import unquote
-        author_id = unquote(author_id)
+        author_uuid = unquote(author_uuid)
 
         # 解析查询参数
         parsed_path = urlparse(self.path)
@@ -880,18 +866,8 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         reports_dir = Path(self.directory)
         report_data = load_report_data(reports_dir)
 
-        # 查找作者信息（支持UUID或旧ID）
-        author_info = None
-        for aid, data in report_data.items():
-            # 检查UUID匹配
-            if data.get('uuid') == author_id:
-                author_info = data
-                break
-            # 兼容旧的author_id
-            if aid == author_id or data.get('id') == author_id or data.get('name') == author_id:
-                author_info = data
-                break
-
+        # 通过UUID查找作者信息
+        author_info = report_data.get(author_uuid)
         if not author_info:
             self.send_error(404, "Author not found")
             return
@@ -1286,7 +1262,7 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
 
 def load_report_data(reports_dir: Path) -> dict:
-    """加载报告索引数据 - 扫描所有作者JSON文件"""
+    """加载报告索引数据 - 扫描所有作者JSON文件，使用UUID作为key"""
     report_data = {}
 
     # 排除的文件：进度文件、索引文件和检查点文件
@@ -1303,16 +1279,14 @@ def load_report_data(reports_dir: Path) -> dict:
                 data = json.load(f)
                 meta = data.get('meta', {})
 
-                # 优先使用UUID作为key，如果没有UUID则使用旧的方式
-                uuid = meta.get('uuid', '')
-                author_id = meta.get('author_id', meta.get('author', json_file.stem))
+                # 获取UUID
+                author_uuid = meta.get('uuid', '')
+                if not author_uuid:
+                    logger.warning(f"跳过没有UUID的文件: {json_file.name}")
+                    continue
 
-                # 使用UUID作为主键（如果存在）
-                key = uuid if uuid else author_id
-
-                report_data[key] = {
-                    'uuid': uuid,  # 保存UUID
-                    'id': author_id,  # 保留原始author_id
+                # 使用UUID作为key
+                report_data[author_uuid] = {
                     'name': meta.get('author', 'Unknown'),
                     'email': meta.get('email', ''),
                     'commits': data.get('summary', {}).get('total_commits', 0),
@@ -1320,7 +1294,6 @@ def load_report_data(reports_dir: Path) -> dict:
                     'projects': len(data.get('projects', [])),
                     'json_file': json_file.name,
                 }
-                # logger.info(f"加载报告: {meta.get('author', 'Unknown')} (UUID: {uuid})")
         except Exception as e:
             logger.warning(f"无法读取 {json_file.name}: {str(e)}")
 
