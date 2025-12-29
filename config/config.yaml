@@ -1,0 +1,52 @@
+# 代码年度报告生成器配置文件
+
+# 管理员账号配置（用于访问管理界面）
+admin:
+  username: "admin"
+  password: "admin"
+
+# 项目路径配置（支持多种方式）
+projects:
+  # 方式1：指定具体的Git仓库
+    - path: "F:/project"
+      name: "my-repo"
+
+  # # 方式2：指定一个目录，自动发现子目录中的所有Git仓库（推荐）
+  # - path: "F:/project/lvtu-server"
+  #   name: "lvtu-server"  # 名称仅用于显示
+  #   # 系统会自动扫描该目录下的所有Git仓库（最多3层深度）
+
+  # 方式3：混合使用
+  # - path: "F:/project"
+  #   name: "自动发现"
+  # - path: "F:/other-specific-repo"
+  #   name: "特定仓库"
+
+# 报告年份
+report_year: 2025
+
+# 作者信息（用于筛选提交记录）
+# 如果不配置或留空，则包含仓库的所有提交者
+authors:
+  # - "Your Name"
+  # - "your.email@example.com"
+  # 留空表示包含所有作者
+
+# 输出目录
+output_dir: "./reports"
+
+# LLM配置（用于生成报告文案）
+llm:
+  provider: "openai"  # 可选: openai, anthropic, azure
+  model: "claude-sonnet-4-5"
+  api_key: "sk-not-needed"  # 本地服务可以填写任意值
+  base_url: "http://localhost:8090"  # 本地LLM服务地址（使用localhost而不是0.0.0.0）
+
+# 报告语言
+language: "zh-CN"
+
+# 主题配置
+theme:
+  primary_color: "#667eea"
+  secondary_color: "#764ba2"
+  accent_color: "#f093fb"

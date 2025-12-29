@@ -1,0 +1,22 @@
+# 作者名字映射配置
+# 用于统一不同格式的作者名字，例如：monge 和 monge(中文名) 统一映射到 monge(中文名)
+#
+# 格式说明：
+# - 原始名字: 映射后的名字
+#   原始名字可以是：
+#     1. 完整的 "Name <email>" 格式
+#     2. 仅名字
+#     3. 仅邮箱
+#   映射后的名字建议使用完整格式 "Name <email>"
+
+# 示例配置（请根据实际情况修改）
+# "Monge" : "Monge(中文名) <monge@example.com>"
+# "monge" : "Monge(中文名) <monge@example.com>"
+# "monge@example.com" : "Monge(中文名) <monge@example.com>"
+
+# 如果某个作者有多个名字变体，可以全部映射到同一个标准名字
+# "John Doe" : "John Doe <john.doe@example.com>"
+# "john.doe@example.com" : "John Doe <john.doe@example.com>"
+# "J. Doe" : "John Doe <john.doe@example.com>"
+
+# 空映射表示不进行任何映射转换

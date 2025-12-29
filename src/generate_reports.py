@@ -9,6 +9,7 @@ import os
 import sys
 import yaml
 import logging
+import uuid
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, List
@@ -233,6 +234,7 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     report_index = {}
+    uuid_mapping = {}  # UUID与作者信息的映射
     generated_reports = []
 
     for idx, (author_info, author_projects) in enumerate(author_data_map.items(), 1):
@@ -249,6 +251,9 @@ def main():
         author_email = author_info.split('<')[1].replace('>', '').strip() if '<' in author_info else ''
 
         print(f"   [{idx}/{total_authors}] 分析作者: {author_name}")
+
+        # 生成UUID作为访问标识
+        author_uuid = str(uuid.uuid4())
 
         # 分析数据
         analyzed_data = analyzer.analyze(author_projects)
@@ -267,6 +272,7 @@ def main():
                 'author': author_name,
                 'email': author_email,
                 'author_id': author_info,
+                'uuid': author_uuid,  # 添加UUID
                 'year': config.get('report_year', 2025),
                 'generated_at': datetime.now().isoformat(),
             },
@@ -279,9 +285,8 @@ def main():
             'theme': config.get('theme', {}),
         }
 
-        # 保存JSON文件
-        safe_name = "".join(c if c.isalnum() or c in ('-', '_') else '_' for c in author_name)
-        json_filename = f"{safe_name}_{config.get('report_year', 2025)}.json"
+        # 保存JSON文件（使用UUID命名，避免中文和特殊字符）
+        json_filename = f"{author_uuid}.json"
         json_path = output_dir / json_filename
 
         with open(json_path, 'w', encoding='utf-8') as f:
@@ -289,9 +294,10 @@ def main():
 
         report_data['meta']['json_file'] = json_filename
 
-        # 保存到索引
-        report_index[author_info] = {
-            'id': author_info,
+        # 保存到索引（使用UUID作为key）
+        report_index[author_uuid] = {
+            'uuid': author_uuid,
+            'id': author_info,  # 保留原始author_id用于兼容
             'name': report_data['meta']['author'],
             'email': report_data['meta']['email'],
             'commits': report_data['summary']['total_commits'],
@@ -301,18 +307,30 @@ def main():
             'generated_at': report_data['meta']['generated_at'],
         }
 
+        # 维护UUID到作者信息的映射
+        uuid_mapping[author_uuid] = {
+            'author_info': author_info,
+            'author_name': author_name,
+            'author_email': author_email,
+        }
+
         generated_reports.append(report_data)
 
         print(f"      [OK] 报告已生成: {json_filename}")
 
-    # 6. 生成总索引文件
-    print(f"\n[6/6] 生成总索引文件...")
+    # 6. 生成总索引文件和UUID映射文件
+    print(f"\n[6/6] 生成总索引文件和UUID映射...")
 
     index_path = output_dir / 'report_index.json'
     with open(index_path, 'w', encoding='utf-8') as f:
         json.dump(report_index, f, ensure_ascii=False, indent=2)
-
     print(f"   [OK] 索引文件: report_index.json")
+
+    # 保存UUID映射关系（便于管理员查看）
+    uuid_mapping_path = output_dir / 'uuid_mapping.json'
+    with open(uuid_mapping_path, 'w', encoding='utf-8') as f:
+        json.dump(uuid_mapping, f, ensure_ascii=False, indent=2)
+    print(f"   [OK] UUID映射: uuid_mapping.json")
 
     # 更新进度为完成
     save_progress(progress_file, {

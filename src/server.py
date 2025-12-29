@@ -477,14 +477,17 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         authors = []
 
         for author_id, data in report_data.items():
+            # 优先使用UUID，如果没有则使用旧的author_id
+            access_id = data.get('uuid', author_id)
             authors.append({
-                'id': author_id,
+                'id': data.get('id', author_id),  # 保留原始id用于显示
+                'uuid': data.get('uuid', ''),  # 添加UUID字段
                 'name': data.get('name', 'Unknown'),
                 'email': data.get('email', ''),
                 'commits': data.get('commits', 0),
                 'net_lines': data.get('net_lines', 0),
                 'projects': data.get('projects', 0),
-                'report_url': f"/report/{author_id}",
+                'report_url': f"/report/{access_id}",  # 使用UUID访问
             })
 
         # 按提交数排序
@@ -503,10 +506,15 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         reports_dir = Path(self.directory)
         report_data = load_report_data(reports_dir)
 
-        # 查找作者的JSON文件
+        # 查找作者的JSON文件（支持UUID或旧ID）
         author_info = None
         for aid, data in report_data.items():
-            if aid == author_id or data.get('name') == author_id:
+            # 检查UUID匹配
+            if data.get('uuid') == author_id:
+                author_info = data
+                break
+            # 兼容旧的author_id
+            if aid == author_id or data.get('id') == author_id or data.get('name') == author_id:
                 author_info = data
                 break
 
@@ -843,10 +851,11 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         """提供个人报告页面 - 实时加载
 
         支持的URL格式:
-        - /report/<author_id>              - 使用默认模板
-        - /report/<author_id>?style=interactive - 使用交互式滚动模板
-        - /report/<author_id>?style=story       - 使用故事模板
-        - /report/<author_id>?style=scroll      - 使用照片墙滚动模板（推荐）
+        - /report/<uuid>                  - 使用UUID访问（推荐）
+        - /report/<author_id>             - 使用旧ID访问（兼容）
+        - /report/<uuid>?style=interactive - 使用交互式滚动模板
+        - /report/<uuid>?style=story       - 使用故事模板
+        - /report/<uuid>?style=scroll      - 使用照片墙滚动模板（推荐）
         """
         # URL解码
         from urllib.parse import unquote
@@ -871,10 +880,15 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         reports_dir = Path(self.directory)
         report_data = load_report_data(reports_dir)
 
-        # 查找作者信息
+        # 查找作者信息（支持UUID或旧ID）
         author_info = None
         for aid, data in report_data.items():
-            if aid == author_id or data.get('name') == author_id or data.get('id') == author_id:
+            # 检查UUID匹配
+            if data.get('uuid') == author_id:
+                author_info = data
+                break
+            # 兼容旧的author_id
+            if aid == author_id or data.get('id') == author_id or data.get('name') == author_id:
                 author_info = data
                 break
 
@@ -1276,7 +1290,7 @@ def load_report_data(reports_dir: Path) -> dict:
     report_data = {}
 
     # 排除的文件：进度文件、索引文件和检查点文件
-    excluded_files = {'.progress.json', 'report_index.json', '.resume_checkpoint.json'}
+    excluded_files = {'.progress.json', 'report_index.json', '.resume_checkpoint.json', 'uuid_mapping.json'}
 
     # 扫描所有JSON文件
     for json_file in reports_dir.glob('*.json'):
@@ -1288,10 +1302,17 @@ def load_report_data(reports_dir: Path) -> dict:
             with open(json_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 meta = data.get('meta', {})
+
+                # 优先使用UUID作为key，如果没有UUID则使用旧的方式
+                uuid = meta.get('uuid', '')
                 author_id = meta.get('author_id', meta.get('author', json_file.stem))
 
-                report_data[author_id] = {
-                    'id': author_id,
+                # 使用UUID作为主键（如果存在）
+                key = uuid if uuid else author_id
+
+                report_data[key] = {
+                    'uuid': uuid,  # 保存UUID
+                    'id': author_id,  # 保留原始author_id
                     'name': meta.get('author', 'Unknown'),
                     'email': meta.get('email', ''),
                     'commits': data.get('summary', {}).get('total_commits', 0),
@@ -1299,7 +1320,7 @@ def load_report_data(reports_dir: Path) -> dict:
                     'projects': len(data.get('projects', [])),
                     'json_file': json_file.name,
                 }
-                # logger.info(f"加载报告: {author_id} ({json_file.name})")
+                # logger.info(f"加载报告: {meta.get('author', 'Unknown')} (UUID: {uuid})")
         except Exception as e:
             logger.warning(f"无法读取 {json_file.name}: {str(e)}")
 
