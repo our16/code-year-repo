@@ -58,7 +58,8 @@
 ![个人报告](docs/images/report.png)
 
 ### 视频展示
-https://github.com/our16/code-year-repo/docs/video/record.webm
+![demo](docs/images/record.gif)
+
 
 ## 🚀 快速开始
 
