@@ -1,0 +1,3038 @@
+{
+  "meta": {
+    "author": "comfyanonymous",
+    "author_id": "comfyanonymous <121283862+comfyanonymous@users.noreply.github.com>",
+    "year": 2025,
+    "generated_at": "2025-12-29T22:59:00.465317",
+    "json_file": "comfyanonymous_2025.json"
+  },
+  "ai_text": "```xml\n<graphs>\n<graph>\n<type>提交次数</type>\n<value>107</value>\n<title>百次提交的执着坚守</title>\n<content>这一年，你用107次提交展现了惊人的开发热情和持续的奋斗精神。平均每月53.5次提交，意味着你几乎每天都在为项目贡献力量。新增4311行代码，删除1069行过往，净增长3242行的积累——每一次提交都是前进的脚步，不是简单的数字堆砌，而是日复一日的坚持与付出。平均每次提交约40行代码，这种\"高频迭代、持续精进\"的提交风格，体现了你作为激情开发者的行动力与毅力。</content>\n</graph>\n\n<graph>\n<type>代码行数</type>\n<value>3242</value>\n<title>三千行代码的积累之路</title>\n<content>4311行新增代码构建起庞大的功能体系，1069行删除代码诠释着持续优化的决心，净增长3242行的背后，是你107次小步迭代的技术征程。删除了接近新增25%的代码量，说明你有着极强的代码鉴赏力和优化意识——敢于在快速迭代中及时修正，勇于持续改进代码质量。三千行净增长，是数量与质量的双重胜利，更是你一年如一日的坚持见证。</content>\n</graph>\n\n<graph>\n<type>项目数量</type>\n<value>1</value>\n<title>专注一域的极致深耕</title>\n<content>全年专注于ComfyUI这一个项目，107次提交全部倾注于此，平均每月53.5次的高频输出。这种\"单点深耕、持续迭代\"的开发模式，让你能够在单一项目上通过无数次小步改进来不断完善代码质量。从功能开发到代码优化，从问题修复到体验提升，你用整整一年的时间专注做好一件事——这种极致的工匠精神，在快节奏的开发中依然保持着对代码质量的执着追求，令人敬佩。</content>\n</graph>\n\n<graph>\n<type>编程语言</type>\n<value>未知</value>\n<title>技术的务实主义者</title>\n<content>在编程语言的选择上，你保持着务实的态度。不拘泥于特定语言的标签限制，而是以项目需求为导向，灵活运用最适合的技术工具。4311行代码的实现与1069行代码的优化，证明你具备扎实的开发能力和优秀的代码品味。这种\"效率优先、质量至上\"的理念，展现了你作为实干型开发者的技术风格。</content>\n</graph>\n\n<graph>\n<type>高效时段</type>\n<value>7:00-8:00</value>\n<title>晨光初照的创作时刻</title>\n<content>7:00-8:00，这个晨光初照的黄金时段，是你创作的高峰时刻。当第一缕阳光洒向大地，当一天刚刚开始，你的编程灵感也随之苏醒。这个时段的选择，展现了你对工作节奏的科学把控——在精力最充沛的清晨，用最清醒的头脑，开启一天的开发工作。那些在晨光中敲下的代码，带着新一天的清新与透彻，每一次提交都充满活力。</content>\n</graph>\n\n<graph>\n<type>重构比例</type>\n<value>7.5%</value>\n<title>适度优化的平衡艺术</title>\n<content>7.5%的重构比例，这个恰到好处的数字体现了你的开发智慧：在快速迭代的同时，不忘对代码质量的关注。107次提交中有约8次用于重构优化，删除了1069行代码——这说明你在保持开发效率的前提下，依然会腾出时间来打磨和改进已有代码。这种\"在奔跑中调整姿势\"的平衡艺术，既保证了项目的快速推进，又确保了代码的可维护性，是敏捷开发团队中难得的素质。</content>\n</graph>\n\n<graph>\n<type>年度寄语</type>\n<value>致敬</value>\n<title>写给明天的你</title>\n<content>百次提交写春秋，晨光灵光日日新。三千代码积跬步，深耕一域见真功。愿你继续以坚持之力，在代码世界创造更多奇迹。</content>\n</graph>\n</graphs>\n```",
+  "theme": {
+    "primary_color": "#667eea",
+    "secondary_color": "#764ba2",
+    "accent_color": "#f093fb"
+  },
+  "year": 2025,
+  "summary": {
+    "total_commits": 107,
+    "total_additions": 4311,
+    "total_deletions": 1069,
+    "net_lines": 3242,
+    "files_changed": 195,
+    "avg_commits_per_month": 53.5,
+    "most_active_day": "2025-11-26"
+  },
+  "time_distribution": {
+    "monthly": {
+      "2025-11": 56,
+      "2025-10": 51
+    },
+    "weekday": {
+      "周一": 6,
+      "周二": 29,
+      "周三": 19,
+      "周四": 14,
+      "周五": 14,
+      "周六": 11,
+      "周日": 14
+    },
+    "hourly": {
+      "17": 3,
+      "15": 5,
+      "13": 3,
+      "8": 10,
+      "7": 12,
+      "3": 8,
+      "0": 2,
+      "23": 1,
+      "16": 4,
+      "14": 3,
+      "11": 12,
+      "6": 10,
+      "12": 7,
+      "4": 4,
+      "9": 4,
+      "5": 6,
+      "19": 1,
+      "10": 10,
+      "2": 2
+    },
+    "calendar_heatmap": [
+      {
+        "date": "2025-01-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-04",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-05",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-06",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-07",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-08",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-09",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-10",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-11",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-12",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-13",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-14",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-15",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-16",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-18",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-19",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-21",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-22",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-23",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-25",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-26",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-29",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-30",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-01-31",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-04",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-05",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-06",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-07",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-08",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-09",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-10",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-11",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-12",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-13",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-14",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-15",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-16",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-18",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-19",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-21",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-22",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-23",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-25",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-26",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-02-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-04",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-05",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-06",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-07",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-08",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-09",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-10",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-11",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-12",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-13",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-14",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-15",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-16",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-18",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-19",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-21",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-22",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-23",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-25",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-26",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-29",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-30",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-03-31",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-04",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-05",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-06",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-07",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-08",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-09",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-10",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-11",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-12",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-13",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-14",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-15",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-16",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-18",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-19",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-21",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-22",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-23",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-25",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-26",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-29",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-04-30",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-04",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-05",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-06",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-07",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-08",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-09",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-10",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-11",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-12",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-13",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-14",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-15",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-16",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-18",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-19",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-21",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-22",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-23",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-25",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-26",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-29",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-30",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-05-31",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-04",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-05",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-06",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-07",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-08",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-09",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-10",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-11",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-12",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-13",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-14",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-15",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-16",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-18",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-19",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-21",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-22",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-23",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-25",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-26",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-29",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-06-30",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-04",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-05",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-06",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-07",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-08",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-09",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-10",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-11",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-12",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-13",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-14",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-15",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-16",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-18",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-19",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-21",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-22",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-23",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-25",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-26",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-29",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-30",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-07-31",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-04",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-05",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-06",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-07",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-08",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-09",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-10",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-11",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-12",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-13",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-14",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-15",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-16",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-18",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-19",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-21",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-22",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-23",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-25",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-26",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-29",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-30",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-08-31",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-04",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-05",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-06",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-07",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-08",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-09",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-10",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-11",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-12",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-13",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-14",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-15",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-16",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-18",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-19",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-21",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-22",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-23",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-25",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-26",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-29",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-09-30",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-10-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-10-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-10-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-10-04",
+        "count": 2,
+        "additions": 21,
+        "deletions": 9,
+        "latest_time": "11:37:43",
+        "level": 1
+      },
+      {
+        "date": "2025-10-05",
+        "count": 1,
+        "additions": 1,
+        "deletions": 2,
+        "latest_time": "10:05:05",
+        "level": 1
+      },
+      {
+        "date": "2025-10-06",
+        "count": 1,
+        "additions": 0,
+        "deletions": 11,
+        "latest_time": "03:41:19",
+        "level": 1
+      },
+      {
+        "date": "2025-10-07",
+        "count": 1,
+        "additions": 142,
+        "deletions": 28,
+        "latest_time": "10:08:08",
+        "level": 1
+      },
+      {
+        "date": "2025-10-08",
+        "count": 1,
+        "additions": 8,
+        "deletions": 0,
+        "latest_time": "07:55:23",
+        "level": 1
+      },
+      {
+        "date": "2025-10-09",
+        "count": 1,
+        "additions": 17,
+        "deletions": 11,
+        "latest_time": "05:49:02",
+        "level": 1
+      },
+      {
+        "date": "2025-10-10",
+        "count": 2,
+        "additions": 32,
+        "deletions": 12,
+        "latest_time": "07:02:40",
+        "level": 1
+      },
+      {
+        "date": "2025-10-11",
+        "count": 1,
+        "additions": 5,
+        "deletions": 4,
+        "latest_time": "05:33:51",
+        "level": 1
+      },
+      {
+        "date": "2025-10-12",
+        "count": 2,
+        "additions": 1249,
+        "deletions": 5,
+        "latest_time": "12:28:01",
+        "level": 1
+      },
+      {
+        "date": "2025-10-13",
+        "count": 1,
+        "additions": 23,
+        "deletions": 20,
+        "latest_time": "11:54:41",
+        "level": 1
+      },
+      {
+        "date": "2025-10-14",
+        "count": 6,
+        "additions": 31,
+        "deletions": 9,
+        "latest_time": "14:09:12",
+        "level": 3
+      },
+      {
+        "date": "2025-10-15",
+        "count": 1,
+        "additions": 1,
+        "deletions": 1,
+        "latest_time": "12:21:11",
+        "level": 1
+      },
+      {
+        "date": "2025-10-16",
+        "count": 1,
+        "additions": 1,
+        "deletions": 1,
+        "latest_time": "06:48:12",
+        "level": 1
+      },
+      {
+        "date": "2025-10-17",
+        "count": 2,
+        "additions": 20,
+        "deletions": 1,
+        "latest_time": "07:59:56",
+        "level": 1
+      },
+      {
+        "date": "2025-10-18",
+        "count": 2,
+        "additions": 5,
+        "deletions": 1,
+        "latest_time": "08:03:28",
+        "level": 1
+      },
+      {
+        "date": "2025-10-19",
+        "count": 4,
+        "additions": 16,
+        "deletions": 24,
+        "latest_time": "13:25:35",
+        "level": 2
+      },
+      {
+        "date": "2025-10-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-10-21",
+        "count": 2,
+        "additions": 191,
+        "deletions": 101,
+        "latest_time": "07:03:06",
+        "level": 1
+      },
+      {
+        "date": "2025-10-22",
+        "count": 1,
+        "additions": 10,
+        "deletions": 4,
+        "latest_time": "07:15:23",
+        "level": 1
+      },
+      {
+        "date": "2025-10-23",
+        "count": 1,
+        "additions": 2,
+        "deletions": 0,
+        "latest_time": "05:26:22",
+        "level": 1
+      },
+      {
+        "date": "2025-10-24",
+        "count": 1,
+        "additions": 158,
+        "deletions": 15,
+        "latest_time": "09:21:14",
+        "level": 1
+      },
+      {
+        "date": "2025-10-25",
+        "count": 1,
+        "additions": 0,
+        "deletions": 6,
+        "latest_time": "07:56:51",
+        "level": 1
+      },
+      {
+        "date": "2025-10-26",
+        "count": 2,
+        "additions": 2,
+        "deletions": 1,
+        "latest_time": "11:07:29",
+        "level": 1
+      },
+      {
+        "date": "2025-10-27",
+        "count": 1,
+        "additions": 2,
+        "deletions": 2,
+        "latest_time": "08:23:01",
+        "level": 1
+      },
+      {
+        "date": "2025-10-28",
+        "count": 4,
+        "additions": 26,
+        "deletions": 12,
+        "latest_time": "16:45:45",
+        "level": 2
+      },
+      {
+        "date": "2025-10-29",
+        "count": 3,
+        "additions": 60,
+        "deletions": 2,
+        "latest_time": "12:37:00",
+        "level": 2
+      },
+      {
+        "date": "2025-10-30",
+        "count": 4,
+        "additions": 18,
+        "deletions": 6,
+        "latest_time": "07:29:01",
+        "level": 2
+      },
+      {
+        "date": "2025-10-31",
+        "count": 2,
+        "additions": 80,
+        "deletions": 7,
+        "latest_time": "10:51:58",
+        "level": 1
+      },
+      {
+        "date": "2025-11-01",
+        "count": 2,
+        "additions": 59,
+        "deletions": 40,
+        "latest_time": "12:25:17",
+        "level": 1
+      },
+      {
+        "date": "2025-11-02",
+        "count": 1,
+        "additions": 1,
+        "deletions": 0,
+        "latest_time": "05:25:59",
+        "level": 1
+      },
+      {
+        "date": "2025-11-03",
+        "count": 1,
+        "additions": 1,
+        "deletions": 1,
+        "latest_time": "02:14:04",
+        "level": 1
+      },
+      {
+        "date": "2025-11-04",
+        "count": 6,
+        "additions": 81,
+        "deletions": 25,
+        "latest_time": "11:14:20",
+        "level": 3
+      },
+      {
+        "date": "2025-11-05",
+        "count": 2,
+        "additions": 40,
+        "deletions": 16,
+        "latest_time": "11:47:35",
+        "level": 1
+      },
+      {
+        "date": "2025-11-06",
+        "count": 4,
+        "additions": 16,
+        "deletions": 18,
+        "latest_time": "17:11:30",
+        "level": 2
+      },
+      {
+        "date": "2025-11-07",
+        "count": 1,
+        "additions": 5,
+        "deletions": 3,
+        "latest_time": "09:24:28",
+        "level": 1
+      },
+      {
+        "date": "2025-11-08",
+        "count": 1,
+        "additions": 10,
+        "deletions": 5,
+        "latest_time": "00:15:05",
+        "level": 1
+      },
+      {
+        "date": "2025-11-09",
+        "count": 1,
+        "additions": 17,
+        "deletions": 5,
+        "latest_time": "04:52:02",
+        "level": 1
+      },
+      {
+        "date": "2025-11-10",
+        "count": 2,
+        "additions": 23,
+        "deletions": 9,
+        "latest_time": "07:51:33",
+        "level": 1
+      },
+      {
+        "date": "2025-11-11",
+        "count": 1,
+        "additions": 11,
+        "deletions": 9,
+        "latest_time": "04:35:29",
+        "level": 1
+      },
+      {
+        "date": "2025-11-12",
+        "count": 1,
+        "additions": 6,
+        "deletions": 0,
+        "latest_time": "08:33:30",
+        "level": 1
+      },
+      {
+        "date": "2025-11-13",
+        "count": 1,
+        "additions": 1,
+        "deletions": 1,
+        "latest_time": "06:04:41",
+        "level": 1
+      },
+      {
+        "date": "2025-11-14",
+        "count": 3,
+        "additions": 35,
+        "deletions": 136,
+        "latest_time": "16:26:05",
+        "level": 2
+      },
+      {
+        "date": "2025-11-15",
+        "count": 1,
+        "additions": 12,
+        "deletions": 5,
+        "latest_time": "19:54:40",
+        "level": 1
+      },
+      {
+        "date": "2025-11-16",
+        "count": 1,
+        "additions": 1,
+        "deletions": 1,
+        "latest_time": "16:01:14",
+        "level": 1
+      },
+      {
+        "date": "2025-11-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-11-18",
+        "count": 3,
+        "additions": 60,
+        "deletions": 1,
+        "latest_time": "13:26:44",
+        "level": 2
+      },
+      {
+        "date": "2025-11-19",
+        "count": 2,
+        "additions": 17,
+        "deletions": 4,
+        "latest_time": "11:36:03",
+        "level": 1
+      },
+      {
+        "date": "2025-11-20",
+        "count": 2,
+        "additions": 3,
+        "deletions": 2,
+        "latest_time": "12:56:23",
+        "level": 1
+      },
+      {
+        "date": "2025-11-21",
+        "count": 3,
+        "additions": 784,
+        "deletions": 129,
+        "latest_time": "12:39:37",
+        "level": 2
+      },
+      {
+        "date": "2025-11-22",
+        "count": 1,
+        "additions": 20,
+        "deletions": 1,
+        "latest_time": "06:51:55",
+        "level": 1
+      },
+      {
+        "date": "2025-11-23",
+        "count": 2,
+        "additions": 4,
+        "deletions": 3,
+        "latest_time": "17:55:22",
+        "level": 1
+      },
+      {
+        "date": "2025-11-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-11-25",
+        "count": 6,
+        "additions": 663,
+        "deletions": 186,
+        "latest_time": "23:50:19",
+        "level": 3
+      },
+      {
+        "date": "2025-11-26",
+        "count": 8,
+        "additions": 320,
+        "deletions": 174,
+        "latest_time": "17:00:43",
+        "level": 3
+      },
+      {
+        "date": "2025-11-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-11-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-11-29",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-11-30",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-01",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-02",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-03",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-04",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-05",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-06",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-07",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-08",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-09",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-10",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-11",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-12",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-13",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-14",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-15",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-16",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-17",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-18",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-19",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-20",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-21",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-22",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-23",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-24",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-25",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-26",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-27",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-28",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-29",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-30",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      },
+      {
+        "date": "2025-12-31",
+        "count": 0,
+        "additions": 0,
+        "deletions": 0,
+        "latest_time": null,
+        "level": 0
+      }
+    ],
+    "best_period": {
+      "hour": "7:00-8:00",
+      "weekday": "周二"
+    }
+  },
+  "code_quality": {
+    "refactor_commits": 8,
+    "refactor_ratio": 7.5,
+    "top_refactors": [
+      {
+        "date": "2025-11-14",
+        "message": "Use same code for chroma and flux blocks so that o",
+        "net_lines": 104
+      },
+      {
+        "date": "2025-10-06",
+        "message": "Remove useless code. (#10223)",
+        "net_lines": 11
+      },
+      {
+        "date": "2025-10-19",
+        "message": "Fix batch size above 1 giving bad output in chroma",
+        "net_lines": 9
+      },
+      {
+        "date": "2025-10-25",
+        "message": "Remove useless function (#10472)",
+        "net_lines": 6
+      },
+      {
+        "date": "2025-11-06",
+        "message": "Enable pinned memory by default on Nvidia. (#10656",
+        "net_lines": 3
+      }
+    ],
+    "avg_additions_per_commit": 40.3,
+    "avg_deletions_per_commit": 10.0
+  },
+  "languages": {
+    "total": 0,
+    "top_languages": [],
+    "distribution": {}
+  },
+  "projects": [
+    {
+      "name": "ComfyUI",
+      "commits": 107,
+      "additions": 4311,
+      "deletions": 1069,
+      "net_lines": 3242
+    }
+  ],
+  "raw_data": {
+    "total_commits": 107,
+    "language_stats": {}
+  }
+}

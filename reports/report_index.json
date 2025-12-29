@@ -1,0 +1,530 @@
+{
+  "Haoming <73768377+Haoming02@users.noreply.github.com>": {
+    "id": "Haoming <73768377+Haoming02@users.noreply.github.com>",
+    "name": "Haoming",
+    "json_file": "Haoming_2025.json",
+    "commits": 3,
+    "net_lines": 15,
+    "projects": 1
+  },
+  "jack6249 <zhangshanqi123@163.com>": {
+    "id": "jack6249 <zhangshanqi123@163.com>",
+    "name": "jack6249",
+    "json_file": "jack6249_2025.json",
+    "commits": 3,
+    "net_lines": 908,
+    "projects": 1
+  },
+  "Nefelibata <2827867731@qq.comgit>": {
+    "id": "Nefelibata <2827867731@qq.comgit>",
+    "name": "Nefelibata",
+    "json_file": "Nefelibata_2025.json",
+    "commits": 1,
+    "net_lines": 14237,
+    "projects": 1
+  },
+  "thunderbolt-fire <820876325@qq.com>": {
+    "id": "thunderbolt-fire <820876325@qq.com>",
+    "name": "thunderbolt-fire",
+    "json_file": "thunderbolt-fire_2025.json",
+    "commits": 2,
+    "net_lines": 437,
+    "projects": 1
+  },
+  "haoye2 <865178512@qq.com>": {
+    "id": "haoye2 <865178512@qq.com>",
+    "name": "haoye2",
+    "json_file": "haoye2_2025.json",
+    "commits": 3,
+    "net_lines": 2419,
+    "projects": 1
+  },
+  "moyu026 <514352823@qq.com>": {
+    "id": "moyu026 <514352823@qq.com>",
+    "name": "moyu026",
+    "json_file": "moyu026_2025.json",
+    "commits": 1,
+    "net_lines": 6,
+    "projects": 1
+  },
+  "Qiacheng Li <choliaky@gmail.com>": {
+    "id": "Qiacheng Li <choliaky@gmail.com>",
+    "name": "Qiacheng Li",
+    "json_file": "Qiacheng_Li_2025.json",
+    "commits": 1,
+    "net_lines": -4,
+    "projects": 1
+  },
+  "Nicolas <1162314270@qq.com>": {
+    "id": "Nicolas <1162314270@qq.com>",
+    "name": "Nicolas",
+    "json_file": "Nicolas_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "Sun Tao <2605127667@qq.com>": {
+    "id": "Sun Tao <2605127667@qq.com>",
+    "name": "Sun Tao",
+    "json_file": "Sun_Tao_2025.json",
+    "commits": 12,
+    "net_lines": 58575,
+    "projects": 1
+  },
+  "Tsumugii24 <2792474059@qq.com>": {
+    "id": "Tsumugii24 <2792474059@qq.com>",
+    "name": "Tsumugii24",
+    "json_file": "Tsumugii24_2025.json",
+    "commits": 14,
+    "net_lines": 358,
+    "projects": 1
+  },
+  "Jukka Seppänen <40791699+kijai@users.noreply.github.com>": {
+    "id": "Jukka Seppänen <40791699+kijai@users.noreply.github.com>",
+    "name": "Jukka Seppänen",
+    "json_file": "Jukka_Seppänen_2025.json",
+    "commits": 1,
+    "net_lines": 2,
+    "projects": 1
+  },
+  "Daniel Harte <norgeous@users.noreply.github.com>": {
+    "id": "Daniel Harte <norgeous@users.noreply.github.com>",
+    "name": "Daniel Harte",
+    "json_file": "Daniel_Harte_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "comfyanonymous <comfyanonymous@protonmail.com>": {
+    "id": "comfyanonymous <comfyanonymous@protonmail.com>",
+    "name": "comfyanonymous",
+    "json_file": "comfyanonymous_2025.json",
+    "commits": 13,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "Christian Byrne <cbyrne@comfy.org>": {
+    "id": "Christian Byrne <cbyrne@comfy.org>",
+    "name": "Christian Byrne",
+    "json_file": "Christian_Byrne_2025.json",
+    "commits": 6,
+    "net_lines": 88,
+    "projects": 1
+  },
+  "xyliu3 <xyliu3@trip.com>": {
+    "id": "xyliu3 <xyliu3@trip.com>",
+    "name": "xyliu3",
+    "json_file": "xyliu3_2025.json",
+    "commits": 11,
+    "net_lines": 7223,
+    "projects": 1
+  },
+  "Shufan Jiang <124921491+Tsumugii24@users.noreply.github.com>": {
+    "id": "Shufan Jiang <124921491+Tsumugii24@users.noreply.github.com>",
+    "name": "Shufan Jiang",
+    "json_file": "Shufan_Jiang_2025.json",
+    "commits": 5,
+    "net_lines": 1094,
+    "projects": 1
+  },
+  "chen070808 <chen070808@gmail.com>": {
+    "id": "chen070808 <chen070808@gmail.com>",
+    "name": "chen070808",
+    "json_file": "chen070808_2025.json",
+    "commits": 1,
+    "net_lines": 1092,
+    "projects": 1
+  },
+  "Chenxu Zhang <93756983+Tasselszcx@users.noreply.github.com>": {
+    "id": "Chenxu Zhang <93756983+Tasselszcx@users.noreply.github.com>",
+    "name": "Chenxu Zhang",
+    "json_file": "Chenxu_Zhang_2025.json",
+    "commits": 4,
+    "net_lines": 14123,
+    "projects": 1
+  },
+  "ThankUYou <148185775+ThankUYou@users.noreply.github.com>": {
+    "id": "ThankUYou <148185775+ThankUYou@users.noreply.github.com>",
+    "name": "ThankUYou",
+    "json_file": "ThankUYou_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "Stone Zhang <stone@drivemode.com>": {
+    "id": "Stone Zhang <stone@drivemode.com>",
+    "name": "Stone Zhang",
+    "json_file": "Stone_Zhang_2025.json",
+    "commits": 1,
+    "net_lines": -9,
+    "projects": 1
+  },
+  "Anatole:-P <2310325104@email.szu.edu.cn>": {
+    "id": "Anatole:-P <2310325104@email.szu.edu.cn>",
+    "name": "Anatole:-P",
+    "json_file": "Anatole_-P_2025.json",
+    "commits": 2,
+    "net_lines": 31126,
+    "projects": 1
+  },
+  "jack6249 <75990196+jack6249@users.noreply.github.com>": {
+    "id": "jack6249 <75990196+jack6249@users.noreply.github.com>",
+    "name": "jack6249",
+    "json_file": "jack6249_2025.json",
+    "commits": 2,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "Zero <63570164+zhiheng-yu@users.noreply.github.com>": {
+    "id": "Zero <63570164+zhiheng-yu@users.noreply.github.com>",
+    "name": "Zero",
+    "json_file": "Zero_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "lyxx2535 <843683531@qq.com>": {
+    "id": "lyxx2535 <843683531@qq.com>",
+    "name": "lyxx2535",
+    "json_file": "lyxx2535_2025.json",
+    "commits": 2,
+    "net_lines": 29,
+    "projects": 1
+  },
+  "Ethanwhh <1375290542@qq.com>": {
+    "id": "Ethanwhh <1375290542@qq.com>",
+    "name": "Ethanwhh",
+    "json_file": "Ethanwhh_2025.json",
+    "commits": 1,
+    "net_lines": 8,
+    "projects": 1
+  },
+  "Faych <90372299+neverbiasu@users.noreply.github.com>": {
+    "id": "Faych <90372299+neverbiasu@users.noreply.github.com>",
+    "name": "Faych",
+    "json_file": "Faych_2025.json",
+    "commits": 1,
+    "net_lines": -7,
+    "projects": 1
+  },
+  "chaObserv <154517000+chaObserv@users.noreply.github.com>": {
+    "id": "chaObserv <154517000+chaObserv@users.noreply.github.com>",
+    "name": "chaObserv",
+    "json_file": "chaObserv_2025.json",
+    "commits": 1,
+    "net_lines": 95,
+    "projects": 1
+  },
+  "rattus <46076784+rattus128@users.noreply.github.com>": {
+    "id": "rattus <46076784+rattus128@users.noreply.github.com>",
+    "name": "rattus",
+    "json_file": "rattus_2025.json",
+    "commits": 11,
+    "net_lines": 132,
+    "projects": 1
+  },
+  "XiaoMa-PM <2310325104@email.szu.edu.cn>": {
+    "id": "XiaoMa-PM <2310325104@email.szu.edu.cn>",
+    "name": "XiaoMa-PM",
+    "json_file": "XiaoMa-PM_2025.json",
+    "commits": 4,
+    "net_lines": 280,
+    "projects": 1
+  },
+  "Future_Y <71256087+yzy-fulture@users.noreply.github.com>": {
+    "id": "Future_Y <71256087+yzy-fulture@users.noreply.github.com>",
+    "name": "Future_Y",
+    "json_file": "Future_Y_2025.json",
+    "commits": 2,
+    "net_lines": 5,
+    "projects": 1
+  },
+  "fancy <fancyboi999@gmail.com>": {
+    "id": "fancy <fancyboi999@gmail.com>",
+    "name": "fancy",
+    "json_file": "fancy_2025.json",
+    "commits": 3,
+    "net_lines": 10097,
+    "projects": 1
+  },
+  "allen2000 <lht2008@163.com>": {
+    "id": "allen2000 <lht2008@163.com>",
+    "name": "allen2000",
+    "json_file": "allen2000_2025.json",
+    "commits": 1,
+    "net_lines": 1243,
+    "projects": 1
+  },
+  "张宸旭 <3199601798@qq.com>": {
+    "id": "张宸旭 <3199601798@qq.com>",
+    "name": "张宸旭",
+    "json_file": "张宸旭_2025.json",
+    "commits": 15,
+    "net_lines": 1496,
+    "projects": 1
+  },
+  "weijia cheng <646025053@qq.com>": {
+    "id": "weijia cheng <646025053@qq.com>",
+    "name": "weijia cheng",
+    "json_file": "weijia_cheng_2025.json",
+    "commits": 6,
+    "net_lines": 9,
+    "projects": 1
+  },
+  "Chen Haokun <45279676+chen070808@users.noreply.github.com>": {
+    "id": "Chen Haokun <45279676+chen070808@users.noreply.github.com>",
+    "name": "Chen Haokun",
+    "json_file": "Chen_Haokun_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "WHQAQ11 <151913535+WHQAQ11@users.noreply.github.com>": {
+    "id": "WHQAQ11 <151913535+WHQAQ11@users.noreply.github.com>",
+    "name": "WHQAQ11",
+    "json_file": "WHQAQ11_2025.json",
+    "commits": 1,
+    "net_lines": 2478,
+    "projects": 1
+  },
+  "ComfyUI Wiki <contact@comfyui-wiki.com>": {
+    "id": "ComfyUI Wiki <contact@comfyui-wiki.com>",
+    "name": "ComfyUI Wiki",
+    "json_file": "ComfyUI_Wiki_2025.json",
+    "commits": 12,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "Finn-Hecker <Finn.Hecker3@gmail.com>": {
+    "id": "Finn-Hecker <Finn.Hecker3@gmail.com>",
+    "name": "Finn-Hecker",
+    "json_file": "Finn-Hecker_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "comfyanonymous <121283862+comfyanonymous@users.noreply.github.com>": {
+    "id": "comfyanonymous <121283862+comfyanonymous@users.noreply.github.com>",
+    "name": "comfyanonymous",
+    "json_file": "comfyanonymous_2025.json",
+    "commits": 107,
+    "net_lines": 3242,
+    "projects": 1
+  },
+  "EverNebula <sfpxxwhb@qq.com>": {
+    "id": "EverNebula <sfpxxwhb@qq.com>",
+    "name": "EverNebula",
+    "json_file": "EverNebula_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "Jedrzej Kosinski <kosinkadink1@gmail.com>": {
+    "id": "Jedrzej Kosinski <kosinkadink1@gmail.com>",
+    "name": "Jedrzej Kosinski",
+    "json_file": "Jedrzej_Kosinski_2025.json",
+    "commits": 7,
+    "net_lines": 133,
+    "projects": 1
+  },
+  "contentis <lspindler@nvidia.com>": {
+    "id": "contentis <lspindler@nvidia.com>",
+    "name": "contentis",
+    "json_file": "contentis_2025.json",
+    "commits": 3,
+    "net_lines": 1184,
+    "projects": 1
+  },
+  "ric-yu <richard95yu@gmail.com>": {
+    "id": "ric-yu <richard95yu@gmail.com>",
+    "name": "ric-yu",
+    "json_file": "ric-yu_2025.json",
+    "commits": 1,
+    "net_lines": 2,
+    "projects": 1
+  },
+  "jjyaoao <jjyaoao@126.com>": {
+    "id": "jjyaoao <jjyaoao@126.com>",
+    "name": "jjyaoao",
+    "json_file": "jjyaoao_2025.json",
+    "commits": 329,
+    "net_lines": 227126,
+    "projects": 1
+  },
+  "Alexander Piskun <13381981+bigcat88@users.noreply.github.com>": {
+    "id": "Alexander Piskun <13381981+bigcat88@users.noreply.github.com>",
+    "name": "Alexander Piskun",
+    "json_file": "Alexander_Piskun_2025.json",
+    "commits": 60,
+    "net_lines": 451,
+    "projects": 1
+  },
+  "freya223 <1733702342@qq.com>": {
+    "id": "freya223 <1733702342@qq.com>",
+    "name": "freya223",
+    "json_file": "freya223_2025.json",
+    "commits": 1,
+    "net_lines": 286,
+    "projects": 1
+  },
+  "HeteroCat <111065724+HeteroCat@users.noreply.github.com>": {
+    "id": "HeteroCat <111065724+HeteroCat@users.noreply.github.com>",
+    "name": "HeteroCat",
+    "json_file": "HeteroCat_2025.json",
+    "commits": 58,
+    "net_lines": 37360,
+    "projects": 1
+  },
+  "Sav1 <1731846012@qq.com>": {
+    "id": "Sav1 <1731846012@qq.com>",
+    "name": "Sav1",
+    "json_file": "Sav1_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "hjz <1912285210@qq.com>": {
+    "id": "hjz <1912285210@qq.com>",
+    "name": "hjz",
+    "json_file": "hjz_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "SleepSheep <yeahhuangyue@163.com>": {
+    "id": "SleepSheep <yeahhuangyue@163.com>",
+    "name": "SleepSheep",
+    "json_file": "SleepSheep_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "Sonnet1219 <2450174013@qq.com>": {
+    "id": "Sonnet1219 <2450174013@qq.com>",
+    "name": "Sonnet1219",
+    "json_file": "Sonnet1219_2025.json",
+    "commits": 1,
+    "net_lines": 1,
+    "projects": 1
+  },
+  "laoyouf <qq121huang@sina.com>": {
+    "id": "laoyouf <qq121huang@sina.com>",
+    "name": "laoyouf",
+    "json_file": "laoyouf_2025.json",
+    "commits": 1,
+    "net_lines": 541,
+    "projects": 1
+  },
+  "LuoPengcheng <2653972504@qq.com>": {
+    "id": "LuoPengcheng <2653972504@qq.com>",
+    "name": "LuoPengcheng",
+    "json_file": "LuoPengcheng_2025.json",
+    "commits": 6,
+    "net_lines": 34,
+    "projects": 1
+  },
+  "monge <mongezheng@gmail.com>": {
+    "id": "monge <mongezheng@gmail.com>",
+    "name": "monge",
+    "json_file": "monge_2025.json",
+    "commits": 41,
+    "net_lines": 43505,
+    "projects": 2
+  },
+  "zrj <819519226@qq.com>": {
+    "id": "zrj <819519226@qq.com>",
+    "name": "zrj",
+    "json_file": "zrj_2025.json",
+    "commits": 3,
+    "net_lines": 1117,
+    "projects": 1
+  },
+  "thankuyou <thankuyou@thankuyoudeMacBook-Air.local>": {
+    "id": "thankuyou <thankuyou@thankuyoudeMacBook-Air.local>",
+    "name": "thankuyou",
+    "json_file": "thankuyou_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "Rizumu Ayaka <rizumu@ayaka.moe>": {
+    "id": "Rizumu Ayaka <rizumu@ayaka.moe>",
+    "name": "Rizumu Ayaka",
+    "json_file": "Rizumu_Ayaka_2025.json",
+    "commits": 1,
+    "net_lines": 22,
+    "projects": 1
+  },
+  "sunpcm <sunpcm@163.com>": {
+    "id": "sunpcm <sunpcm@163.com>",
+    "name": "sunpcm",
+    "json_file": "sunpcm_2025.json",
+    "commits": 6,
+    "net_lines": -3,
+    "projects": 1
+  },
+  "guill <jacob.e.segal@gmail.com>": {
+    "id": "guill <jacob.e.segal@gmail.com>",
+    "name": "guill",
+    "json_file": "guill_2025.json",
+    "commits": 1,
+    "net_lines": 168,
+    "projects": 1
+  },
+  "Tao Sun <168447269+fengju0213@users.noreply.github.com>": {
+    "id": "Tao Sun <168447269+fengju0213@users.noreply.github.com>",
+    "name": "Tao Sun",
+    "json_file": "Tao_Sun_2025.json",
+    "commits": 6,
+    "net_lines": 537,
+    "projects": 1
+  },
+  "Arjan Singh <1598641+arjansingh@users.noreply.github.com>": {
+    "id": "Arjan Singh <1598641+arjansingh@users.noreply.github.com>",
+    "name": "Arjan Singh",
+    "json_file": "Arjan_Singh_2025.json",
+    "commits": 2,
+    "net_lines": 0,
+    "projects": 1
+  },
+  ")s <sm1les@qq.com>": {
+    "id": ")s <sm1les@qq.com>",
+    "name": ")s",
+    "json_file": "_s_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "chenzq <chenzq@mail.ustc.edu.cn>": {
+    "id": "chenzq <chenzq@mail.ustc.edu.cn>",
+    "name": "chenzq",
+    "json_file": "chenzq_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "filtered <176114999+webfiltered@users.noreply.github.com>": {
+    "id": "filtered <176114999+webfiltered@users.noreply.github.com>",
+    "name": "filtered",
+    "json_file": "filtered_2025.json",
+    "commits": 1,
+    "net_lines": 0,
+    "projects": 1
+  },
+  "tigazheng <756339740@qq.com>": {
+    "id": "tigazheng <756339740@qq.com>",
+    "name": "tigazheng",
+    "json_file": "tigazheng_2025.json",
+    "commits": 737,
+    "net_lines": 105899,
+    "projects": 5
+  },
+  "rattus128 <46076784+rattus128@users.noreply.github.com>": {
+    "id": "rattus128 <46076784+rattus128@users.noreply.github.com>",
+    "name": "rattus128",
+    "json_file": "rattus128_2025.json",
+    "commits": 2,
+    "net_lines": -98,
+    "projects": 1
+  }
+}

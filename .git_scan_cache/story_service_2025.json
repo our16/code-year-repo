@@ -1,0 +1,123 @@
+{
+  "project": {
+    "path": "F:\\project\\story_service",
+    "name": "story_service",
+    "auto_discovered": true
+  },
+  "data": {
+    "project_name": "story_service",
+    "path": "F:\\project\\story_service",
+    "commits": [
+      {
+        "hash": "8895b783a268be3a35cb102333dca36d0447ec42",
+        "short_hash": "8895b783",
+        "date": "2025-12-24T08:54:22",
+        "timestamp": 1766537662,
+        "message": "main",
+        "author": "tigazheng",
+        "email": "756339740@qq.com",
+        "files_changed": 3,
+        "additions": 17,
+        "deletions": 9,
+        "languages": [],
+        "changed_files": [],
+        "analysis_level": "stats"
+      },
+      {
+        "hash": "f8cd0c2e192d49a779a6a57ebea3917d2a265018",
+        "short_hash": "f8cd0c2e",
+        "date": "2025-12-24T08:47:05",
+        "timestamp": 1766537225,
+        "message": "main",
+        "author": "tigazheng",
+        "email": "756339740@qq.com",
+        "files_changed": 8,
+        "additions": 276,
+        "deletions": 53,
+        "languages": [],
+        "changed_files": [],
+        "analysis_level": "stats"
+      },
+      {
+        "hash": "ac39187436e157df008e3a826221c558c7254dca",
+        "short_hash": "ac391874",
+        "date": "2025-12-24T08:18:43",
+        "timestamp": 1766535523,
+        "message": "main",
+        "author": "tigazheng",
+        "email": "756339740@qq.com",
+        "files_changed": 24,
+        "additions": 812,
+        "deletions": 3035,
+        "languages": [],
+        "changed_files": [],
+        "analysis_level": "stats"
+      },
+      {
+        "hash": "95a37827b638540b8ada36fab001acfc9df34fbb",
+        "short_hash": "95a37827",
+        "date": "2025-12-24T08:18:35",
+        "timestamp": 1766535515,
+        "message": "main",
+        "author": "tigazheng",
+        "email": "756339740@qq.com",
+        "files_changed": 1,
+        "additions": 51,
+        "deletions": 0,
+        "languages": [],
+        "changed_files": [],
+        "analysis_level": "stats"
+      },
+      {
+        "hash": "04fcf822e7ad5ae67d5973444362e8ebcac9842e",
+        "short_hash": "04fcf822",
+        "date": "2025-12-23T23:36:08",
+        "timestamp": 1766504168,
+        "message": "main",
+        "author": "tigazheng",
+        "email": "756339740@qq.com",
+        "files_changed": 1,
+        "additions": 16,
+        "deletions": 10,
+        "languages": [],
+        "changed_files": [],
+        "analysis_level": "stats"
+      },
+      {
+        "hash": "6430332c69cbd85cb8b00c1f5d4ffe9500a308db",
+        "short_hash": "6430332c",
+        "date": "2025-12-23T23:34:35",
+        "timestamp": 1766504075,
+        "message": "main",
+        "author": "tigazheng",
+        "email": "756339740@qq.com",
+        "files_changed": 1,
+        "additions": 64,
+        "deletions": 18,
+        "languages": [],
+        "changed_files": [],
+        "analysis_level": "stats"
+      },
+      {
+        "hash": "432fb09ddd6e94f63641274c2d844cbac5b4e6b5",
+        "short_hash": "432fb09d",
+        "date": "2025-11-30T18:57:37",
+        "timestamp": 1764500257,
+        "message": "init",
+        "author": "tigazheng",
+        "email": "756339740@qq.com",
+        "files_changed": 23,
+        "additions": 3254,
+        "deletions": 0,
+        "languages": [],
+        "changed_files": [],
+        "analysis_level": "stats"
+      }
+    ],
+    "language_stats": {},
+    "total_commits": 7,
+    "branch": "master"
+  },
+  "scan_time": "2025-12-29T22:51:15.980115",
+  "report_year": 2025
+}

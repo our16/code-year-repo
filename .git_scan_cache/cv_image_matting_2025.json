@@ -1,0 +1,63 @@
+{
+  "project": {
+    "path": "F:\\project\\cv_image_matting",
+    "name": "cv_image_matting",
+    "auto_discovered": true
+  },
+  "data": {
+    "project_name": "cv_image_matting",
+    "path": "F:\\project\\cv_image_matting",
+    "commits": [
+      {
+        "hash": "e25faec9f19d52b8cc1664a357debe541ea13286",
+        "short_hash": "e25faec9",
+        "date": "2025-12-24T08:52:03",
+        "timestamp": 1766537523,
+        "message": "展示二维码",
+        "author": "tigazheng",
+        "email": "756339740@qq.com",
+        "files_changed": 3,
+        "additions": 848,
+        "deletions": 79,
+        "languages": [],
+        "changed_files": [],
+        "analysis_level": "stats"
+      },
+      {
+        "hash": "f99fa2fb3a828772a725814371adc4094250e583",
+        "short_hash": "f99fa2fb",
+        "date": "2025-12-23T22:03:56",
+        "timestamp": 1766498636,
+        "message": "展示二维码",
+        "author": "tigazheng",
+        "email": "756339740@qq.com",
+        "files_changed": 1,
+        "additions": 83,
+        "deletions": 261,
+        "languages": [],
+        "changed_files": [],
+        "analysis_level": "stats"
+      },
+      {
+        "hash": "4831b3381b474f1ebf3f977951b4b35bcb82a7a3",
+        "short_hash": "4831b338",
+        "date": "2025-12-23T22:02:04",
+        "timestamp": 1766498524,
+        "message": "展示二维码",
+        "author": "tigazheng",
+        "email": "756339740@qq.com",
+        "files_changed": 29,
+        "additions": 26629,
+        "deletions": 38,
+        "languages": [],
+        "changed_files": [],
+        "analysis_level": "stats"
+      }
+    ],
+    "language_stats": {},
+    "total_commits": 3,
+    "branch": "master"
+  },
+  "scan_time": "2025-12-29T22:51:13.932499",
+  "report_year": 2025
+}
