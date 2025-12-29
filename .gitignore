@@ -32,9 +32,6 @@ ENV/
 *.swp
 *.swo
 *~
-.git_scan_cache
-# Reports
-reports/
 
 # Config files (keep examples)
 # OS
