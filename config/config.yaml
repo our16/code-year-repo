@@ -5,6 +5,17 @@ admin:
   username: "admin"
   password: "admin"
 
+# 并发配置
+concurrency:
+  # Git仓库扫描并发数（同时扫描多个仓库）
+  repo_workers: 4  # 默认4，建议设置为CPU核心数
+  # 单个仓库内部提交分析并发数（分析单个仓库的提交时使用）
+  commit_workers: 8  # 默认8，单个仓库内的提交并发分析
+  # LLM并发生成报告数（同时生成多个作者的报告）
+  llm_workers: 3  # 默认3，根据LLM服务性能调整
+  # 总体最大并发数（限制整体并发线程数，避免资源耗尽）
+  max_workers: 20  # 默认16
+
 # 项目路径配置（支持多种方式）
 projects:
   # 方式1：指定具体的Git仓库
@@ -41,6 +52,9 @@ llm:
   model: "claude-sonnet-4-5"
   api_key: "sk-not-needed"  # 本地服务可以填写任意值
   base_url: "http://localhost:8090"  # 本地LLM服务地址（使用localhost而不是0.0.0.0）
+  timeout: 120  # LLM请求超时时间（秒），默认120秒
+  max_retries: 1  # 失败重试次数，默认2次
+  retry_delay: 5  # 重试延迟（秒），默认1秒
 
 # 报告语言
 language: "zh-CN"

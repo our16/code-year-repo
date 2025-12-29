@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-LLM客户端 - 生成个性化报告文案
+LLM客户端 - 生成个性化报告文案（支持并发和重试）
 """
 
 import os
+import time
 from typing import Dict, Any
 
 
@@ -17,18 +18,26 @@ class LLMClient:
         self.api_key = self.config.get('api_key', '')
         self.model = self.config.get('model', 'gpt-4')
         self.base_url = self.config.get('base_url', '')
+        self.timeout = self.config.get('timeout', 120)  # 超时时间
+        self.max_retries = self.config.get('max_retries', 2)  # 最大重试次数
+        self.retry_delay = self.config.get('retry_delay', 1)  # 重试延迟
 
     def generate_report_text(self, data: Dict[str, Any]) -> str:
-        """生成报告文案"""
+        """生成报告文案（支持重试）"""
         if not self.api_key:
             return self._get_default_text(data)
 
-        try:
-            # 使用 OpenAI-compatible API（支持所有兼容 OpenAI 协议的服务）
-            return self._generate_with_openai_compatible(data)
-        except Exception as e:
-            print(f"LLM生成失败，使用默认文案: {str(e)}")
-            return self._get_default_text(data)
+        # 带重试的生成
+        for attempt in range(self.max_retries + 1):
+            try:
+                return self._generate_with_openai_compatible(data)
+            except Exception as e:
+                if attempt < self.max_retries:
+                    print(f"LLM生成失败，第{attempt + 1}次重试: {str(e)}")
+                    time.sleep(self.retry_delay)
+                else:
+                    print(f"LLM生成失败，已达最大重试次数，使用默认文案: {str(e)}")
+                    return self._get_default_text(data)
 
     def _generate_with_openai_compatible(self, data: Dict[str, Any]) -> str:
         """使用 OpenAI-compatible API 生成文案（支持本地LLM服务）"""

@@ -25,8 +25,13 @@ class GitDataCollector:
         self.config = config
         self.authors = config.get('authors', [])
         self.report_year = config.get('report_year', 2024)
-        # 并发配置：从配置文件读取最大并发数，默认为4
-        self.max_workers = config.get('max_workers', 4)
+
+        # 并发配置：从配置文件读取并发参数
+        concurrency_config = config.get('concurrency', {})
+        self.repo_workers = concurrency_config.get('repo_workers', 4)  # 仓库扫描并发数
+        self.commit_workers = concurrency_config.get('commit_workers', 8)  # 提交分析并发数
+        self.max_workers = concurrency_config.get('max_workers', 16)  # 总体最大并发数
+
         # 线程锁，用于保护日志输出和文件写入
         self.log_lock = threading.Lock()
         self.file_lock = threading.Lock()
@@ -169,8 +174,91 @@ class GitDataCollector:
         _, ext = os.path.splitext(file_path.lower())
         return ext_map.get(ext, 'Other')
 
+    def _analyze_commit(self, commit: git.Commit, repo) -> Dict[str, Any]:
+        """分析单个提交（用于并发处理）"""
+        commit_date = datetime.fromtimestamp(commit.committed_date)
+
+        # 获取提交的文件变更
+        additions = 0
+        deletions = 0
+        files_changed = 0
+        languages = []
+        changed_files = []
+
+        try:
+            if commit.parents:
+                # 获取与父提交的差异
+                parent = commit.parents[0]
+                diff = parent.diff(commit, create_patch=True, **{'unified': 0})
+
+                for diff_item in diff:
+                    files_changed += 1
+                    file_path = diff_item.a_path if diff_item.a_path else diff_item.b_path
+
+                    # 检测语言
+                    if file_path:
+                        lang = self._detect_language(file_path)
+                        languages.append(lang)
+                        changed_files.append(file_path)
+
+                    # 更准确的行数统计
+                    try:
+                        diff_text = diff_item.diff.decode('utf-8', errors='ignore')
+                        lines = diff_text.split('\n')
+
+                        for line in lines:
+                            # 统计新增行（以+开头，但不是+++）
+                            if line.startswith('+') and not line.startswith('+++'):
+                                additions += 1
+                            # 统计删除行（以-开头，但不是---）
+                            elif line.startswith('-') and not line.startswith('---'):
+                                deletions += 1
+                    except Exception:
+                        pass
+            else:
+                # 初始提交（没有父提交）
+                try:
+                    # 统计所有新增文件
+                    for item in commit.tree.traverse():
+                        if item.type == 'blob':
+                            try:
+                                data = item.data_stream.read()
+                                # 简单估算：假设平均每行40个字符
+                                lines = max(1, len(data.decode('utf-8', errors='ignore')) // 40)
+                                additions += lines
+                                files_changed += 1
+                            except Exception:
+                                pass
+                except Exception:
+                    pass
+        except Exception as e:
+            # 如果diff解析失败，尝试从stats中获取
+            try:
+                stats = commit.stats.total
+                additions += stats['insertions']
+                deletions += stats['deletions']
+                files_changed += stats['files']
+            except Exception:
+                with self.log_lock:
+                    logger.warning(f"警告: 无法解析提交 {commit.hexsha[:8]} 的差异: {str(e)}")
+
+        return {
+            'hash': commit.hexsha,
+            'short_hash': commit.hexsha[:8],
+            'date': commit_date.isoformat(),
+            'timestamp': commit.committed_date,
+            'message': commit.message.strip(),
+            'author': commit.author.name,
+            'email': commit.author.email,
+            'files_changed': files_changed,
+            'additions': max(0, additions),
+            'deletions': max(0, deletions),
+            'languages': languages,
+            'changed_files': changed_files,
+        }
+
     def collect_project(self, project: Dict[str, Any]) -> Dict[str, Any]:
-        """采集单个项目的Git数据"""
+        """采集单个项目的Git数据（支持并发）"""
         repo_path = project['path']
         project_name = project['name']
 
@@ -195,9 +283,11 @@ class GitDataCollector:
                 since_date = datetime(self.report_year, 1, 1)
                 until_date = datetime(self.report_year + 1, 1, 1)  # 下一年1月1日
 
-                logger.info(f"  时间范围: {since_date.strftime('%Y-%m-%d')} ~ {until_date.strftime('%Y-%m-%d')}")
+                with self.log_lock:
+                    logger.info(f"  时间范围: {since_date.strftime('%Y-%m-%d')} ~ {until_date.strftime('%Y-%m-%d')}")
         except Exception as e:
-            logger.warning(f"  时间范围设置失败: {e}, 将遍历所有提交")
+            with self.log_lock:
+                logger.warning(f"  时间范围设置失败: {e}, 将遍历所有提交")
             since_date = None
             until_date = None
 
@@ -209,90 +299,65 @@ class GitDataCollector:
             # 无时间范围限制，遍历所有提交
             commit_iterator = repo.iter_commits()
 
+        # 先收集符合条件的提交（不进行分析）
+        target_commits = []
         for commit in commit_iterator:
             # 筛选目标作者和年份
             if not self._is_target_author(commit):
                 continue
             if not self._is_target_year(commit):
                 continue
+            target_commits.append(commit)
 
-            commit_date = datetime.fromtimestamp(commit.committed_date)
+        if not target_commits:
+            with self.log_lock:
+                logger.info(f"  没有找到符合条件的提交")
+            return {
+                'project_name': project_name,
+                'path': repo_path,
+                'commits': [],
+                'language_stats': {},
+                'total_commits': 0,
+                'branch': 'HEAD',
+            }
 
-            # 获取提交的文件变更
-            additions = 0
-            deletions = 0
-            files_changed = 0
+        with self.log_lock:
+            logger.info(f"  找到 {len(target_commits)} 个符合条件的提交，开始并发分析...")
 
-            try:
-                if commit.parents:
-                    # 获取与父提交的差异
-                    parent = commit.parents[0]
-                    diff = parent.diff(commit, create_patch=True, **{'unified': 0})
+        # 使用线程池并发分析提交
+        commits_data = []
+        with ThreadPoolExecutor(max_workers=self.commit_workers) as executor:
+            # 提交所有任务
+            future_to_commit = {
+                executor.submit(self._analyze_commit, commit, repo): commit
+                for commit in target_commits
+            }
 
-                    for diff_item in diff:
-                        files_changed += 1
-                        file_path = diff_item.a_path if diff_item.a_path else diff_item.b_path
-
-                        # 检测语言
-                        if file_path:
-                            lang = self._detect_language(file_path)
-                            language_stats[lang] += 1
-                            file_changes[file_path] += 1
-
-                        # 更准确的行数统计
-                        try:
-                            diff_text = diff_item.diff.decode('utf-8', errors='ignore')
-                            lines = diff_text.split('\n')
-
-                            for line in lines:
-                                # 统计新增行（以+开头，但不是+++）
-                                if line.startswith('+') and not line.startswith('+++'):
-                                    additions += 1
-                                # 统计删除行（以-开头，但不是---）
-                                elif line.startswith('-') and not line.startswith('---'):
-                                    deletions += 1
-                        except Exception:
-                            pass
-                else:
-                    # 初始提交（没有父提交）
-                    try:
-                        # 统计所有新增文件
-                        for item in commit.tree.traverse():
-                            if item.type == 'blob':
-                                try:
-                                    data = item.data_stream.read()
-                                    # 简单估算：假设平均每行40个字符
-                                    lines = max(1, len(data.decode('utf-8', errors='ignore')) // 40)
-                                    additions += lines
-                                    files_changed += 1
-                                except Exception:
-                                    pass
-                    except Exception:
-                        pass
-            except Exception as e:
-                # 如果diff解析失败，尝试从stats中获取
+            # 收集结果
+            completed = 0
+            for future in as_completed(future_to_commit):
                 try:
-                    stats = commit.stats.total
-                    additions += stats['insertions']
-                    deletions += stats['deletions']
-                    files_changed += stats['files']
-                except Exception:
-                    print(f"      警告: 无法解析提交 {commit.hexsha[:8]} 的差异: {str(e)}")
-                    continue
+                    result = future.result()
+                    commits_data.append(result)
 
-            # 保存提交数据
-            commits_data.append({
-                'hash': commit.hexsha,
-                'short_hash': commit.hexsha[:8],
-                'date': commit_date.isoformat(),
-                'timestamp': commit.committed_date,
-                'message': commit.message.strip(),
-                'author': commit.author.name,
-                'email': commit.author.email,
-                'files_changed': files_changed,
-                'additions': max(0, additions),
-                'deletions': max(0, deletions),
-            })
+                    completed += 1
+                    if completed % 100 == 0 or completed == len(target_commits):
+                        with self.log_lock:
+                            logger.info(f"    进度: {completed}/{len(target_commits)}")
+                except Exception as exc:
+                    commit = future_to_commit[future]
+                    with self.log_lock:
+                        logger.warning(f"    分析提交 {commit.hexsha[:8]} 时出错: {exc}")
+
+        # 按时间排序
+        commits_data.sort(key=lambda x: x['timestamp'], reverse=True)
+
+        # 汇总语言统计和文件变更
+        for commit_data in commits_data:
+            for lang in commit_data.get('languages', []):
+                language_stats[lang] += 1
+            for file_path in commit_data.get('changed_files', []):
+                file_changes[file_path] += 1
 
         # 获取分支名（处理detached HEAD状态）
         try:
@@ -423,8 +488,8 @@ class GitDataCollector:
             # 清空缓存
             self._clear_all_cache()
 
-        # 使用线程池并发采集未缓存的项目
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+        # 使用线程池并发采集未缓存的项目（使用repo_workers配置）
+        with ThreadPoolExecutor(max_workers=self.repo_workers) as executor:
             # 提交所有采集任务
             future_to_project = {
                 executor.submit(self.collect_project, project): project

@@ -13,6 +13,7 @@ import uuid
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, List
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # 添加src目录到路径
 sys.path.insert(0, str(Path(__file__).parent))
@@ -46,6 +47,85 @@ def load_author_mapping(mapping_path: str) -> Dict[str, str]:
         mapping = yaml.safe_load(f) or {}
 
     return mapping
+
+
+def generate_single_report(author_info, author_projects, author_data_map, config, analyzer, llm_client, output_dir):
+    """生成单个作者的报告（用于并发处理）
+
+    Returns:
+        tuple: (author_info, report_data, uuid_mapping_info)
+    """
+    author_name = author_info.split('<')[0].strip()
+    author_email = author_info.split('<')[1].replace('>', '').strip() if '<' in author_info else ''
+
+    print(f"   分析作者: {author_name}")
+
+    # 生成UUID作为访问标识
+    author_uuid = str(uuid.uuid4())
+
+    # 分析数据
+    analyzed_data = analyzer.analyze(author_projects)
+
+    # 生成AI文案
+    ai_text = None
+    if llm_client:
+        try:
+            ai_text = llm_client.generate_report_text(analyzed_data)
+            print(f"      AI文案生成成功")
+        except Exception as e:
+            print(f"      警告: AI文案生成失败 - {str(e)}")
+
+    # 构建报告数据
+    report_data = {
+        'meta': {
+            'author': author_name,
+            'email': author_email,
+            'author_id': author_info,
+            'uuid': author_uuid,  # 添加UUID
+            'year': config.get('report_year', 2025),
+            'generated_at': datetime.now().isoformat(),
+        },
+        'summary': analyzed_data['summary'],
+        'time_distribution': analyzed_data['time_distribution'],
+        'code_quality': analyzed_data['code_quality'],
+        'languages': analyzed_data['languages'],
+        'projects': analyzed_data['projects'],
+        'ai_text': ai_text,
+        'theme': config.get('theme', {}),
+    }
+
+    # 保存JSON文件（使用UUID命名，避免中文和特殊字符）
+    json_filename = f"{author_uuid}.json"
+    json_path = output_dir / json_filename
+
+    with open(json_path, 'w', encoding='utf-8') as f:
+        json.dump(report_data, f, ensure_ascii=False, indent=2)
+
+    report_data['meta']['json_file'] = json_filename
+
+    # UUID映射信息
+    uuid_mapping_info = {
+        'author_info': author_info,
+        'author_name': author_name,
+        'author_email': author_email,
+    }
+
+    # 索引信息
+    index_info = {
+        'uuid': author_uuid,
+        'id': author_info,  # 保留原始author_id用于兼容
+        'name': report_data['meta']['author'],
+        'email': report_data['meta']['email'],
+        'commits': report_data['summary']['total_commits'],
+        'net_lines': report_data['summary']['net_lines'],
+        'projects': len(report_data['projects']),
+        'json_file': report_data['meta']['json_file'],
+        'generated_at': report_data['meta']['generated_at'],
+    }
+
+    print(f"      报告已生成: {json_filename}")
+
+    return author_uuid, report_data, uuid_mapping_info, index_info
 
 
 def apply_author_mapping(author_info: str, mapping: Dict[str, str]) -> str:
@@ -227,7 +307,7 @@ def main():
     else:
         print("   使用预设模板生成文案")
 
-    # 5. 为每个作者生成JSON报告
+    # 5. 为每个作者生成JSON报告（支持LLM并发）
     print(f"\n[5/6] 生成JSON报告...")
 
     analyzer = DataAnalyzer(config)
@@ -237,86 +317,75 @@ def main():
     uuid_mapping = {}  # UUID与作者信息的映射
     generated_reports = []
 
-    for idx, (author_info, author_projects) in enumerate(author_data_map.items(), 1):
-        # 更新进度
-        save_progress(progress_file, {
-            'status': 'generating',
-            'total': total_authors,
-            'completed': idx - 1,
-            'current': f'正在分析 {author_info.split("<")[0].strip()}',
-            'percentage': round((idx - 1) / total_authors * 100, 1)
-        })
+    # 获取LLM并发配置
+    concurrency_config = config.get('concurrency', {})
+    llm_workers = concurrency_config.get('llm_workers', 3)
+    use_llm_parallel = llm_client is not None and llm_workers > 1
 
-        author_name = author_info.split('<')[0].strip()
-        author_email = author_info.split('<')[1].replace('>', '').strip() if '<' in author_info else ''
+    if use_llm_parallel and len(author_data_map) > 1:
+        # 并发生成报告
+        print(f"   使用LLM并发生成报告（并发数: {llm_workers}）...")
 
-        print(f"   [{idx}/{total_authors}] 分析作者: {author_name}")
+        with ThreadPoolExecutor(max_workers=llm_workers) as executor:
+            # 提交所有生成任务
+            future_to_author = {
+                executor.submit(
+                    generate_single_report,
+                    author_info,
+                    author_projects,
+                    author_data_map,
+                    config,
+                    analyzer,
+                    llm_client,
+                    output_dir
+                ): author_info
+                for author_info, author_projects in author_data_map.items()
+            }
 
-        # 生成UUID作为访问标识
-        author_uuid = str(uuid.uuid4())
+            # 收集结果
+            completed = 0
+            for future in as_completed(future_to_author):
+                try:
+                    author_uuid, report_data, uuid_info, index_info = future.result()
 
-        # 分析数据
-        analyzed_data = analyzer.analyze(author_projects)
+                    # 保存到索引
+                    report_index[author_uuid] = index_info
+                    uuid_mapping[author_uuid] = uuid_info
+                    generated_reports.append(report_data)
 
-        # 生成AI文案
-        ai_text = None
-        if llm_client:
-            try:
-                ai_text = llm_client.generate_report_text(analyzed_data)
-            except Exception as e:
-                print(f"      警告: AI文案生成失败 - {str(e)}")
+                    completed += 1
+                    save_progress(progress_file, {
+                        'status': 'generating',
+                        'total': total_authors,
+                        'completed': completed,
+                        'current': f'已完成 {completed}/{total_authors}',
+                        'percentage': round(completed / total_authors * 100, 1)
+                    })
 
-        # 构建报告数据
-        report_data = {
-            'meta': {
-                'author': author_name,
-                'email': author_email,
-                'author_id': author_info,
-                'uuid': author_uuid,  # 添加UUID
-                'year': config.get('report_year', 2025),
-                'generated_at': datetime.now().isoformat(),
-            },
-            'summary': analyzed_data['summary'],
-            'time_distribution': analyzed_data['time_distribution'],
-            'code_quality': analyzed_data['code_quality'],
-            'languages': analyzed_data['languages'],
-            'projects': analyzed_data['projects'],
-            'ai_text': ai_text,
-            'theme': config.get('theme', {}),
-        }
+                except Exception as exc:
+                    author_info = future_to_author[future]
+                    print(f"      警告: 生成报告失败 {author_info}: {exc}")
+    else:
+        # 串行生成报告
+        for idx, (author_info, author_projects) in enumerate(author_data_map.items(), 1):
+            # 更新进度
+            save_progress(progress_file, {
+                'status': 'generating',
+                'total': total_authors,
+                'completed': idx - 1,
+                'current': f'正在分析 {author_info.split("<")[0].strip()}',
+                'percentage': round((idx - 1) / total_authors * 100, 1)
+            })
 
-        # 保存JSON文件（使用UUID命名，避免中文和特殊字符）
-        json_filename = f"{author_uuid}.json"
-        json_path = output_dir / json_filename
+            author_uuid, report_data, uuid_info, index_info = generate_single_report(
+                author_info, author_projects, author_data_map,
+                config, analyzer, llm_client, output_dir
+            )
 
-        with open(json_path, 'w', encoding='utf-8') as f:
-            json.dump(report_data, f, ensure_ascii=False, indent=2)
-
-        report_data['meta']['json_file'] = json_filename
-
-        # 保存到索引（使用UUID作为key）
-        report_index[author_uuid] = {
-            'uuid': author_uuid,
-            'id': author_info,  # 保留原始author_id用于兼容
-            'name': report_data['meta']['author'],
-            'email': report_data['meta']['email'],
-            'commits': report_data['summary']['total_commits'],
-            'net_lines': report_data['summary']['net_lines'],
-            'projects': len(report_data['projects']),
-            'json_file': report_data['meta']['json_file'],
-            'generated_at': report_data['meta']['generated_at'],
-        }
-
-        # 维护UUID到作者信息的映射
-        uuid_mapping[author_uuid] = {
-            'author_info': author_info,
-            'author_name': author_name,
-            'author_email': author_email,
-        }
-
-        generated_reports.append(report_data)
-
-        print(f"      [OK] 报告已生成: {json_filename}")
+            # 保存到索引
+            report_index[author_uuid] = index_info
+            uuid_mapping[author_uuid] = uuid_info
+            generated_reports.append(report_data)
 
     # 6. 生成总索引文件和UUID映射文件
     print(f"\n[6/6] 生成总索引文件和UUID映射...")

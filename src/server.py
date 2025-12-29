@@ -476,15 +476,17 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
         authors = []
 
-        for author_uuid, data in report_data.items():
+        for key, data in report_data.items():
+            # 如果有UUID则使用UUID，否则使用key（author_id）
+            access_id = data.get('uuid', key)
             authors.append({
-                'uuid': author_uuid,  # UUID作为主要标识
+                'uuid': data.get('uuid', ''),  # 可能为空（旧报告）
                 'name': data.get('name', 'Unknown'),
                 'email': data.get('email', ''),
                 'commits': data.get('commits', 0),
                 'net_lines': data.get('net_lines', 0),
                 'projects': data.get('projects', 0),
-                'report_url': f"/report/{author_uuid}",  # 使用UUID访问
+                'report_url': f"/report/{access_id}",  # 使用UUID或author_id
             })
 
         # 按提交数排序
@@ -497,14 +499,14 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
 
         self.send_json_response(response)
 
-    def send_author_data(self, author_uuid):
-        """发送特定作者的JSON数据 - 通过UUID查询"""
+    def send_author_data(self, access_id):
+        """发送特定作者的JSON数据 - 支持UUID或author_id"""
         # 实时重新加载报告数据
         reports_dir = Path(self.directory)
         report_data = load_report_data(reports_dir)
 
-        # 通过UUID查找作者
-        author_info = report_data.get(author_uuid)
+        # 通过access_id查找作者（可能是UUID或author_id）
+        author_info = report_data.get(access_id)
         if not author_info:
             self.send_error(404, "Author not found")
             return
@@ -834,18 +836,19 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
             }
             self.send_json_response(response)
 
-    def serve_author_report(self, author_uuid):
-        """提供个人报告页面 - 通过UUID访问
+    def serve_author_report(self, access_id):
+        """提供个人报告页面 - 支持UUID或author_id
 
         支持的URL格式:
-        - /report/<uuid>                    - 使用UUID访问
+        - /report/<uuid>                    - 使用UUID访问（新报告）
+        - /report/<author_id>               - 使用author_id访问（旧报告兼容）
         - /report/<uuid>?style=interactive  - 使用交互式滚动模板
         - /report/<uuid>?style=story        - 使用故事模板
         - /report/<uuid>?style=scroll       - 使用照片墙滚动模板（推荐）
         """
         # URL解码
         from urllib.parse import unquote
-        author_uuid = unquote(author_uuid)
+        access_id = unquote(access_id)
 
         # 解析查询参数
         parsed_path = urlparse(self.path)
@@ -866,8 +869,8 @@ class ReportHTTPRequestHandler(SimpleHTTPRequestHandler):
         reports_dir = Path(self.directory)
         report_data = load_report_data(reports_dir)
 
-        # 通过UUID查找作者信息
-        author_info = report_data.get(author_uuid)
+        # 通过access_id查找作者信息（可能是UUID或author_id）
+        author_info = report_data.get(access_id)
         if not author_info:
             self.send_error(404, "Author not found")
             return
